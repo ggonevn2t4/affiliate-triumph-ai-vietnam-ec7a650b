@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, BarChart3, DollarSign, Users, ShoppingBag, BarChart2, FilePen } from 'lucide-react';
+import { ArrowLeft, BarChart3, DollarSign, Users, ShoppingBag, BarChart2, FilePen, BookUser } from 'lucide-react';
 import StatCard from '@/components/dashboard/StatCard';
 import RevenueChart from '@/components/dashboard/RevenueChart';
 import ProductSuggestion from '@/components/dashboard/ProductSuggestion';
@@ -62,6 +62,12 @@ const Dashboard = () => {
                     <Link to="/content" className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md">
                       <FilePen className="h-4 w-4 mr-3" />
                       Nội dung
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/ai-coaching" className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md">
+                      <BookUser className="h-4 w-4 mr-3" />
+                      AI Coaching
                     </Link>
                   </li>
                 </ul>
