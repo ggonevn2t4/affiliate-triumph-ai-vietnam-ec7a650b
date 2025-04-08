@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,6 +18,7 @@ const TrendAnalyzerTool = () => {
   const [timeRange, setTimeRange] = useState<string>("month");
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<TrendResult[] | null>(null);
+  const [apiKey] = useState("AIzaSyCk_MvT2AFWY-_jK02Vi9jc_BX-NjNVWRk"); // Gemini API key
 
   const nicheOptions = [
     { id: "fashion", label: "Thời trang" },
@@ -36,10 +36,10 @@ const TrendAnalyzerTool = () => {
   ];
 
   const handleAnalyzeTrends = async () => {
-    if (!query.trim()) {
+    if (!query.trim() && niche.trim() === "") {
       toast({
         title: "Thiếu thông tin",
-        description: "Vui lòng nhập lĩnh vực bạn muốn phân tích xu hướng",
+        description: "Vui lòng chọn ngành hàng hoặc nhập từ khóa để phân tích xu hướng",
         variant: "destructive"
       });
       return;
@@ -47,10 +47,98 @@ const TrendAnalyzerTool = () => {
 
     setIsLoading(true);
     
-    // In a real application, this would call the Gemini API
-    // For this demo, we'll simulate a response
-    setTimeout(() => {
-      // Demo data based on selected niche
+    try {
+      // Call the Gemini API for trend analysis
+      const prompt = `Bạn là một chuyên gia phân tích xu hướng thị trường Affiliate Marketing. 
+      Hãy phân tích xu hướng cho ngành "${nicheOptions.find(option => option.id === niche)?.label || niche}" 
+      ${query ? `với từ khóa cụ thể: "${query}"` : ""} 
+      trong khoảng thời gian ${timeRangeOptions.find(option => option.id === timeRange)?.label || timeRange}.
+      
+      Hãy đưa ra kết quả dưới dạng JSON với định dạng:
+      [
+        {
+          "keyword": "Từ khóa xu hướng 1",
+          "growthRate": số phần trăm tăng trưởng (chỉ số, không có ký hiệu %),
+          "searchVolume": số lượng tìm kiếm ước tính mỗi tháng (chỉ số, không có dấu phẩy hay ký hiệu khác),
+          "potentialProducts": ["Sản phẩm tiềm năng 1", "Sản phẩm tiềm năng 2", "Sản phẩm tiềm năng 3"],
+          "insights": "Phân tích chuyên sâu về xu hướng này"
+        },
+        {
+          "keyword": "Từ khóa xu hướng 2",
+          "growthRate": số phần trăm tăng trưởng,
+          "searchVolume": số lượng tìm kiếm,
+          "potentialProducts": ["Sản phẩm tiềm năng 1", "Sản phẩm tiềm năng 2", "Sản phẩm tiềm năng 3"],
+          "insights": "Phân tích chuyên sâu về xu hướng này"
+        },
+        {
+          "keyword": "Từ khóa xu hướng 3",
+          "growthRate": số phần trăm tăng trưởng,
+          "searchVolume": số lượng tìm kiếm,
+          "potentialProducts": ["Sản phẩm tiềm năng 1", "Sản phẩm tiềm năng 2", "Sản phẩm tiềm năng 3"],
+          "insights": "Phân tích chuyên sâu về xu hướng này"
+        }
+      ]
+      
+      Đảm bảo cung cấp thông tin thực tế và cập nhật về xu hướng thị trường Việt Nam.`;
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: prompt }]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.2,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 2048,
+            responseFormat: { "format": "JSON" }
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+        const resultText = data.candidates[0].content.parts[0].text;
+        
+        // Parse the JSON text from the response
+        // First, find where the JSON array starts and ends
+        const jsonMatch = resultText.match(/\[[\s\S]*\]/);
+        if (jsonMatch) {
+          const jsonStr = jsonMatch[0];
+          const parsedResults = JSON.parse(jsonStr) as TrendResult[];
+          setResults(parsedResults);
+        } else {
+          throw new Error("Could not parse JSON from response");
+        }
+      } else {
+        throw new Error("Unexpected API response format");
+      }
+      
+      toast({
+        title: "Phân tích hoàn tất",
+        description: "Dữ liệu xu hướng đã được phân tích và hiển thị",
+      });
+    } catch (error) {
+      console.error("Error analyzing trends:", error);
+      toast({
+        title: "Lỗi phân tích",
+        description: "Đã có lỗi xảy ra khi phân tích xu hướng. Vui lòng thử lại sau.",
+        variant: "destructive"
+      });
+      
+      // Use demo data as fallback
       const demoResults: Record<string, TrendResult[]> = {
         "fashion": [
           {
@@ -74,42 +162,14 @@ const TrendAnalyzerTool = () => {
             potentialProducts: ["Áo khoác bomber oversized", "Áo khoác bomber phối màu", "Bomber jacket vintage"],
             insights: "Áo khoác bomber đang trở lại mạnh mẽ trong mùa thu/đông năm nay. Các mẫu oversized và phiên bản có họa tiết độc đáo đang được tìm kiếm nhiều nhất."
           }
-        ],
-        "tech": [
-          {
-            keyword: "Tai nghe chống ồn chủ động",
-            growthRate: 93,
-            searchVolume: 18500,
-            potentialProducts: ["Tai nghe true wireless ANC", "Tai nghe over-ear cao cấp", "Tai nghe dành cho gaming"],
-            insights: "Nhu cầu về tai nghe chống ồn chủ động tăng mạnh do xu hướng làm việc từ xa và học trực tuyến. Các sản phẩm có thời lượng pin dài và khả năng chống ồn tốt được ưa chuộng nhất."
-          },
-          {
-            keyword: "Máy lọc không khí thông minh",
-            growthRate: 135,
-            searchVolume: 22000,
-            potentialProducts: ["Máy lọc không khí kết nối WiFi", "Máy lọc không khí diệt khuẩn", "Máy lọc không khí cho phòng nhỏ"],
-            insights: "Ô nhiễm không khí tại các thành phố lớn và dịch bệnh đã thúc đẩy nhu cầu về máy lọc không khí thông minh. Sản phẩm có thể điều khiển qua điện thoại và hiển thị chất lượng không khí thời gian thực đang rất được quan tâm."
-          },
-          {
-            keyword: "Máy chiếu mini",
-            growthRate: 72,
-            searchVolume: 13800,
-            potentialProducts: ["Máy chiếu mini không dây", "Máy chiếu thông minh Android", "Máy chiếu 4K nhỏ gọn"],
-            insights: "Xu hướng giải trí tại nhà đang thúc đẩy nhu cầu về máy chiếu mini. Các sản phẩm dễ di chuyển, kết nối không dây và có độ phân giải cao đang được tìm kiếm nhiều nhất."
-          }
         ]
       };
       
-      // Get results based on selected niche or default
       const selectedNicheResults = demoResults[niche] || demoResults["fashion"];
       setResults(selectedNicheResults);
+    } finally {
       setIsLoading(false);
-      
-      toast({
-        title: "Phân tích hoàn tất",
-        description: "Dữ liệu xu hướng đã được phân tích và hiển thị",
-      });
-    }, 2000);
+    }
   };
 
   // Helper function to render growth indicator

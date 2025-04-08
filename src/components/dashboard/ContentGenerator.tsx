@@ -1,7 +1,7 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles, RefreshCcw, Copy, Check } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 interface ContentFormat {
   id: string;
@@ -21,16 +21,71 @@ const ContentGenerator = () => {
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [generatedContent, setGeneratedContent] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
+  const [apiKey] = useState("AIzaSyCk_MvT2AFWY-_jK02Vi9jc_BX-NjNVWRk"); // Gemini API key
   
-  const handleGenerate = () => {
-    if (!productName) return;
+  const handleGenerate = async () => {
+    if (!productName) {
+      toast({
+        title: "Thiếu thông tin",
+        description: "Vui lòng nhập tên sản phẩm để tạo nội dung",
+        variant: "destructive"
+      });
+      return;
+    }
     
     setIsGenerating(true);
     setGeneratedContent('');
     
-    // Giả lập tạo nội dung bằng AI
-    setTimeout(() => {
-      // Nội dung giả lập dựa trên tên sản phẩm và định dạng
+    try {
+      const formatName = contentFormats.find(format => format.id === selectedFormat)?.name || selectedFormat;
+      
+      const prompt = `Bạn là một chuyên gia về Affiliate Marketing tại Việt Nam.
+      Hãy tạo nội dung "${formatName}" cho sản phẩm có tên: "${productName}".
+      
+      Hãy tạo nội dung phù hợp với định dạng, tối ưu SEO, và hấp dẫn để tăng tỷ lệ chuyển đổi.
+      Viết bằng tiếng Việt và phù hợp với thị trường Việt Nam.`;
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: prompt }]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 1024,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+        const content = data.candidates[0].content.parts[0].text;
+        setGeneratedContent(content);
+      } else {
+        throw new Error("Unexpected API response format");
+      }
+    } catch (error) {
+      console.error("Error generating content:", error);
+      toast({
+        title: "Lỗi",
+        description: "Đã có lỗi xảy ra khi tạo nội dung. Vui lòng thử lại sau.",
+        variant: "destructive"
+      });
+      
       const formatTexts = {
         blog: `# Đánh giá chi tiết về ${productName}: Có đáng để bạn mua không?
 
@@ -45,7 +100,7 @@ Nếu bạn đang tìm kiếm một ${productName} chất lượng cao, bạn đ
 
 ## Ai nên mua ${productName}?
 
-Sản phẩm này đặc biệt phù hợp với những người đang tìm kiếm giải pháp hiệu quả mà không cần phải chi quá nhiều tiền...`,
+Sản phẩm này đặc biệt phù hợp với những ng��ời đang tìm kiếm giải pháp hiệu quả mà không cần phải chi quá nhiều tiền...`,
         
         social: `🔥 REVIEW HOT: ${productName} - Sản phẩm đang làm mưa làm gió trên thị trường!
 
@@ -87,14 +142,19 @@ Mua ngay kẻo hết!`,
       };
       
       setGeneratedContent(formatTexts[selectedFormat as keyof typeof formatTexts]);
+    } finally {
       setIsGenerating(false);
-    }, 2000);
+    }
   };
   
   const handleCopy = () => {
     if (!generatedContent) return;
     navigator.clipboard.writeText(generatedContent);
     setCopied(true);
+    toast({
+      title: "Đã sao chép",
+      description: "Nội dung đã được sao chép vào clipboard",
+    });
     setTimeout(() => setCopied(false), 2000);
   };
   

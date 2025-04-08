@@ -20,7 +20,7 @@ const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [apiKey, setApiKey] = useState(""); // For demo purposes
+  const [apiKey] = useState("AIzaSyCk_MvT2AFWY-_jK02Vi9jc_BX-NjNVWRk"); // Gemini API key
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom whenever messages change
@@ -59,48 +59,86 @@ const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
     setIsLoading(true);
 
     try {
-      // In a real application, you would call the Gemini API here
-      // For now, we'll simulate a response
-      
-      // Simulated AI response
-      setTimeout(() => {
-        const aiResponses: Record<string, string[]> = {
-          "Hướng dẫn cho người mới": [
-            "Để bắt đầu với Affiliate Marketing, bạn nên: 1) Chọn ngách phù hợp với sở thích, 2) Tìm hiểu sản phẩm kỹ lưỡng, 3) Xây dựng nền tảng nội dung (blog, social media), 4) Tạo liên kết affiliate và theo dõi hiệu suất, 5) Tối ưu hóa chiến dịch dựa trên số liệu.",
-            "Một sai lầm phổ biến của người mới là chọn quá nhiều sản phẩm để quảng bá. Tôi khuyên bạn nên tập trung vào 2-3 sản phẩm đầu tiên để học hỏi và hoàn thiện chiến lược marketing của mình.",
-            "Đối với thị trường Việt Nam, các kênh hiệu quả nhất cho người mới bao gồm Facebook, TikTok và các diễn đàn chuyên ngành. Hãy bắt đầu từ những nơi bạn đã quen thuộc."
+      // Prepare conversation history for context
+      const conversationHistory = messages.map(msg => ({
+        role: msg.sender === "user" ? "user" : "model",
+        parts: [{ text: msg.text }]
+      }));
+
+      // Add the new user message
+      conversationHistory.push({
+        role: "user",
+        parts: [{ text: input }]
+      });
+
+      // Call the Gemini API
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [
+                { 
+                  text: `Bạn là một trợ lý AI chuyên về Affiliate Marketing trong thị trường Việt Nam. 
+                  Chủ đề hiện tại: "${selectedTopic}". 
+                  Hãy trả lời câu hỏi sau với kiến thức cập nhật về thị trường Việt Nam và xu hướng Affiliate Marketing hiện tại: ${input}`
+                }
+              ]
+            }
           ],
-          "Chiến lược nội dung": [
-            "Nội dung review sản phẩm chi tiết kết hợp với trải nghiệm cá nhân thường mang lại hiệu quả cao nhất. Hãy tạo nội dung giải quyết vấn đề thực tế của người dùng.",
-            "Để tối ưu SEO cho nội dung affiliate, hãy nghiên cứu từ khóa có lượng tìm kiếm cao nhưng cạnh tranh thấp, sử dụng cấu trúc rõ ràng với tiêu đề H1, H2, và thêm hình ảnh chất lượng cao.",
-            "Tần suất đăng bài lý tưởng là 2-3 bài/tuần đối với blog và hàng ngày đối với mạng xã hội. Chất lượng luôn quan trọng hơn số lượng."
-          ]
-        };
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 1024,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Check if we have a proper response
+      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+        const aiResponse = data.candidates[0].content.parts[0].text;
         
-        // Get response based on topic or use default
-        const topicResponses = aiResponses[selectedTopic] || [
-          `Cảm ơn câu hỏi của bạn về "${input}". Trong lĩnh vực Affiliate Marketing, điều quan trọng là luôn theo dõi và phân tích số liệu để tối ưu hóa chiến dịch của bạn. Hãy cho tôi biết thêm về mục tiêu cụ thể và tôi sẽ đưa ra lời khuyên phù hợp hơn.`
-        ];
-        
-        const randomIndex = Math.floor(Math.random() * topicResponses.length);
+        // Add AI response to messages
         const aiMessage = {
           id: Date.now().toString(),
-          text: topicResponses[randomIndex],
+          text: aiResponse,
           sender: "ai" as const,
           timestamp: new Date()
         };
 
         setMessages(prev => [...prev, aiMessage]);
-        setIsLoading(false);
-      }, 1500);
-
+      } else {
+        throw new Error("Unexpected API response format");
+      }
     } catch (error) {
-      console.error("Error calling AI API:", error);
+      console.error("Error calling Gemini API:", error);
       toast({
         title: "Lỗi",
         description: "Đã có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại sau.",
         variant: "destructive"
       });
+      
+      // Add fallback AI response in case of error
+      const errorMessage = {
+        id: Date.now().toString(),
+        text: "Xin lỗi, tôi đang gặp một số vấn đề kỹ thuật. Vui lòng thử lại sau.",
+        sender: "ai" as const,
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -189,7 +227,7 @@ const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
           </Button>
         </div>
         <p className="text-xs text-gray-500 mt-2">
-          AI Coaching được hỗ trợ bởi công nghệ Gemini. Tư vấn dựa trên dữ liệu thị trường Việt Nam và xu hướng Affiliate Marketing hiện tại.
+          AI Coaching được hỗ trợ bởi công nghệ Gemini 2.5 Pro. Tư vấn dựa trên dữ liệu thị trường Việt Nam và xu hướng Affiliate Marketing hiện tại.
         </p>
       </form>
     </div>
