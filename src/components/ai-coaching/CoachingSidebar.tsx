@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { BookUser, MessageSquare, Compass, Lightbulb, Star } from "lucide-react";
+import { BookUser, MessageSquare, Compass, Lightbulb, Star, PenSquare } from "lucide-react";
 
 const CoachingSidebar = () => {
   return (
@@ -15,6 +15,15 @@ const CoachingSidebar = () => {
               >
                 <BookUser className="h-4 w-4 mr-3" />
                 Coaching AI
+              </Link>
+            </li>
+            <li>
+              <Link 
+                to="/ai-tools" 
+                className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md"
+              >
+                <PenSquare className="h-4 w-4 mr-3" />
+                Công cụ AI
               </Link>
             </li>
             <li>
