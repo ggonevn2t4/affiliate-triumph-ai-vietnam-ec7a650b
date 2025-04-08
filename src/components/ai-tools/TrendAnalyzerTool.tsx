@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { Compass, Search, TrendingUp, Calendar } from "lucide-react";
+import OpenAI from "openai";
 
 interface TrendResult {
   keyword: string;
@@ -18,7 +19,8 @@ const TrendAnalyzerTool = () => {
   const [timeRange, setTimeRange] = useState<string>("month");
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<TrendResult[] | null>(null);
-  const [apiKey] = useState("AIzaSyCk_MvT2AFWY-_jK02Vi9jc_BX-NjNVWRk"); // Gemini API key
+  const [apiKey] = useState("sk-default-openai-key"); // Replace with your OpenAI key
+  const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
 
   const nicheOptions = [
     { id: "fashion", label: "Thời trang" },
@@ -48,7 +50,7 @@ const TrendAnalyzerTool = () => {
     setIsLoading(true);
     
     try {
-      // Call the Gemini API for trend analysis
+      // Prepare the prompt for trend analysis
       const prompt = `Bạn là một chuyên gia phân tích xu hướng thị trường Affiliate Marketing. 
       Hãy phân tích xu hướng cho ngành "${nicheOptions.find(option => option.id === niche)?.label || niche}" 
       ${query ? `với từ khóa cụ thể: "${query}"` : ""} 
@@ -79,57 +81,48 @@ const TrendAnalyzerTool = () => {
         }
       ]
       
-      Đảm bảo cung cấp thông tin thực tế và cập nhật về xu hướng thị trường Việt Nam.`;
+      Đảm bảo cung cấp thông tin thực tế và cập nhật về xu hướng thị trường Việt Nam.
+      
+      Trả lời chỉ bao gồm JSON, không có chữ hay định dạng khác.`;
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: prompt }]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.2,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 2048,
-            responseFormat: { "format": "JSON" }
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "You are a Vietnamese market analysis expert specializing in affiliate marketing trends. Only respond with JSON data, nothing else."
           },
-        }),
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+        max_tokens: 2048,
       });
 
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const resultText = response.choices[0]?.message?.content || "{}";
       
-      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-        const resultText = data.candidates[0].content.parts[0].text;
+      try {
+        // Parse the JSON
+        const parsedData = JSON.parse(resultText);
+        // Check if it's an array or if it's wrapped in another object
+        const trendsData = Array.isArray(parsedData) ? parsedData : parsedData.trends || parsedData.results || [];
         
-        // Parse the JSON text from the response
-        // First, find where the JSON array starts and ends
-        const jsonMatch = resultText.match(/\[[\s\S]*\]/);
-        if (jsonMatch) {
-          const jsonStr = jsonMatch[0];
-          const parsedResults = JSON.parse(jsonStr) as TrendResult[];
-          setResults(parsedResults);
+        if (trendsData.length > 0) {
+          setResults(trendsData as TrendResult[]);
+          toast({
+            title: "Phân tích hoàn tất",
+            description: "Dữ liệu xu hướng đã được phân tích và hiển thị",
+          });
         } else {
-          throw new Error("Could not parse JSON from response");
+          throw new Error("No trend data found");
         }
-      } else {
-        throw new Error("Unexpected API response format");
+      } catch (parseError) {
+        console.error("Error parsing JSON response:", parseError);
+        throw new Error("Could not parse JSON from response");
       }
-      
-      toast({
-        title: "Phân tích hoàn tất",
-        description: "Dữ liệu xu hướng đã được phân tích và hiển thị",
-      });
     } catch (error) {
       console.error("Error analyzing trends:", error);
       toast({

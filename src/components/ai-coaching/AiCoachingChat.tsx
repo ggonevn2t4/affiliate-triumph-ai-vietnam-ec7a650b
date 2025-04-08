@@ -1,9 +1,9 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, ChevronDown, ArrowLeft, User } from "lucide-react";
+import { Send, ChevronDown, ArrowLeft } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import OpenAI from "openai";
 
 interface AiCoachingChatProps {
   selectedTopic: string;
@@ -20,8 +20,9 @@ const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [apiKey] = useState("AIzaSyCk_MvT2AFWY-_jK02Vi9jc_BX-NjNVWRk"); // Gemini API key
+  const [apiKey] = useState("sk-default-openai-key"); // Replace with your OpenAI key
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
+  const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
 
   // Scroll to bottom whenever messages change
   useEffect(() => {
@@ -61,68 +62,46 @@ const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
     try {
       // Prepare conversation history for context
       const conversationHistory = messages.map(msg => ({
-        role: msg.sender === "user" ? "user" : "model",
-        parts: [{ text: msg.text }]
+        role: msg.sender === "user" ? "user" : "assistant",
+        content: msg.text
       }));
 
       // Add the new user message
       conversationHistory.push({
         role: "user",
-        parts: [{ text: input }]
+        content: input
       });
 
-      // Call the Gemini API
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [
-                { 
-                  text: `Bạn là một trợ lý AI chuyên về Affiliate Marketing trong thị trường Việt Nam. 
-                  Chủ đề hiện tại: "${selectedTopic}". 
-                  Hãy trả lời câu hỏi sau với kiến thức cập nhật về thị trường Việt Nam và xu hướng Affiliate Marketing hiện tại: ${input}`
-                }
-              ]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 1024,
+      // Call the OpenAI API
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini", // Using GPT-4o-mini as a replacement
+        messages: [
+          {
+            role: "system",
+            content: `Bạn là một trợ lý AI chuyên về Affiliate Marketing trong thị trường Việt Nam. 
+                    Chủ đề hiện tại: "${selectedTopic}". 
+                    Hãy trả lời với kiến thức cập nhật về thị trường Việt Nam và xu hướng Affiliate Marketing hiện tại.`
           },
-        }),
+          ...conversationHistory
+        ],
+        temperature: 0.7,
+        max_tokens: 1024,
       });
 
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-      }
-
-      const data = await response.json();
+      // Get AI response
+      const aiResponse = response.choices[0]?.message?.content || "Xin lỗi, tôi không thể xử lý yêu cầu của bạn lúc này.";
       
-      // Check if we have a proper response
-      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-        const aiResponse = data.candidates[0].content.parts[0].text;
-        
-        // Add AI response to messages
-        const aiMessage = {
-          id: Date.now().toString(),
-          text: aiResponse,
-          sender: "ai" as const,
-          timestamp: new Date()
-        };
+      // Add AI response to messages
+      const aiMessage = {
+        id: Date.now().toString(),
+        text: aiResponse,
+        sender: "ai" as const,
+        timestamp: new Date()
+      };
 
-        setMessages(prev => [...prev, aiMessage]);
-      } else {
-        throw new Error("Unexpected API response format");
-      }
+      setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
-      console.error("Error calling Gemini API:", error);
+      console.error("Error calling OpenAI API:", error);
       toast({
         title: "Lỗi",
         description: "Đã có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại sau.",

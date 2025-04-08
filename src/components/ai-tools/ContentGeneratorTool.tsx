@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { PenSquare, Copy, Check, Sparkles } from "lucide-react";
+import OpenAI from "openai";
 
 const ContentGeneratorTool = () => {
   const [prompt, setPrompt] = useState("");
@@ -10,7 +11,8 @@ const ContentGeneratorTool = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [apiKey] = useState("AIzaSyCk_MvT2AFWY-_jK02Vi9jc_BX-NjNVWRk");
+  const [apiKey] = useState("sk-default-openai-key");
+  const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
 
   const contentTypeOptions = [
     { id: "blog-post", label: "Bài viết blog" },
@@ -47,44 +49,29 @@ const ContentGeneratorTool = () => {
       
       Viết nội dung bằng tiếng Việt, tối ưu cho affiliate marketing.`;
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: systemPrompt }]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 2048,
-          },
-        }),
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 2048,
       });
 
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const content = response.choices[0]?.message?.content;
       
-      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-        const content = data.candidates[0].content.parts[0].text;
+      if (content) {
         setGeneratedContent(content);
+        toast({
+          title: "Nội dung đã được tạo",
+          description: "Nội dung AI đã được tạo thành công",
+        });
       } else {
         throw new Error("Unexpected API response format");
       }
-      
-      toast({
-        title: "Nội dung đã được tạo",
-        description: "Nội dung AI đã được tạo thành công",
-      });
     } catch (error) {
       console.error("Error generating content:", error);
       toast({

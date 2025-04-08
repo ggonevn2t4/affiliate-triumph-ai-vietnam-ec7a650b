@@ -104,7 +104,7 @@ const AiTools = () => {
             <div className="border border-gray-100 rounded-lg p-5 shadow-sm">
               <h4 className="font-medium text-lg mb-2">Tạo nội dung tự động</h4>
               <p className="text-gray-600 mb-4">Tạo bài viết blog, mô tả sản phẩm và nội dung mạng xã hội chất lượng cao chỉ với vài cú nhấp chuột</p>
-              <div className="text-brand-blue font-medium">Sử dụng công nghệ Gemini 2.5 Pro</div>
+              <div className="text-brand-blue font-medium">Sử dụng công nghệ OpenAI GPT</div>
             </div>
             <div className="border border-gray-100 rounded-lg p-5 shadow-sm">
               <h4 className="font-medium text-lg mb-2">Phân tích xu hướng thị trường</h4>

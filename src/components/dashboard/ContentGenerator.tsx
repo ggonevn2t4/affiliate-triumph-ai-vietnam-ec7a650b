@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles, RefreshCcw, Copy, Check } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import OpenAI from 'openai';
 
 interface ContentFormat {
   id: string;
@@ -21,7 +22,8 @@ const ContentGenerator = () => {
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [generatedContent, setGeneratedContent] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
-  const [apiKey] = useState("AIzaSyCk_MvT2AFWY-_jK02Vi9jc_BX-NjNVWRk"); // Gemini API key
+  const [apiKey] = useState("sk-default-openai-key"); // Replace with your OpenAI key
+  const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
   
   const handleGenerate = async () => {
     if (!productName) {
@@ -45,35 +47,25 @@ const ContentGenerator = () => {
       Hãy tạo nội dung phù hợp với định dạng, tối ưu SEO, và hấp dẫn để tăng tỷ lệ chuyển đổi.
       Viết bằng tiếng Việt và phù hợp với thị trường Việt Nam.`;
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: prompt }]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 1024,
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "You are a Vietnamese affiliate marketing expert. Create compelling content optimized for the Vietnamese market."
           },
-        }),
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1024,
       });
 
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const content = response.choices[0]?.message?.content;
       
-      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-        const content = data.candidates[0].content.parts[0].text;
+      if (content) {
         setGeneratedContent(content);
       } else {
         throw new Error("Unexpected API response format");
@@ -100,7 +92,7 @@ Nếu bạn đang tìm kiếm một ${productName} chất lượng cao, bạn đ
 
 ## Ai nên mua ${productName}?
 
-Sản phẩm này đặc biệt phù hợp với những ng��ời đang tìm kiếm giải pháp hiệu quả mà không cần phải chi quá nhiều tiền...`,
+Sản phẩm này đặc biệt phù hợp với những người đang tìm kiếm giải pháp hiệu quả mà không cần phải chi quá nhiều tiền...`,
         
         social: `🔥 REVIEW HOT: ${productName} - Sản phẩm đang làm mưa làm gió trên thị trường!
 
