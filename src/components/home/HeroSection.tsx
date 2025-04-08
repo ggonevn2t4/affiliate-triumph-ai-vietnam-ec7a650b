@@ -1,21 +1,16 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
-
 const HeroSection = () => {
   const [email, setEmail] = useState('');
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Xử lý đăng ký
     console.log("Email đăng ký:", email);
     setEmail('');
   };
-
-  return (
-    <div className="relative bg-gradient-to-br from-gray-50 to-blue-50 py-20 md:py-28">
+  return <div className="relative bg-gradient-to-br from-gray-50 to-blue-50 py-20 md:py-28">
       {/* Decoration */}
       <div className="absolute top-20 left-10 w-64 h-64 bg-brand-blue/5 rounded-full blur-3xl"></div>
       <div className="absolute bottom-10 right-10 w-80 h-80 bg-brand-purple/5 rounded-full blur-3xl"></div>
@@ -35,14 +30,7 @@ const HeroSection = () => {
             </p>
 
             <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 mb-8">
-              <input
-                type="email"
-                placeholder="Email của bạn"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-brand-blue flex-grow"
-                required
-              />
+              <input type="email" placeholder="Email của bạn" value={email} onChange={e => setEmail(e.target.value)} className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-brand-blue flex-grow" required />
               <Button type="submit" className="btn-gradient rounded-lg px-6 py-3 whitespace-nowrap">
                 Dùng thử miễn phí
               </Button>
@@ -58,11 +46,7 @@ const HeroSection = () => {
 
           <div className="lg:w-1/2 relative">
             <div className="glass-card p-4 md:p-6 shadow-xl relative z-20 animate-float">
-              <img 
-                src="https://placehold.co/600x400?text=Dashboard+Preview" 
-                alt="Dashboard Preview"
-                className="rounded-lg shadow-sm" 
-              />
+              <img alt="Dashboard Preview" className="rounded-lg shadow-sm" src="/lovable-uploads/e4640c69-bee7-460b-9939-3e7fb9643b35.png" />
             </div>
             
             {/* Stats floating cards */}
@@ -80,7 +64,9 @@ const HeroSection = () => {
               </div>
             </div>
             
-            <div className="absolute -right-10 md:-right-12 bottom-1/4 glass-card p-3 md:p-4 shadow-md animate-float" style={{animationDelay: "0.2s"}}>
+            <div className="absolute -right-10 md:-right-12 bottom-1/4 glass-card p-3 md:p-4 shadow-md animate-float" style={{
+            animationDelay: "0.2s"
+          }}>
               <div className="flex items-center">
                 <div className="bg-brand-blue/10 rounded-full p-2 mr-3">
                   <svg className="w-4 h-4 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,8 +94,6 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default HeroSection;
