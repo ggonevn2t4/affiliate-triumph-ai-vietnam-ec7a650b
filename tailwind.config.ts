@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,14 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+                // Thêm màu sắc chính của ứng dụng
+                brand: {
+                    blue: "#3B82F6",
+                    purple: "#8B5CF6",
+                    "purple-light": "#A78BFA",
+                    "blue-light": "#60A5FA",
+                },
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,12 +92,25 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+                'float': {
+                    '0%, 100%': { transform: 'translateY(0)' },
+                    '50%': { transform: 'translateY(-10px)' },
+                }
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+				'accordion-up': 'accordion-up 0.2s ease-out',
+                'float': 'float 3s ease-in-out infinite',
+			},
+            fontFamily: {
+                sans: ['Nunito', 'sans-serif'],
+                display: ['"SF Pro Display"', 'sans-serif'],
+            },
+            backgroundImage: {
+                'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                'gradient-primary': 'linear-gradient(to right, #3B82F6, #8B5CF6)',
+            }
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

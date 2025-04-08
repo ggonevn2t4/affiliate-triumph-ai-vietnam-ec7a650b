@@ -1,0 +1,199 @@
+
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Sparkles, RefreshCcw, Copy, Check } from 'lucide-react';
+
+interface ContentFormat {
+  id: string;
+  name: string;
+}
+
+const contentFormats: ContentFormat[] = [
+  { id: 'blog', name: 'Bài viết blog' },
+  { id: 'social', name: 'Mạng xã hội' },
+  { id: 'email', name: 'Email marketing' },
+  { id: 'product', name: 'Mô tả sản phẩm' },
+];
+
+const ContentGenerator = () => {
+  const [productName, setProductName] = useState('');
+  const [selectedFormat, setSelectedFormat] = useState<string>('blog');
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [generatedContent, setGeneratedContent] = useState<string>('');
+  const [copied, setCopied] = useState<boolean>(false);
+  
+  const handleGenerate = () => {
+    if (!productName) return;
+    
+    setIsGenerating(true);
+    setGeneratedContent('');
+    
+    // Giả lập tạo nội dung bằng AI
+    setTimeout(() => {
+      // Nội dung giả lập dựa trên tên sản phẩm và định dạng
+      const formatTexts = {
+        blog: `# Đánh giá chi tiết về ${productName}: Có đáng để bạn mua không?
+
+Nếu bạn đang tìm kiếm một ${productName} chất lượng cao, bạn đã đến đúng nơi. Trong bài viết này, chúng tôi sẽ phân tích chi tiết về sản phẩm này và giúp bạn quyết định xem nó có phải là lựa chọn tốt cho nhu cầu của bạn hay không.
+
+## Những ưu điểm nổi bật của ${productName}
+
+- Thiết kế hiện đại và bền bỉ
+- Hiệu suất vượt trội so với các sản phẩm cùng phân khúc
+- Tiết kiệm chi phí dài hạn
+- Được nhiều chuyên gia đánh giá cao
+
+## Ai nên mua ${productName}?
+
+Sản phẩm này đặc biệt phù hợp với những người đang tìm kiếm giải pháp hiệu quả mà không cần phải chi quá nhiều tiền...`,
+        
+        social: `🔥 REVIEW HOT: ${productName} - Sản phẩm đang làm mưa làm gió trên thị trường!
+
+✅ Thiết kế sang trọng
+✅ Hiệu suất vượt trội
+✅ Giá cực kỳ hợp lý
+
+👉 Đừng bỏ lỡ cơ hội sở hữu ${productName} với ưu đãi đặc biệt khi mua qua link trong bio!
+
+#review #musthave #deal`,
+        
+        email: `Chào bạn,
+
+Tôi vừa khám phá ra một sản phẩm tuyệt vời mà tôi nghĩ bạn sẽ thích - ${productName}.
+
+Điều làm tôi ấn tượng nhất về ${productName} là [đặc điểm nổi bật]. Nó giải quyết vấn đề [vấn đề phổ biến] một cách hiệu quả và tiết kiệm.
+
+Hiện tại đang có chương trình giảm giá 15% cho sản phẩm này. Bạn có thể tìm hiểu thêm tại đây: [Link]
+
+Trân trọng,
+[Tên của bạn]`,
+        
+        product: `${productName}
+
+★★★★★ (4.9/5) - Dựa trên 253 đánh giá
+
+✅ [Đặc điểm nổi bật 1]
+✅ [Đặc điểm nổi bật 2]
+✅ [Đặc điểm nổi bật 3]
+
+👉 Sản phẩm hot nhất phân khúc [loại sản phẩm] hiện nay
+👉 Bảo hành chính hãng 12 tháng
+👉 Giao hàng miễn phí toàn quốc
+
+Giá gốc: ₫XXX,XXX
+Giá ưu đãi: ₫XXX,XXX (Giảm 20%)
+
+Mua ngay kẻo hết!`,
+      };
+      
+      setGeneratedContent(formatTexts[selectedFormat as keyof typeof formatTexts]);
+      setIsGenerating(false);
+    }, 2000);
+  };
+  
+  const handleCopy = () => {
+    if (!generatedContent) return;
+    navigator.clipboard.writeText(generatedContent);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  
+  const handleRegenerate = () => {
+    handleGenerate();
+  };
+  
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-semibold">Tạo nội dung bằng AI</h3>
+        <div className="flex items-center text-brand-purple text-sm font-medium">
+          <Sparkles className="w-4 h-4 mr-2" />
+          <span>AI content creator</span>
+        </div>
+      </div>
+      
+      <div className="grid gap-4 mb-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Tên sản phẩm</label>
+          <input
+            type="text"
+            value={productName}
+            onChange={(e) => setProductName(e.target.value)}
+            placeholder="Nhập tên sản phẩm để tạo nội dung"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-blue/50 focus:border-brand-blue"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Định dạng nội dung</label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {contentFormats.map((format) => (
+              <button
+                key={format.id}
+                onClick={() => setSelectedFormat(format.id)}
+                className={`px-3 py-2 border rounded-md text-sm transition-all
+                  ${selectedFormat === format.id
+                    ? 'border-brand-purple bg-brand-purple/10 text-brand-purple'
+                    : 'border-gray-200 hover:border-gray-300'
+                  }`}
+              >
+                {format.name}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        <Button 
+          onClick={handleGenerate}
+          disabled={!productName || isGenerating}
+          className="btn-gradient"
+        >
+          {isGenerating ? (
+            <>
+              <RefreshCcw className="w-4 h-4 mr-2 animate-spin" />
+              Đang tạo...
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4 mr-2" />
+              Tạo nội dung
+            </>
+          )}
+        </Button>
+      </div>
+      
+      {generatedContent && (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg">
+          <div className="flex justify-between items-center px-4 py-2 border-b border-gray-200">
+            <span className="text-sm font-medium">Nội dung đã tạo</span>
+            <div className="flex space-x-2">
+              <button 
+                onClick={handleRegenerate} 
+                className="p-1 rounded hover:bg-gray-200"
+                title="Tạo lại"
+              >
+                <RefreshCcw className="w-4 h-4 text-gray-600" />
+              </button>
+              <button 
+                onClick={handleCopy} 
+                className="p-1 rounded hover:bg-gray-200"
+                title="Sao chép"
+              >
+                {copied ? (
+                  <Check className="w-4 h-4 text-green-600" />
+                ) : (
+                  <Copy className="w-4 h-4 text-gray-600" />
+                )}
+              </button>
+            </div>
+          </div>
+          <div className="p-4 text-sm whitespace-pre-line max-h-80 overflow-y-auto">
+            {generatedContent}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ContentGenerator;
