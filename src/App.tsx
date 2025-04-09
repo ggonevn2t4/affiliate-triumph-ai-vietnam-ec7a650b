@@ -12,6 +12,7 @@ import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import AiCoaching from "./pages/AiCoaching";
 import AiTools from "./pages/AiTools";
+import CreateCampaign from "./pages/CreateCampaign";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => {
               <Route path="/register" element={<Register />} />
               <Route path="/ai-coaching" element={<AiCoaching />} />
               <Route path="/ai-tools" element={<AiTools />} />
+              <Route path="/create-campaign" element={<CreateCampaign />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -47,7 +47,7 @@ const Dashboard = () => {
                     </Link>
                   </li>
                   <li>
-                    <Link to="/campaigns" className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md">
+                    <Link to="/create-campaign" className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md">
                       <ShoppingBag className="h-4 w-4 mr-3" />
                       Chiến dịch
                     </Link>
@@ -82,11 +82,11 @@ const Dashboard = () => {
               <h2 className="text-2xl font-bold mb-1">Xin chào, Thành An</h2>
               <p className="mb-4 opacity-90">Chào mừng quay trở lại với AffiliateVN!</p>
               <div className="flex items-center space-x-4">
-                <Button className="bg-white text-brand-blue hover:bg-blue-50">
-                  Tạo chiến dịch mới
+                <Button className="bg-white text-brand-blue hover:bg-blue-50" asChild>
+                  <Link to="/create-campaign">Tạo chiến dịch mới</Link>
                 </Button>
-                <Button variant="outline" className="border-white text-white hover:bg-white/10">
-                  Khám phá công cụ AI
+                <Button variant="outline" className="border-white text-white hover:bg-white/10" asChild>
+                  <Link to="/ai-tools">Khám phá công cụ AI</Link>
                 </Button>
               </div>
             </div>
