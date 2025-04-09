@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { Compass, Search, TrendingUp, Calendar } from "lucide-react";
+import { Compass, Search, TrendingUp, Calendar, Settings } from "lucide-react";
 import OpenAI from "openai";
+import { ApiKeyDialog } from "./ApiKeyDialog";
 
 interface TrendResult {
   keyword: string;
@@ -19,8 +20,12 @@ const TrendAnalyzerTool = () => {
   const [timeRange, setTimeRange] = useState<string>("month");
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<TrendResult[] | null>(null);
-  const [apiKey] = useState("sk-default-openai-key"); // Replace with your OpenAI key
-  const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
+  const [apiKey, setApiKey] = useState(() => {
+    const savedKey = localStorage.getItem("openai-api-key");
+    return savedKey || "";
+  });
+  const [isApiKeyDialogOpen, setIsApiKeyDialogOpen] = useState(false);
+  const openai = apiKey ? new OpenAI({ apiKey, dangerouslyAllowBrowser: true }) : null;
 
   const nicheOptions = [
     { id: "fashion", label: "Thời trang" },
@@ -44,6 +49,11 @@ const TrendAnalyzerTool = () => {
         description: "Vui lòng chọn ngành hàng hoặc nhập từ khóa để phân tích xu hướng",
         variant: "destructive"
       });
+      return;
+    }
+
+    if (!apiKey) {
+      setIsApiKeyDialogOpen(true);
       return;
     }
 
@@ -85,15 +95,15 @@ const TrendAnalyzerTool = () => {
       
       Trả lời chỉ bao gồm JSON, không có chữ hay định dạng khác.`;
 
-      const response = await openai.chat.completions.create({
+      const response = await openai!.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
           {
-            role: "system",
+            role: "system" as const,
             content: "You are a Vietnamese market analysis expert specializing in affiliate marketing trends. Only respond with JSON data, nothing else."
           },
           {
-            role: "user",
+            role: "user" as const,
             content: prompt
           }
         ],
@@ -108,7 +118,7 @@ const TrendAnalyzerTool = () => {
         // Parse the JSON
         const parsedData = JSON.parse(resultText);
         // Check if it's an array or if it's wrapped in another object
-        const trendsData = Array.isArray(parsedData) ? parsedData : parsedData.trends || parsedData.results || [];
+        const trendsData = Array.isArray(parsedData) ? parsedData : (parsedData.trends || parsedData.results || []);
         
         if (trendsData.length > 0) {
           setResults(trendsData as TrendResult[]);
@@ -123,13 +133,24 @@ const TrendAnalyzerTool = () => {
         console.error("Error parsing JSON response:", parseError);
         throw new Error("Could not parse JSON from response");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error analyzing trends:", error);
-      toast({
-        title: "Lỗi phân tích",
-        description: "Đã có lỗi xảy ra khi phân tích xu hướng. Vui lòng thử lại sau.",
-        variant: "destructive"
-      });
+      
+      // Check for API key errors
+      if (error.status === 401 || (error.error && error.error.type === "invalid_request_error")) {
+        toast({
+          title: "Lỗi API key",
+          description: "API key không hợp lệ hoặc đã hết hạn. Vui lòng cập nhật API key của bạn.",
+          variant: "destructive"
+        });
+        setIsApiKeyDialogOpen(true);
+      } else {
+        toast({
+          title: "Lỗi phân tích",
+          description: "Đã có lỗi xảy ra khi phân tích xu hướng. Vui lòng thử lại sau.",
+          variant: "destructive"
+        });
+      }
       
       // Use demo data as fallback
       const demoResults: Record<string, TrendResult[]> = {
@@ -178,9 +199,13 @@ const TrendAnalyzerTool = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 text-lg font-semibold">
-        <Compass className="h-5 w-5 text-brand-purple" />
-        <h2>AI Trend Analyzer</h2>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-lg font-semibold">
+          <Compass className="h-5 w-5 text-brand-purple" />
+          <h2>AI Trend Analyzer</h2>
+        </div>
+        
+        <ApiKeyDialog open={isApiKeyDialogOpen} onOpenChange={setIsApiKeyDialogOpen} />
       </div>
       
       <div className="space-y-4">
@@ -302,7 +327,7 @@ const TrendAnalyzerTool = () => {
               <Calendar className="h-4 w-4 mr-1" />
               <span>Dữ liệu cập nhật: {new Date().toLocaleDateString("vi-VN")}</span>
             </div>
-            <span>Powered by Google Gemini 2.5 Pro API</span>
+            <span>Powered by OpenAI GPT-4o-mini API</span>
           </div>
         </div>
       )}
