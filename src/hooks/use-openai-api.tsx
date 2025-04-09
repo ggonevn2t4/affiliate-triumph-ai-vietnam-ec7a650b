@@ -7,6 +7,8 @@ interface UseOpenAIApiOptions {
   onApiKeyMissing?: () => void;
 }
 
+const DEFAULT_API_KEY = "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";
+
 export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
   const [apiKey, setApiKey] = useState<string>('');
   const [openai, setOpenai] = useState<OpenAI | null>(null);
@@ -14,12 +16,20 @@ export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
 
   useEffect(() => {
     // Load API key from localStorage on component mount
-    const savedKey = localStorage.getItem('openai-api-key');
+    const savedKey = localStorage.getItem('openai-api-key') || DEFAULT_API_KEY;
     if (savedKey) {
       setApiKey(savedKey);
       setOpenai(new OpenAI({ apiKey: savedKey, dangerouslyAllowBrowser: true }));
+      // Lưu API key mặc định nếu chưa có
+      if (!localStorage.getItem('openai-api-key')) {
+        localStorage.setItem('openai-api-key', DEFAULT_API_KEY);
+      }
     }
   }, []);
+
+  const cleanAsterisks = (text: string): string => {
+    return text.replace(/\*\*/g, "");
+  };
 
   const updateApiKey = (newKey: string) => {
     if (newKey) {
@@ -53,14 +63,29 @@ export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
     setIsLoading(true);
     
     try {
+      // Cập nhật các prompt system để loại bỏ ký tự **
+      const updatedMessages = messages.map(msg => {
+        if (msg.role === "system") {
+          return {
+            ...msg,
+            content: msg.content + " QUAN TRỌNG: KHÔNG sử dụng ký tự ** trong nội dung phản hồi."
+          };
+        }
+        return msg;
+      });
+      
       const response = await openai.chat.completions.create({
         model,
-        messages,
+        messages: updatedMessages,
         temperature: 0.7,
         max_tokens: 2048,
       });
       
-      return response.choices[0]?.message?.content || null;
+      let content = response.choices[0]?.message?.content || null;
+      if (content) {
+        content = cleanAsterisks(content);
+      }
+      return content;
     } catch (error: any) {
       console.error("OpenAI API error:", error);
       

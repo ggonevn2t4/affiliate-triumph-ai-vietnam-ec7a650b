@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles, RefreshCcw, Copy, Check } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -16,14 +17,32 @@ const contentFormats: ContentFormat[] = [
   { id: 'product', name: 'Mô tả sản phẩm' },
 ];
 
+const DEFAULT_API_KEY = "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";
+
 const ContentGenerator = () => {
   const [productName, setProductName] = useState('');
   const [selectedFormat, setSelectedFormat] = useState<string>('blog');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [generatedContent, setGeneratedContent] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
-  const [apiKey] = useState("sk-default-openai-key"); // Replace with your OpenAI key
+  
+  const [apiKey, setApiKey] = useState(() => {
+    const savedKey = localStorage.getItem("openai-api-key") || DEFAULT_API_KEY;
+    return savedKey;
+  });
+  
   const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
+
+  useEffect(() => {
+    // Lưu API key mặc định nếu chưa có
+    if (!localStorage.getItem("openai-api-key")) {
+      localStorage.setItem("openai-api-key", DEFAULT_API_KEY);
+    }
+  }, []);
+
+  const cleanAsterisks = (text: string): string => {
+    return text.replace(/\*\*/g, "");
+  };
   
   const handleGenerate = async () => {
     if (!productName) {
@@ -45,14 +64,16 @@ const ContentGenerator = () => {
       Hãy tạo nội dung "${formatName}" cho sản phẩm có tên: "${productName}".
       
       Hãy tạo nội dung phù hợp với định dạng, tối ưu SEO, và hấp dẫn để tăng tỷ lệ chuyển đổi.
-      Viết bằng tiếng Việt và phù hợp với thị trường Việt Nam.`;
+      Viết bằng tiếng Việt và phù hợp với thị trường Việt Nam.
+      
+      QUAN TRỌNG: KHÔNG sử dụng ký tự ** trong nội dung.`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
-            content: "You are a Vietnamese affiliate marketing expert. Create compelling content optimized for the Vietnamese market."
+            content: "You are a Vietnamese affiliate marketing expert. Create compelling content optimized for the Vietnamese market. Do not use asterisks (**) in your content."
           },
           {
             role: "user",
@@ -66,7 +87,7 @@ const ContentGenerator = () => {
       const content = response.choices[0]?.message?.content;
       
       if (content) {
-        setGeneratedContent(content);
+        setGeneratedContent(cleanAsterisks(content));
       } else {
         throw new Error("Unexpected API response format");
       }
@@ -133,7 +154,8 @@ Giá ưu đãi: ₫XXX,XXX (Giảm 20%)
 Mua ngay kẻo hết!`,
       };
       
-      setGeneratedContent(formatTexts[selectedFormat as keyof typeof formatTexts]);
+      const content = formatTexts[selectedFormat as keyof typeof formatTexts];
+      setGeneratedContent(cleanAsterisks(content));
     } finally {
       setIsGenerating(false);
     }

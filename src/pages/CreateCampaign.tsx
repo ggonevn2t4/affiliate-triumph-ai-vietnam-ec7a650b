@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,14 +8,27 @@ import CampaignForm, { CampaignFormValues } from "@/components/campaigns/Campaig
 import ApiKeyDialog from "@/components/ai-tools/ApiKeyDialog";
 import { useOpenAiApi } from "@/hooks/use-openai-api";
 
+const DEFAULT_API_KEY = "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";
+
 const CreateCampaign = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isKeyDialogOpen, setIsKeyDialogOpen] = useState(false);
   
+  useEffect(() => {
+    // Lưu API key mặc định nếu chưa có
+    if (!localStorage.getItem('openai-api-key')) {
+      localStorage.setItem('openai-api-key', DEFAULT_API_KEY);
+    }
+  }, []);
+  
   const { generateCompletion, isLoading: isAiLoading } = useOpenAiApi({
     onApiKeyMissing: () => setIsKeyDialogOpen(true)
   });
+
+  const cleanAsterisks = (text: string): string => {
+    return text ? text.replace(/\*\*/g, "") : text;
+  };
 
   const onSubmit = async (values: CampaignFormValues) => {
     setIsSubmitting(true);
@@ -54,12 +67,16 @@ const CreateCampaign = () => {
     }
 
     try {
-      const prompt = `Tạo mô tả chiến dịch affiliate marketing với tên "${name}", mục tiêu "${target}" và ngân sách "${budget}". Mô tả nên ngắn gọn, súc tích và thể hiện rõ giá trị của chiến dịch.`;
+      const prompt = `Tạo mô tả chiến dịch affiliate marketing với tên "${name}", mục tiêu "${target}" và ngân sách "${budget}". Mô tả nên ngắn gọn, súc tích và thể hiện rõ giá trị của chiến dịch. QUAN TRỌNG: KHÔNG sử dụng ký tự ** trong nội dung.`;
       
-      const result = await generateCompletion([
-        { role: "system", content: "Bạn là trợ lý viết nội dung affiliate marketing chuyên nghiệp. Hãy tạo mô tả chiến dịch súc tích, hấp dẫn và thuyết phục." },
+      let result = await generateCompletion([
+        { role: "system", content: "Bạn là trợ lý viết nội dung affiliate marketing chuyên nghiệp. Hãy tạo mô tả chiến dịch súc tích, hấp dẫn và thuyết phục. Không sử dụng ký tự ** trong nội dung." },
         { role: "user", content: prompt }
       ]);
+
+      if (result) {
+        result = cleanAsterisks(result);
+      }
 
       return result;
     } catch (error) {

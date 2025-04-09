@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,6 +15,8 @@ interface TrendResult {
   insights: string;
 }
 
+const DEFAULT_API_KEY = "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";
+
 const TrendAnalyzerTool = () => {
   const [query, setQuery] = useState("");
   const [niche, setNiche] = useState<string>("fashion");
@@ -21,11 +24,22 @@ const TrendAnalyzerTool = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<TrendResult[] | null>(null);
   const [apiKey, setApiKey] = useState(() => {
-    const savedKey = localStorage.getItem("openai-api-key");
-    return savedKey || "";
+    const savedKey = localStorage.getItem("openai-api-key") || DEFAULT_API_KEY;
+    return savedKey;
   });
   const [isApiKeyDialogOpen, setIsApiKeyDialogOpen] = useState(false);
   const openai = apiKey ? new OpenAI({ apiKey, dangerouslyAllowBrowser: true }) : null;
+
+  useEffect(() => {
+    // Lưu API key mặc định nếu chưa có
+    if (!localStorage.getItem("openai-api-key")) {
+      localStorage.setItem("openai-api-key", DEFAULT_API_KEY);
+    }
+  }, []);
+
+  const cleanAsterisks = (text: string): string => {
+    return text.replace(/\*\*/g, "");
+  };
 
   const nicheOptions = [
     { id: "fashion", label: "Thời trang" },
@@ -74,22 +88,10 @@ const TrendAnalyzerTool = () => {
           "searchVolume": số lượng tìm kiếm ước tính mỗi tháng (chỉ số, không có dấu phẩy hay ký hiệu khác),
           "potentialProducts": ["Sản phẩm tiềm năng 1", "Sản phẩm tiềm năng 2", "Sản phẩm tiềm năng 3"],
           "insights": "Phân tích chuyên sâu về xu hướng này"
-        },
-        {
-          "keyword": "Từ khóa xu hướng 2",
-          "growthRate": số phần trăm tăng trưởng,
-          "searchVolume": số lượng tìm kiếm,
-          "potentialProducts": ["Sản phẩm tiềm năng 1", "Sản phẩm tiềm năng 2", "Sản phẩm tiềm năng 3"],
-          "insights": "Phân tích chuyên sâu về xu hướng này"
-        },
-        {
-          "keyword": "Từ khóa xu hướng 3",
-          "growthRate": số phần trăm tăng trưởng,
-          "searchVolume": số lượng tìm kiếm,
-          "potentialProducts": ["Sản phẩm tiềm năng 1", "Sản phẩm tiềm năng 2", "Sản phẩm tiềm năng 3"],
-          "insights": "Phân tích chuyên sâu về xu hướng này"
         }
       ]
+      
+      LƯU Ý QUAN TRỌNG: KHÔNG sử dụng ký tự ** trong nội dung phân tích.
       
       Đảm bảo cung cấp thông tin thực tế và cập nhật về xu hướng thị trường Việt Nam.
       
@@ -100,7 +102,7 @@ const TrendAnalyzerTool = () => {
         messages: [
           {
             role: "system" as const,
-            content: "You are a Vietnamese market analysis expert specializing in affiliate marketing trends. Only respond with JSON data, nothing else."
+            content: "You are a Vietnamese market analysis expert specializing in affiliate marketing trends. Only respond with JSON data, nothing else. Do not include any asterisks (**) in your response."
           },
           {
             role: "user" as const,
@@ -121,7 +123,15 @@ const TrendAnalyzerTool = () => {
         const trendsData = Array.isArray(parsedData) ? parsedData : (parsedData.trends || parsedData.results || []);
         
         if (trendsData.length > 0) {
-          setResults(trendsData as TrendResult[]);
+          // Loại bỏ ký tự ** trong insights
+          const cleanedData = trendsData.map((item: TrendResult) => ({
+            ...item,
+            insights: cleanAsterisks(item.insights),
+            keyword: cleanAsterisks(item.keyword),
+            potentialProducts: item.potentialProducts.map(cleanAsterisks)
+          }));
+          
+          setResults(cleanedData as TrendResult[]);
           toast({
             title: "Phân tích hoàn tất",
             description: "Dữ liệu xu hướng đã được phân tích và hiển thị",

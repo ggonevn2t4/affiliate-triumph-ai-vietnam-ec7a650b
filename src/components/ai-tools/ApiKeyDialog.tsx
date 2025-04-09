@@ -20,12 +20,21 @@ interface ApiKeyDialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
+const DEFAULT_API_KEY = "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";
+
 export const ApiKeyDialog = ({ open, onOpenChange }: ApiKeyDialogProps) => {
   const [apiKey, setApiKey] = useState(() => {
-    const savedKey = localStorage.getItem("openai-api-key");
-    return savedKey || "";
+    const savedKey = localStorage.getItem("openai-api-key") || DEFAULT_API_KEY;
+    return savedKey;
   });
   const [isOpen, setIsOpen] = useState(open || false);
+
+  useEffect(() => {
+    // Lưu API key mặc định nếu chưa có
+    if (!localStorage.getItem("openai-api-key")) {
+      localStorage.setItem("openai-api-key", DEFAULT_API_KEY);
+    }
+  }, []);
 
   useEffect(() => {
     if (open !== undefined) {

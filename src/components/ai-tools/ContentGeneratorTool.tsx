@@ -17,6 +17,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const DEFAULT_API_KEY = "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";
+
 const ContentGeneratorTool = () => {
   const [prompt, setPrompt] = useState("");
   const [contentType, setContentType] = useState<string>("blog-post");
@@ -24,8 +26,8 @@ const ContentGeneratorTool = () => {
   const [generatedContent, setGeneratedContent] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [apiKey, setApiKey] = useState(() => {
-    const savedKey = localStorage.getItem("openai-api-key");
-    return savedKey || "";
+    const savedKey = localStorage.getItem("openai-api-key") || DEFAULT_API_KEY;
+    return savedKey;
   });
   const [isApiKeyDialogOpen, setIsApiKeyDialogOpen] = useState(false);
   const openai = apiKey ? new OpenAI({ apiKey, dangerouslyAllowBrowser: true }) : null;
@@ -38,6 +40,13 @@ const ContentGeneratorTool = () => {
     { id: "landing-page", label: "Nội dung trang đích" }
   ];
 
+  useEffect(() => {
+    // Lưu API key mặc định nếu chưa có
+    if (!localStorage.getItem("openai-api-key")) {
+      localStorage.setItem("openai-api-key", DEFAULT_API_KEY);
+    }
+  }, []);
+
   const saveApiKey = (key: string) => {
     setApiKey(key);
     localStorage.setItem("openai-api-key", key);
@@ -46,6 +55,10 @@ const ContentGeneratorTool = () => {
       title: "Cập nhật API Key",
       description: "API key của bạn đã được cập nhật thành công."
     });
+  };
+
+  const cleanAsterisks = (text: string): string => {
+    return text.replace(/\*\*/g, "");
   };
 
   const handleGenerateContent = async () => {
@@ -77,6 +90,7 @@ const ContentGeneratorTool = () => {
       - Phù hợp với văn hóa và thị trường Việt Nam
       - Có tính thuyết phục cao và tạo niềm tin
       - Có giọng điệu phù hợp với đối tượng mục tiêu
+      - QUAN TRỌNG: KHÔNG sử dụng ký tự ** trong bài viết
       
       Viết nội dung bằng tiếng Việt, tối ưu cho affiliate marketing.`;
 
@@ -92,9 +106,10 @@ const ContentGeneratorTool = () => {
         max_tokens: 2048,
       });
 
-      const content = response.choices[0]?.message?.content;
+      let content = response.choices[0]?.message?.content;
       
       if (content) {
+        content = cleanAsterisks(content);
         setGeneratedContent(content);
         toast({
           title: "Nội dung đã được tạo",
@@ -124,11 +139,11 @@ const ContentGeneratorTool = () => {
 
       // Use a fallback response
       const demoResponses: Record<string, string> = {
-        "blog-post": `# 5 Chiến lược Tiếp thị Liên kết Hiệu quả cho Người mới Bắt đầu\n\nTiếp thị liên kết là một cách tuyệt vời để kiếm thu nhập thụ động, nhưng làm thế nào để bắt đầu hiệu quả? Trong bài viết này, chúng ta sẽ khám phá 5 chiến lược quan trọng giúp bạn xây dựng nền tảng vững chắc trong lĩnh vực này.\n\n## 1. Chọn ngách phù hợp với đam mê\n\nKhi mới bắt đầu, việc chọn một lĩnh vực bạn quan tâm và có kiến thức sẽ giúp bạn duy trì động lực lâu dài. Đồng thời, hãy nghiên cứu về tiềm năng sinh lời của ngách đó trước khi đi sâu vào nó.\n\n## 2. Xây dựng nền tảng nội dung chất lượng\n\nBlog, kênh YouTube hoặc tài khoản mạng xã hội với nội dung giá trị là nền tảng để bạn giới thiệu sản phẩm một cách tự nhiên. Tập trung vào việc giải quyết vấn đề của độc giả thay vì chỉ bán hàng.\n\n## 3. Sử dụng chiến lược SEO cơ bản\n\nNghiên cứu từ khóa và tối ưu hóa nội dung của bạn để được xếp hạng cao trên các công cụ tìm kiếm. Điều này giúp tăng lưu lượng truy cập tự nhiên đến nền tảng của bạn.\n\n## 4. Xây dựng danh sách email\n\nEmail marketing vẫn là một trong những kênh có ROI cao nhất. Hãy tạo tài nguyên giá trị miễn phí để thu thập email và xây dựng mối quan hệ với khách hàng tiềm năng.\n\n## 5. Phân tích và tối ưu hóa liên tục\n\nSử dụng công cụ phân tích để theo dõi hiệu suất của các liên kết affiliate và điều chỉnh chiến lược của bạn dựa trên dữ liệu thực tế.\n\nKết hợp 5 chiến lược này sẽ giúp bạn xây dựng nền tảng tiếp thị liên kết vững chắc và sinh lời trong dài hạn.`,
+        "blog-post": `5 Chiến lược Tiếp thị Liên kết Hiệu quả cho Người mới Bắt đầu\n\nTiếp thị liên kết là một cách tuyệt vời để kiếm thu nhập thụ động, nhưng làm thế nào để bắt đầu hiệu quả? Trong bài viết này, chúng ta sẽ khám phá 5 chiến lược quan trọng giúp bạn xây dựng nền tảng vững chắc trong lĩnh vực này.\n\n1. Chọn ngách phù hợp với đam mê\n\nKhi mới bắt đầu, việc chọn một lĩnh vực bạn quan tâm và có kiến thức sẽ giúp bạn duy trì động lực lâu dài. Đồng thời, hãy nghiên cứu về tiềm năng sinh lời của ngách đó trước khi đi sâu vào nó.\n\n2. Xây dựng nền tảng nội dung chất lượng\n\nBlog, kênh YouTube hoặc tài khoản mạng xã hội với nội dung giá trị là nền tảng để bạn giới thiệu sản phẩm một cách tự nhiên. Tập trung vào việc giải quyết vấn đề của độc giả thay vì chỉ bán hàng.\n\n3. Sử dụng chiến lược SEO cơ bản\n\nNghiên cứu từ khóa và tối ưu hóa nội dung của bạn để được xếp hạng cao trên các công cụ tìm kiếm. Điều này giúp tăng lưu lượng truy cập tự nhiên đến nền tảng của bạn.\n\n4. Xây dựng danh sách email\n\nEmail marketing vẫn là một trong những kênh có ROI cao nhất. Hãy tạo tài nguyên giá trị miễn phí để thu thập email và xây dựng mối quan hệ với khách hàng tiềm năng.\n\n5. Phân tích và tối ưu hóa liên tục\n\nSử dụng công cụ phân tích để theo dõi hiệu suất của các liên kết affiliate và điều chỉnh chiến lược của bạn dựa trên dữ liệu thực tế.\n\nKết hợp 5 chiến lược này sẽ giúp bạn xây dựng nền tảng tiếp thị liên kết vững chắc và sinh lời trong dài hạn.`,
       };
       
       const selectedTypeContent = demoResponses[contentType] || demoResponses["blog-post"];
-      setGeneratedContent(selectedTypeContent);
+      setGeneratedContent(cleanAsterisks(selectedTypeContent));
     } finally {
       setIsLoading(false);
     }
