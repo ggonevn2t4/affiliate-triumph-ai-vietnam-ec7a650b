@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -62,22 +63,22 @@ const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
     try {
       // Prepare conversation history for context
       const conversationHistory = messages.map(msg => ({
-        role: msg.sender === "user" ? "user" : "assistant",
+        role: msg.sender === "user" ? "user" as const : "assistant" as const,
         content: msg.text
       }));
 
       // Add the new user message
       conversationHistory.push({
-        role: "user",
+        role: "user" as const,
         content: input
       });
 
-      // Call the OpenAI API
+      // Call the OpenAI API with the correct message types
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini", // Using GPT-4o-mini as a replacement
         messages: [
           {
-            role: "system",
+            role: "system" as const,
             content: `Bạn là một trợ lý AI chuyên về Affiliate Marketing trong thị trường Việt Nam. 
                     Chủ đề hiện tại: "${selectedTopic}". 
                     Hãy trả lời với kiến thức cập nhật về thị trường Việt Nam và xu hướng Affiliate Marketing hiện tại.`
