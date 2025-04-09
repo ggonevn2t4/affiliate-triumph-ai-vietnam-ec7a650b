@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
+import { Facebook, Instagram, Twitter, Youtube, Phone, MapPin } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -88,8 +88,20 @@ const Footer = () => {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-4">Hỗ trợ</h3>
-            <ul className="space-y-2">
+            <h3 className="text-lg font-semibold mb-4">Liên hệ</h3>
+            <ul className="space-y-3">
+              <li className="flex items-center">
+                <Phone size={18} className="mr-2 text-brand-blue" />
+                <a href="tel:0708684608" className="text-gray-600 hover:text-brand-blue transition-colors">
+                  0708684608 (Zalo)
+                </a>
+              </li>
+              <li className="flex items-start">
+                <MapPin size={18} className="mr-2 text-brand-blue flex-shrink-0 mt-1" />
+                <span className="text-gray-600">
+                  Landmark 81, Quận Bình Thạnh, TPHCM
+                </span>
+              </li>
               <li>
                 <Link to="/help-center" className="text-gray-600 hover:text-brand-blue transition-colors">
                   Trung tâm hỗ trợ
@@ -98,16 +110,6 @@ const Footer = () => {
               <li>
                 <Link to="/documentation" className="text-gray-600 hover:text-brand-blue transition-colors">
                   Tài liệu hướng dẫn
-                </Link>
-              </li>
-              <li>
-                <Link to="/community" className="text-gray-600 hover:text-brand-blue transition-colors">
-                  Cộng đồng
-                </Link>
-              </li>
-              <li>
-                <Link to="/privacy" className="text-gray-600 hover:text-brand-blue transition-colors">
-                  Chính sách bảo mật
                 </Link>
               </li>
             </ul>
