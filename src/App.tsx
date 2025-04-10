@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
@@ -33,6 +33,13 @@ const App = () => {
               <Route path="/ai-coaching" element={<AiCoaching />} />
               <Route path="/ai-tools" element={<AiTools />} />
               <Route path="/create-campaign" element={<CreateCampaign />} />
+              
+              {/* Nested routes - if you add any, add them here */}
+              <Route path="/ai-coaching/history" element={<Navigate to="/ai-coaching" />} />
+              <Route path="/ai-coaching/resources" element={<Navigate to="/ai-coaching" />} />
+              <Route path="/ai-coaching/tips" element={<Navigate to="/ai-coaching" />} />
+              <Route path="/ai-coaching/success-stories" element={<Navigate to="/ai-coaching" />} />
+              
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
