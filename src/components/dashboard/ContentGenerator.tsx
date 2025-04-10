@@ -1,9 +1,9 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles, RefreshCcw, Copy, Check } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import OpenAI from 'openai';
+import { useGeminiApi } from '@/hooks/use-gemini-api';
 
 interface ContentFormat {
   id: string;
@@ -17,33 +17,14 @@ const contentFormats: ContentFormat[] = [
   { id: 'product', name: 'Mô tả sản phẩm' },
 ];
 
-const DEFAULT_API_KEY = "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";
-
 const ContentGenerator = () => {
   const [productName, setProductName] = useState('');
   const [selectedFormat, setSelectedFormat] = useState<string>('blog');
-  const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [generatedContent, setGeneratedContent] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
   
-  const [apiKey, setApiKey] = useState(() => {
-    const savedKey = localStorage.getItem("openai-api-key") || DEFAULT_API_KEY;
-    return savedKey;
-  });
-  
-  const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
+  const { generateCompletion, isLoading: isGenerating } = useGeminiApi();
 
-  useEffect(() => {
-    // Lưu API key mặc định nếu chưa có
-    if (!localStorage.getItem("openai-api-key")) {
-      localStorage.setItem("openai-api-key", DEFAULT_API_KEY);
-    }
-  }, []);
-
-  const cleanAsterisks = (text: string): string => {
-    return text.replace(/\*\*/g, "");
-  };
-  
   const handleGenerate = async () => {
     if (!productName) {
       toast({
@@ -54,7 +35,6 @@ const ContentGenerator = () => {
       return;
     }
     
-    setIsGenerating(true);
     setGeneratedContent('');
     
     try {
@@ -68,26 +48,19 @@ const ContentGenerator = () => {
       
       QUAN TRỌNG: KHÔNG sử dụng ký tự ** trong nội dung.`;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: "You are a Vietnamese affiliate marketing expert. Create compelling content optimized for the Vietnamese market. Do not use asterisks (**) in your content."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1024,
-      });
-
-      const content = response.choices[0]?.message?.content;
+      const content = await generateCompletion([
+        {
+          role: "system",
+          content: "You are a Vietnamese affiliate marketing expert. Create compelling content optimized for the Vietnamese market. Do not use asterisks (**) in your content."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ]);
       
       if (content) {
-        setGeneratedContent(cleanAsterisks(content));
+        setGeneratedContent(content);
       } else {
         throw new Error("Unexpected API response format");
       }
@@ -155,9 +128,7 @@ Mua ngay kẻo hết!`,
       };
       
       const content = formatTexts[selectedFormat as keyof typeof formatTexts];
-      setGeneratedContent(cleanAsterisks(content));
-    } finally {
-      setIsGenerating(false);
+      setGeneratedContent(content);
     }
   };
   

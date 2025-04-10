@@ -1,11 +1,11 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { Compass, Search, TrendingUp, Calendar, Settings } from "lucide-react";
-import OpenAI from "openai";
+import { Compass, Search, TrendingUp, Calendar } from "lucide-react";
 import { ApiKeyDialog } from "./ApiKeyDialog";
+import { useGeminiApi } from "@/hooks/use-gemini-api";
 
 interface TrendResult {
   keyword: string;
@@ -15,31 +15,16 @@ interface TrendResult {
   insights: string;
 }
 
-const DEFAULT_API_KEY = "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";
-
 const TrendAnalyzerTool = () => {
   const [query, setQuery] = useState("");
   const [niche, setNiche] = useState<string>("fashion");
   const [timeRange, setTimeRange] = useState<string>("month");
-  const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<TrendResult[] | null>(null);
-  const [apiKey, setApiKey] = useState(() => {
-    const savedKey = localStorage.getItem("openai-api-key") || DEFAULT_API_KEY;
-    return savedKey;
-  });
   const [isApiKeyDialogOpen, setIsApiKeyDialogOpen] = useState(false);
-  const openai = apiKey ? new OpenAI({ apiKey, dangerouslyAllowBrowser: true }) : null;
-
-  useEffect(() => {
-    // Lưu API key mặc định nếu chưa có
-    if (!localStorage.getItem("openai-api-key")) {
-      localStorage.setItem("openai-api-key", DEFAULT_API_KEY);
-    }
-  }, []);
-
-  const cleanAsterisks = (text: string): string => {
-    return text.replace(/\*\*/g, "");
-  };
+  
+  const { generateCompletion, isLoading } = useGeminiApi({
+    onApiKeyMissing: () => setIsApiKeyDialogOpen(true)
+  });
 
   const nicheOptions = [
     { id: "fashion", label: "Thời trang" },
@@ -66,13 +51,6 @@ const TrendAnalyzerTool = () => {
       return;
     }
 
-    if (!apiKey) {
-      setIsApiKeyDialogOpen(true);
-      return;
-    }
-
-    setIsLoading(true);
-    
     try {
       // Prepare the prompt for trend analysis
       const prompt = `Bạn là một chuyên gia phân tích xu hướng thị trường Affiliate Marketing. 
@@ -97,70 +75,55 @@ const TrendAnalyzerTool = () => {
       
       Trả lời chỉ bao gồm JSON, không có chữ hay định dạng khác.`;
 
-      const response = await openai!.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system" as const,
-            content: "You are a Vietnamese market analysis expert specializing in affiliate marketing trends. Only respond with JSON data, nothing else. Do not include any asterisks (**) in your response."
-          },
-          {
-            role: "user" as const,
-            content: prompt
-          }
-        ],
-        temperature: 0.2,
-        response_format: { type: "json_object" },
-        max_tokens: 2048,
-      });
-
-      const resultText = response.choices[0]?.message?.content || "{}";
-      
-      try {
-        // Parse the JSON
-        const parsedData = JSON.parse(resultText);
-        // Check if it's an array or if it's wrapped in another object
-        const trendsData = Array.isArray(parsedData) ? parsedData : (parsedData.trends || parsedData.results || []);
-        
-        if (trendsData.length > 0) {
-          // Loại bỏ ký tự ** trong insights
-          const cleanedData = trendsData.map((item: TrendResult) => ({
-            ...item,
-            insights: cleanAsterisks(item.insights),
-            keyword: cleanAsterisks(item.keyword),
-            potentialProducts: item.potentialProducts.map(cleanAsterisks)
-          }));
-          
-          setResults(cleanedData as TrendResult[]);
-          toast({
-            title: "Phân tích hoàn tất",
-            description: "Dữ liệu xu hướng đã được phân tích và hiển thị",
-          });
-        } else {
-          throw new Error("No trend data found");
+      const result = await generateCompletion([
+        {
+          role: "system",
+          content: "You are a Vietnamese market analysis expert specializing in affiliate marketing trends. Only respond with JSON data, nothing else. Do not include any asterisks (**) in your response."
+        },
+        {
+          role: "user",
+          content: prompt
         }
-      } catch (parseError) {
-        console.error("Error parsing JSON response:", parseError);
-        throw new Error("Could not parse JSON from response");
+      ]);
+      
+      if (result) {
+        try {
+          // Tìm JSON object trong phản hồi
+          const jsonStart = result.indexOf('[');
+          const jsonEnd = result.lastIndexOf(']') + 1;
+          
+          if (jsonStart > -1 && jsonEnd > jsonStart) {
+            const jsonString = result.substring(jsonStart, jsonEnd);
+            // Parse the JSON
+            const trendsData = JSON.parse(jsonString) as TrendResult[];
+            
+            if (trendsData.length > 0) {
+              setResults(trendsData);
+              toast({
+                title: "Phân tích hoàn tất",
+                description: "Dữ liệu xu hướng đã được phân tích và hiển thị",
+              });
+            } else {
+              throw new Error("No trend data found");
+            }
+          } else {
+            throw new Error("Invalid JSON format in response");
+          }
+        } catch (parseError) {
+          console.error("Error parsing JSON response:", parseError, result);
+          throw new Error("Could not parse JSON from response");
+        }
+      } else {
+        throw new Error("No response from API");
       }
     } catch (error: any) {
       console.error("Error analyzing trends:", error);
       
-      // Check for API key errors
-      if (error.status === 401 || (error.error && error.error.type === "invalid_request_error")) {
-        toast({
-          title: "Lỗi API key",
-          description: "API key không hợp lệ hoặc đã hết hạn. Vui lòng cập nhật API key của bạn.",
-          variant: "destructive"
-        });
-        setIsApiKeyDialogOpen(true);
-      } else {
-        toast({
-          title: "Lỗi phân tích",
-          description: "Đã có lỗi xảy ra khi phân tích xu hướng. Vui lòng thử lại sau.",
-          variant: "destructive"
-        });
-      }
+      toast({
+        title: "Lỗi phân tích",
+        description: "Đã có lỗi xảy ra khi phân tích xu hướng. Vui lòng thử lại sau.",
+        variant: "destructive"
+      });
       
       // Use demo data as fallback
       const demoResults: Record<string, TrendResult[]> = {
@@ -191,8 +154,6 @@ const TrendAnalyzerTool = () => {
       
       const selectedNicheResults = demoResults[niche] || demoResults["fashion"];
       setResults(selectedNicheResults);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -288,6 +249,7 @@ const TrendAnalyzerTool = () => {
         </Button>
       </div>
       
+      {/* Kết quả phân tích */}
       {results && (
         <div className="mt-8">
           <h3 className="font-medium text-lg mb-4">Kết quả phân tích xu hướng</h3>
@@ -337,7 +299,7 @@ const TrendAnalyzerTool = () => {
               <Calendar className="h-4 w-4 mr-1" />
               <span>Dữ liệu cập nhật: {new Date().toLocaleDateString("vi-VN")}</span>
             </div>
-            <span>Powered by OpenAI GPT-4o-mini API</span>
+            <span>Powered by Google Gemini API</span>
           </div>
         </div>
       )}

@@ -2,9 +2,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, ChevronDown, ArrowLeft, Settings } from "lucide-react";
+import { Send, ArrowLeft, Settings } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import OpenAI from "openai";
+import { useGeminiApi } from "@/hooks/use-gemini-api";
 import { 
   Dialog,
   DialogContent,
@@ -31,14 +31,20 @@ interface Message {
 const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [apiKey, setApiKey] = useState(() => {
-    const savedKey = localStorage.getItem("openai-api-key");
+    const savedKey = localStorage.getItem("gemini-api-key");
     return savedKey || "";
   });
   const [isApiKeyDialogOpen, setIsApiKeyDialogOpen] = useState(!apiKey);
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
-  const openai = apiKey ? new OpenAI({ apiKey, dangerouslyAllowBrowser: true }) : null;
+  
+  const { 
+    generateCompletion, 
+    isLoading,
+    updateApiKey 
+  } = useGeminiApi({
+    onApiKeyMissing: () => setIsApiKeyDialogOpen(true)
+  });
 
   // Scroll to bottom whenever messages change
   useEffect(() => {
@@ -60,13 +66,11 @@ const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
   }, [selectedTopic]);
 
   const saveApiKey = (key: string) => {
-    setApiKey(key);
-    localStorage.setItem("openai-api-key", key);
-    setIsApiKeyDialogOpen(false);
-    toast({
-      title: "Cập nhật API Key",
-      description: "API key của bạn đã được cập nhật thành công."
-    });
+    if (key) {
+      setApiKey(key);
+      updateApiKey(key);
+      setIsApiKeyDialogOpen(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -88,7 +92,6 @@ const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
 
     setMessages(prev => [...prev, userMessage]);
     setInput("");
-    setIsLoading(true);
 
     try {
       // Prepare conversation history for context
@@ -103,52 +106,34 @@ const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
         content: input
       });
 
-      // Call the OpenAI API with the correct message types
-      const response = await openai!.chat.completions.create({
-        model: "gpt-4o-mini", // Using GPT-4o-mini as a replacement
-        messages: [
-          {
-            role: "system" as const,
-            content: `Bạn là một trợ lý AI chuyên về Affiliate Marketing trong thị trường Việt Nam. 
-                    Chủ đề hiện tại: "${selectedTopic}". 
-                    Hãy trả lời với kiến thức cập nhật về thị trường Việt Nam và xu hướng Affiliate Marketing hiện tại.`
-          },
-          ...conversationHistory
-        ],
-        temperature: 0.7,
-        max_tokens: 1024,
-      });
-
-      // Get AI response
-      const aiResponse = response.choices[0]?.message?.content || "Xin lỗi, tôi không thể xử lý yêu cầu của bạn lúc này.";
-      
-      // Add AI response to messages
-      const aiMessage = {
-        id: Date.now().toString(),
-        text: aiResponse,
-        sender: "ai" as const,
-        timestamp: new Date()
+      // Add system message
+      const systemMessage = {
+        role: "system" as const,
+        content: `Bạn là một trợ lý AI chuyên về Affiliate Marketing trong thị trường Việt Nam. 
+                Chủ đề hiện tại: "${selectedTopic}". 
+                Hãy trả lời với kiến thức cập nhật về thị trường Việt Nam và xu hướng Affiliate Marketing hiện tại.`
       };
 
-      setMessages(prev => [...prev, aiMessage]);
-    } catch (error: any) {
-      console.error("Error calling OpenAI API:", error);
-      
-      // Check for API key errors
-      if (error.status === 401 || (error.error && error.error.type === "invalid_request_error")) {
-        toast({
-          title: "Lỗi API key",
-          description: "API key không hợp lệ hoặc đã hết hạn. Vui lòng cập nhật API key của bạn.",
-          variant: "destructive"
-        });
-        setIsApiKeyDialogOpen(true);
+      // Call the Gemini API
+      const aiResponse = await generateCompletion(
+        [systemMessage, ...conversationHistory]
+      );
+
+      if (aiResponse) {
+        // Add AI response to messages
+        const aiMessage = {
+          id: Date.now().toString(),
+          text: aiResponse,
+          sender: "ai" as const,
+          timestamp: new Date()
+        };
+
+        setMessages(prev => [...prev, aiMessage]);
       } else {
-        toast({
-          title: "Lỗi",
-          description: "Đã có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại sau.",
-          variant: "destructive"
-        });
+        throw new Error("No response from API");
       }
+    } catch (error: any) {
+      console.error("Error in chat:", error);
       
       // Add fallback AI response in case of error
       const errorMessage = {
@@ -159,8 +144,6 @@ const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
       };
       
       setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -190,9 +173,9 @@ const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle>OpenAI API Key</DialogTitle>
+                  <DialogTitle>Google Gemini API Key</DialogTitle>
                   <DialogDescription>
-                    Nhập API key OpenAI của bạn để sử dụng dịch vụ AI. API key sẽ được lưu trên trình duyệt của bạn.
+                    Nhập API key Google Gemini của bạn để sử dụng dịch vụ AI. API key sẽ được lưu trên trình duyệt của bạn.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
@@ -203,7 +186,7 @@ const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
                     <Input
                       id="api-key"
                       type="password"
-                      placeholder="sk-..."
+                      placeholder="AIzaSy..."
                       className="col-span-4"
                       value={apiKey}
                       onChange={(e) => setApiKey(e.target.value)}
@@ -281,7 +264,7 @@ const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
             </Button>
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            AI Coaching được hỗ trợ bởi công nghệ OpenAI GPT-4o-mini. Tư vấn dựa trên dữ liệu thị trường Việt Nam và xu hướng Affiliate Marketing hiện tại.
+            AI Coaching được hỗ trợ bởi công nghệ Google Gemini API. Tư vấn dựa trên dữ liệu thị trường Việt Nam và xu hướng Affiliate Marketing hiện tại.
           </p>
         </form>
       </div>

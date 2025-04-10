@@ -1,34 +1,21 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import CampaignForm, { CampaignFormValues } from "@/components/campaigns/CampaignForm";
 import ApiKeyDialog from "@/components/ai-tools/ApiKeyDialog";
-import { useOpenAiApi } from "@/hooks/use-openai-api";
-
-const DEFAULT_API_KEY = "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";
+import { useGeminiApi } from "@/hooks/use-gemini-api";
 
 const CreateCampaign = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isKeyDialogOpen, setIsKeyDialogOpen] = useState(false);
   
-  useEffect(() => {
-    // Lưu API key mặc định nếu chưa có
-    if (!localStorage.getItem('openai-api-key')) {
-      localStorage.setItem('openai-api-key', DEFAULT_API_KEY);
-    }
-  }, []);
-  
-  const { generateCompletion, isLoading: isAiLoading } = useOpenAiApi({
+  const { generateCompletion, isLoading: isAiLoading } = useGeminiApi({
     onApiKeyMissing: () => setIsKeyDialogOpen(true)
   });
-
-  const cleanAsterisks = (text: string): string => {
-    return text ? text.replace(/\*\*/g, "") : text;
-  };
 
   const onSubmit = async (values: CampaignFormValues) => {
     setIsSubmitting(true);
@@ -73,10 +60,6 @@ const CreateCampaign = () => {
         { role: "system", content: "Bạn là trợ lý viết nội dung affiliate marketing chuyên nghiệp. Hãy tạo mô tả chiến dịch súc tích, hấp dẫn và thuyết phục. Không sử dụng ký tự ** trong nội dung." },
         { role: "user", content: prompt }
       ]);
-
-      if (result) {
-        result = cleanAsterisks(result);
-      }
 
       return result;
     } catch (error) {
