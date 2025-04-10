@@ -18,6 +18,13 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
     // Sử dụng API key cố định từ hệ thống
     if (YOUR_FIXED_API_KEY && YOUR_FIXED_API_KEY !== "YOUR_API_KEY_HERE") {
       setGenAI(new GoogleGenerativeAI(YOUR_FIXED_API_KEY));
+    } else {
+      console.error("API key is missing or not set correctly");
+      toast({
+        title: "Thông báo hệ thống",
+        description: "Tính năng AI đang được bảo trì. Vui lòng thử lại sau.",
+        variant: "destructive"
+      });
     }
   }, []);
 
@@ -27,7 +34,7 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
 
   const generateCompletion = async (
     messages: Array<{role: "system" | "user" | "assistant"; content: string}>,
-    model = "gemini-2.0-flash-live-001"
+    model = "gemini-pro"
   ) => {
     if (!genAI || YOUR_FIXED_API_KEY === "YOUR_API_KEY_HERE") {
       toast({
@@ -44,13 +51,18 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
       // Kết hợp prompt hệ thống với tin nhắn người dùng
       const systemPrompt = messages.find(msg => msg.role === "system")?.content || "";
       
-      // Chuyển đổi định dạng tin nhắn từ OpenAI sang Gemini
-      const userMessages = messages
-        .filter(msg => msg.role !== "system")
-        .map(msg => ({
-          role: msg.role === "assistant" ? "model" : "user",
-          parts: [{ text: msg.content }]
-        }));
+      // Lấy nội dung tin nhắn của người dùng
+      const userMessage = messages.find(msg => msg.role === "user")?.content || "";
+      
+      if (!userMessage) {
+        toast({
+          title: "Lỗi",
+          description: "Không có nội dung để tạo. Vui lòng nhập thông tin.",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return null;
+      }
       
       // Lấy Gemini model
       const geminiModel = genAI.getGenerativeModel({ model });
@@ -65,23 +77,20 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
         systemInstruction: systemPrompt ? { text: systemPrompt } : undefined,
       });
       
-      // Lấy tin nhắn cuối cùng của người dùng và trích xuất phần nội dung
-      const lastUserMessage = userMessages[userMessages.length - 1];
-      const result = await chat.sendMessageStream(lastUserMessage.parts);
-      
-      // Lấy nội dung phản hồi
-      let responseText = "";
-      for await (const chunk of result.stream) {
-        const chunkText = chunk.text();
-        responseText += chunkText;
-      }
+      // Gửi tin nhắn của người dùng
+      const result = await chat.sendMessage(userMessage);
+      const response = await result.response;
+      let responseText = response.text();
       
       // Xử lý và trả về kết quả
       if (responseText) {
         responseText = cleanAsterisks(responseText);
+        return responseText;
+      } else {
+        // Xử lý trường hợp không có phản hồi
+        console.error("Không nhận được phản hồi từ API");
+        return "Không thể tạo nội dung. Vui lòng thử lại sau.";
       }
-      
-      return responseText;
     } catch (error: any) {
       console.error("Google Gemini API error:", error);
       

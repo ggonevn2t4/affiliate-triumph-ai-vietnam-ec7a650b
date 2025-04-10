@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { PenSquare, Copy, Check, Sparkles } from "lucide-react";
+import { PenSquare, Copy, Check, Sparkles, AlertTriangle } from "lucide-react";
 import { ApiKeyDialog } from "./ApiKeyDialog";
 import { useGeminiApi } from "@/hooks/use-gemini-api";
 
@@ -13,6 +13,7 @@ const ContentGeneratorTool = () => {
   const [generatedContent, setGeneratedContent] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [isApiKeyDialogOpen, setIsApiKeyDialogOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const { generateCompletion, isLoading } = useGeminiApi();
 
@@ -34,6 +35,8 @@ const ContentGeneratorTool = () => {
       return;
     }
 
+    setError(null);
+    
     try {
       const contentTypeLabel = contentTypeOptions.find(option => option.id === contentType)?.label || contentType;
       
@@ -50,6 +53,8 @@ const ContentGeneratorTool = () => {
       
       Viết nội dung bằng tiếng Việt, tối ưu cho affiliate marketing.`;
 
+      console.log("Sending request to Gemini API...");
+      
       const content = await generateCompletion([
         {
           role: "system",
@@ -61,6 +66,8 @@ const ContentGeneratorTool = () => {
         }
       ]);
       
+      console.log("Received response:", content ? "Content received" : "No content");
+      
       if (content) {
         setGeneratedContent(content);
         toast({
@@ -68,10 +75,13 @@ const ContentGeneratorTool = () => {
           description: "Nội dung AI đã được tạo thành công",
         });
       } else {
-        throw new Error("Không thể tạo nội dung");
+        setError("Hệ thống không thể tạo nội dung. Vui lòng thử lại sau.");
+        // Sử dụng nội dung mẫu cho trường hợp thất bại
+        setFallbackContent();
       }
     } catch (error: any) {
       console.error("Error generating content:", error);
+      setError("Đã xảy ra lỗi khi tạo nội dung.");
       
       toast({
         title: "Lỗi",
@@ -80,13 +90,21 @@ const ContentGeneratorTool = () => {
       });
 
       // Sử dụng nội dung mẫu nếu có lỗi
-      const demoResponses: Record<string, string> = {
-        "blog-post": `5 Chiến lược Tiếp thị Liên kết Hiệu quả cho Người mới Bắt đầu\n\nTiếp thị liên kết là một cách tuyệt vời để kiếm thu nhập thụ động, nhưng làm thế nào để bắt đầu hiệu quả? Trong bài viết này, chúng ta sẽ khám phá 5 chiến lược quan trọng giúp bạn xây dựng nền tảng vững chắc trong lĩnh vực này.\n\n1. Chọn ngách phù hợp với đam mê\n\nKhi mới bắt đầu, việc chọn một lĩnh vực bạn quan tâm và có kiến thức sẽ giúp bạn duy trì động lực lâu dài. Đồng thời, hãy nghiên cứu về tiềm năng sinh lời của ngách đó trước khi đi sâu vào nó.\n\n2. Xây dựng nền tảng nội dung chất lượng\n\nBlog, kênh YouTube hoặc tài khoản mạng xã hội với nội dung giá trị là nền tảng để bạn giới thiệu sản phẩm một cách tự nhiên. Tập trung vào việc giải quyết vấn đề của độc giả thay vì chỉ bán hàng.\n\n3. Sử dụng chiến lược SEO cơ bản\n\nNghiên cứu từ khóa và tối ưu hóa nội dung của bạn để được xếp hạng cao trên các công cụ tìm kiếm. Điều này giúp tăng lưu lượng truy cập tự nhiên đến nền tảng của bạn.\n\n4. Xây dựng danh sách email\n\nEmail marketing vẫn là một trong những kênh có ROI cao nhất. Hãy tạo tài nguyên giá trị miễn phí để thu thập email và xây dựng mối quan hệ với khách hàng tiềm năng.\n\n5. Phân tích và tối ưu hóa liên tục\n\nSử dụng công cụ phân tích để theo dõi hiệu suất của các liên kết affiliate và điều chỉnh chiến lược của bạn dựa trên dữ liệu thực tế.\n\nKết hợp 5 chiến lược này sẽ giúp bạn xây dựng nền tảng tiếp thị liên kết vững chắc và sinh lời trong dài hạn.`,
-      };
-      
-      const selectedTypeContent = demoResponses[contentType] || demoResponses["blog-post"];
-      setGeneratedContent(selectedTypeContent);
+      setFallbackContent();
     }
+  };
+
+  const setFallbackContent = () => {
+    const demoResponses: Record<string, string> = {
+      "blog-post": `5 Chiến lược Tiếp thị Liên kết Hiệu quả cho Người mới Bắt đầu\n\nTiếp thị liên kết là một cách tuyệt vời để kiếm thu nhập thụ động, nhưng làm thế nào để bắt đầu hiệu quả? Trong bài viết này, chúng ta sẽ khám phá 5 chiến lược quan trọng giúp bạn xây dựng nền tảng vững chắc trong lĩnh vực này.\n\n1. Chọn ngách phù hợp với đam mê\n\nKhi mới bắt đầu, việc chọn một lĩnh vực bạn quan tâm và có kiến thức sẽ giúp bạn duy trì động lực lâu dài. Đồng thời, hãy nghiên cứu về tiềm năng sinh lời của ngách đó trước khi đi sâu vào nó.\n\n2. Xây dựng nền tảng nội dung chất lượng\n\nBlog, kênh YouTube hoặc tài khoản mạng xã hội với nội dung giá trị là nền tảng để bạn giới thiệu sản phẩm một cách tự nhiên. Tập trung vào việc giải quyết vấn đề của độc giả thay vì chỉ bán hàng.\n\n3. Sử dụng chiến lược SEO cơ bản\n\nNghiên cứu từ khóa và tối ưu hóa nội dung của bạn để được xếp hạng cao trên các công cụ tìm kiếm. Điều này giúp tăng lưu lượng truy cập tự nhiên đến nền tảng của bạn.\n\n4. Xây dựng danh sách email\n\nEmail marketing vẫn là một trong những kênh có ROI cao nhất. Hãy tạo tài nguyên giá trị miễn phí để thu thập email và xây dựng mối quan hệ với khách hàng tiềm năng.\n\n5. Phân tích và tối ưu hóa liên tục\n\nSử dụng công cụ phân tích để theo dõi hiệu suất của các liên kết affiliate và điều chỉnh chiến lược của bạn dựa trên dữ liệu thực tế.\n\nKết hợp 5 chiến lược này sẽ giúp bạn xây dựng nền tảng tiếp thị liên kết vững chắc và sinh lời trong dài hạn.`,
+      "product-description": `Máy Lọc Không Khí SmartBreeze Pro\n\n★★★★★ (4.8/5) - Dựa trên 325 đánh giá\n\n✅ Công nghệ lọc HEPA 13 lớp loại bỏ 99.97% bụi mịn PM2.5\n✅ Diệt khuẩn UV-C tiên tiến\n✅ Vận hành siêu êm, phù hợp cho phòng ngủ\n\n👉 Thiết bị lọc không khí cao cấp nhất trên thị trường hiện nay\n👉 Bảo hành chính hãng 24 tháng\n👉 Miễn phí vận chuyển toàn quốc\n\nGiá gốc: 5.990.000₫\nGiá ưu đãi: 4.790.000₫ (Giảm 20%)\n\nMua ngay hôm nay để bảo vệ sức khỏe gia đình bạn khỏi ô nhiễm không khí!`,
+      "social-media": `🔥 REVIEW HOT: Tai nghe không dây SoundPods Pro - Sản phẩm đang làm mưa làm gió thị trường audio!\n\n✅ Thời lượng pin 36 giờ, gấp đôi đối thủ\n✅ Chống ồn chủ động thế hệ mới\n✅ Chất âm studio chuẩn xác\n✅ Kết nối Bluetooth 5.3 không độ trễ\n\n👉 Đừng bỏ lỡ ưu đãi GIẢM NGAY 30% chỉ trong tuần này!\n\nClick link trong bio để mua với giá ưu đãi nhất thị trường 🎧\n\n#SoundPodsProVN #AmThanhChatLuong #UuDaiHot`,
+      "email": `Chào [Tên khách hàng],\n\nCảm ơn bạn đã quan tâm đến các sản phẩm chăm sóc da từ thiên nhiên của chúng tôi!\n\nChúng tôi vừa ra mắt bộ sản phẩm mới "Natural Radiance" với công thức độc quyền từ chiết xuất lô hội hữu cơ và vitamin C tinh khiết, đặc biệt phù hợp với làn da người Việt.\n\nƯu đãi đặc biệt dành riêng cho bạn:\n• Giảm 25% cho đơn hàng đầu tiên\n• Quà tặng: Mặt nạ dưỡng ẩm cao cấp (trị giá 350.000đ)\n• Miễn phí vận chuyển\n\nKhuyến mãi chỉ kéo dài 7 ngày - hãy nhanh tay đặt hàng ngay hôm nay!\n\n[BUTTON: MUA NGAY VỚI ƯU ĐÃI 25%]\n\nTrân trọng,\nĐội ngũ Chăm sóc Khách hàng`,
+      "landing-page": `# Khóa Học Online "Thành Công Với Affiliate Marketing"\n\n## Bạn Muốn Tạo Thu Nhập Thụ Động Từ Affiliate Marketing?\n\nKhóa học "Thành Công Với Affiliate Marketing" sẽ giúp bạn xây dựng hệ thống kiếm tiền tự động, ngay cả khi bạn đang ngủ!\n\n### Học Viên Của Chúng Tôi Đạt Được:\n✓ Thu nhập trung bình 15-30 triệu đồng/tháng\n✓ Tự do về thời gian và địa điểm làm việc\n✓ Kỹ năng marketing online đỉnh cao\n✓ Mạng lưới đối tác rộng khắp\n\n### Nội Dung Khóa Học:\n• 8 module đào tạo chuyên sâu\n• 30+ video bài giảng HD\n• Công cụ và template độc quyền\n• Hỗ trợ 1-1 từ chuyên gia\n• Cộng đồng học viên năng động\n\n## Ưu Đãi Đặc Biệt - Chỉ Còn 5 Suất Cuối!\n~~3.990.000đ~~ CHỈ CÒN 1.990.000đ\n\n[ĐĂNG KÝ NGAY]\n\n*Cam kết hoàn tiền 100% trong 30 ngày nếu không hài lòng*`,
+    };
+    
+    const selectedTypeContent = demoResponses[contentType] || demoResponses["blog-post"];
+    setGeneratedContent(selectedTypeContent);
   };
 
   const handleCopyContent = () => {
@@ -163,6 +181,16 @@ const ContentGeneratorTool = () => {
           )}
         </Button>
       </div>
+      
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
+          <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-red-800 text-sm">{error}</p>
+            <p className="text-red-600 text-xs mt-1">Hệ thống sẽ hiển thị nội dung mẫu dưới đây.</p>
+          </div>
+        </div>
+      )}
       
       {generatedContent && (
         <div className="mt-8 border rounded-lg">

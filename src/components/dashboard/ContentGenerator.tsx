@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Sparkles, RefreshCcw, Copy, Check } from 'lucide-react';
+import { Sparkles, RefreshCcw, Copy, Check, AlertTriangle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useGeminiApi } from '@/hooks/use-gemini-api';
 
@@ -22,6 +22,7 @@ const ContentGenerator = () => {
   const [selectedFormat, setSelectedFormat] = useState<string>('blog');
   const [generatedContent, setGeneratedContent] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   
   const { generateCompletion, isLoading: isGenerating } = useGeminiApi();
 
@@ -36,9 +37,12 @@ const ContentGenerator = () => {
     }
     
     setGeneratedContent('');
+    setError(null);
     
     try {
       const formatName = contentFormats.find(format => format.id === selectedFormat)?.name || selectedFormat;
+      
+      console.log("Bắt đầu tạo nội dung cho:", productName, "với định dạng:", formatName);
       
       const prompt = `Bạn là một chuyên gia về Affiliate Marketing tại Việt Nam.
       Hãy tạo nội dung "${formatName}" cho sản phẩm có tên: "${productName}".
@@ -59,21 +63,31 @@ const ContentGenerator = () => {
         }
       ]);
       
+      console.log("Nhận được phản hồi:", content ? "Có nội dung" : "Không có nội dung");
+      
       if (content) {
         setGeneratedContent(content);
       } else {
-        throw new Error("Unexpected API response format");
+        setError("Không thể tạo nội dung cho sản phẩm này. Đang hiển thị nội dung mẫu.");
+        setFallbackContent();
       }
     } catch (error) {
       console.error("Error generating content:", error);
+      setError("Đã xảy ra lỗi khi tạo nội dung. Đang hiển thị nội dung mẫu.");
+      
       toast({
         title: "Lỗi",
         description: "Đã có lỗi xảy ra khi tạo nội dung. Vui lòng thử lại sau.",
         variant: "destructive"
       });
       
-      const formatTexts = {
-        blog: `# Đánh giá chi tiết về ${productName}: Có đáng để bạn mua không?
+      setFallbackContent();
+    }
+  };
+  
+  const setFallbackContent = () => {
+    const formatTexts = {
+      blog: `# Đánh giá chi tiết về ${productName}: Có đáng để bạn mua không?
 
 Nếu bạn đang tìm kiếm một ${productName} chất lượng cao, bạn đã đến đúng nơi. Trong bài viết này, chúng tôi sẽ phân tích chi tiết về sản phẩm này và giúp bạn quyết định xem nó có phải là lựa chọn tốt cho nhu cầu của bạn hay không.
 
@@ -87,8 +101,8 @@ Nếu bạn đang tìm kiếm một ${productName} chất lượng cao, bạn đ
 ## Ai nên mua ${productName}?
 
 Sản phẩm này đặc biệt phù hợp với những người đang tìm kiếm giải pháp hiệu quả mà không cần phải chi quá nhiều tiền...`,
-        
-        social: `🔥 REVIEW HOT: ${productName} - Sản phẩm đang làm mưa làm gió trên thị trường!
+      
+      social: `🔥 REVIEW HOT: ${productName} - Sản phẩm đang làm mưa làm gió trên thị trường!
 
 ✅ Thiết kế sang trọng
 ✅ Hiệu suất vượt trội
@@ -97,8 +111,8 @@ Sản phẩm này đặc biệt phù hợp với những người đang tìm ki�
 👉 Đừng bỏ lỡ cơ hội sở hữu ${productName} với ưu đãi đặc biệt khi mua qua link trong bio!
 
 #review #musthave #deal`,
-        
-        email: `Chào bạn,
+      
+      email: `Chào bạn,
 
 Tôi vừa khám phá ra một sản phẩm tuyệt vời mà tôi nghĩ bạn sẽ thích - ${productName}.
 
@@ -108,8 +122,8 @@ Hiện tại đang có chương trình giảm giá 15% cho sản phẩm này. B�
 
 Trân trọng,
 [Tên của bạn]`,
-        
-        product: `${productName}
+      
+      product: `${productName}
 
 ★★★★★ (4.9/5) - Dựa trên 253 đánh giá
 
@@ -125,11 +139,10 @@ Giá gốc: ₫XXX,XXX
 Giá ưu đãi: ₫XXX,XXX (Giảm 20%)
 
 Mua ngay kẻo hết!`,
-      };
-      
-      const content = formatTexts[selectedFormat as keyof typeof formatTexts];
-      setGeneratedContent(content);
-    }
+    };
+    
+    const content = formatTexts[selectedFormat as keyof typeof formatTexts];
+    setGeneratedContent(content);
   };
   
   const handleCopy = () => {
@@ -206,6 +219,15 @@ Mua ngay kẻo hết!`,
           )}
         </Button>
       </div>
+      
+      {error && (
+        <div className="mb-4 bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
+          <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-amber-800 text-sm">{error}</p>
+          </div>
+        </div>
+      )}
       
       {generatedContent && (
         <div className="bg-gray-50 border border-gray-200 rounded-lg">
