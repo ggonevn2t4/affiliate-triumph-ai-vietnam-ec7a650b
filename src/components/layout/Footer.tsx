@@ -39,24 +39,24 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4">Sản phẩm</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/dashboard" className="text-gray-600 hover:text-brand-blue transition-colors">
+                <a href="/dashboard" className="text-gray-600 hover:text-brand-blue transition-colors">
                   Bảng điều khiển
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/ai-tools" className="text-gray-600 hover:text-brand-blue transition-colors">
+                <a href="/ai-tools" className="text-gray-600 hover:text-brand-blue transition-colors">
                   Công cụ AI
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/analytics" className="text-gray-600 hover:text-brand-blue transition-colors">
+                <a href="/analytics" className="text-gray-600 hover:text-brand-blue transition-colors">
                   Phân tích dữ liệu
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/link-management" className="text-gray-600 hover:text-brand-blue transition-colors">
+                <a href="/link-management" className="text-gray-600 hover:text-brand-blue transition-colors">
                   Quản lý liên kết
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
@@ -65,24 +65,24 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4">Công ty</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/about" className="text-gray-600 hover:text-brand-blue transition-colors">
+                <a href="/about" className="text-gray-600 hover:text-brand-blue transition-colors">
                   Giới thiệu
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/blog" className="text-gray-600 hover:text-brand-blue transition-colors">
+                <a href="/blog" className="text-gray-600 hover:text-brand-blue transition-colors">
                   Blog
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/careers" className="text-gray-600 hover:text-brand-blue transition-colors">
+                <a href="/careers" className="text-gray-600 hover:text-brand-blue transition-colors">
                   Tuyển dụng
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/contact" className="text-gray-600 hover:text-brand-blue transition-colors">
+                <a href="/contact" className="text-gray-600 hover:text-brand-blue transition-colors">
                   Liên hệ
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
@@ -103,14 +103,14 @@ const Footer = () => {
                 </span>
               </li>
               <li>
-                <Link to="/help-center" className="text-gray-600 hover:text-brand-blue transition-colors">
+                <a href="/help-center" className="text-gray-600 hover:text-brand-blue transition-colors">
                   Trung tâm hỗ trợ
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/documentation" className="text-gray-600 hover:text-brand-blue transition-colors">
+                <a href="/documentation" className="text-gray-600 hover:text-brand-blue transition-colors">
                   Tài liệu hướng dẫn
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
@@ -119,15 +119,15 @@ const Footer = () => {
         <div className="border-t border-gray-200 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-600 mb-4 md:mb-0">© 2025 AffiliateVN. Tất cả quyền được bảo lưu.</p>
           <div className="flex space-x-6">
-            <Link to="/terms" className="text-gray-600 hover:text-brand-blue transition-colors">
+            <a href="/terms" className="text-gray-600 hover:text-brand-blue transition-colors">
               Điều khoản sử dụng
-            </Link>
-            <Link to="/privacy" className="text-gray-600 hover:text-brand-blue transition-colors">
+            </a>
+            <a href="/privacy" className="text-gray-600 hover:text-brand-blue transition-colors">
               Chính sách bảo mật
-            </Link>
-            <Link to="/cookies" className="text-gray-600 hover:text-brand-blue transition-colors">
+            </a>
+            <a href="/cookies" className="text-gray-600 hover:text-brand-blue transition-colors">
               Cookie
-            </Link>
+            </a>
           </div>
         </div>
       </div>

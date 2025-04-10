@@ -1,7 +1,8 @@
+
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
+
 const HeroSection = () => {
   const [email, setEmail] = useState('');
   const handleSubmit = (e: React.FormEvent) => {
@@ -10,6 +11,7 @@ const HeroSection = () => {
     console.log("Email đăng ký:", email);
     setEmail('');
   };
+  
   return <div className="relative bg-gradient-to-br from-gray-50 to-blue-50 py-20 md:py-28">
       {/* Decoration */}
       <div className="absolute top-20 left-10 w-64 h-64 bg-brand-blue/5 rounded-full blur-3xl"></div>
@@ -96,4 +98,5 @@ const HeroSection = () => {
       </div>
     </div>;
 };
+
 export default HeroSection;

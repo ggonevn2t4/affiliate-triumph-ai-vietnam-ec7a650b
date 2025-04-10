@@ -1,7 +1,6 @@
 
 import { Button } from '@/components/ui/button';
 import { Sparkles, ArrowRight, BookUser } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 const AiToolsSection = () => {
   return (
@@ -48,12 +47,12 @@ const AiToolsSection = () => {
                   <span>Tạo nội dung phù hợp với văn hóa và thị trường Việt Nam</span>
                 </li>
               </ul>
-              <Link to="/ai-tools">
+              <a href="/ai-tools">
                 <Button variant="outline" className="w-full flex items-center justify-center group">
                   Khám phá công cụ AI
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
-              </Link>
+              </a>
             </div>
           </div>
 
@@ -85,12 +84,12 @@ const AiToolsSection = () => {
                   <span>Cập nhật liên tục về các sự kiện mua sắm lớn tại Việt Nam</span>
                 </li>
               </ul>
-              <Link to="/ai-tools">
+              <a href="/ai-tools">
                 <Button variant="outline" className="w-full flex items-center justify-center group">
                   Khám phá công cụ AI
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
-              </Link>
+              </a>
             </div>
           </div>
 
@@ -122,12 +121,12 @@ const AiToolsSection = () => {
                   <span>Hướng dẫn tùy chỉnh cho marketers ở mọi cấp độ kinh nghiệm</span>
                 </li>
               </ul>
-              <Link to="/ai-coaching">
+              <a href="/ai-coaching">
                 <Button variant="outline" className="w-full flex items-center justify-center group">
                   Trải nghiệm AI Coaching
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
-              </Link>
+              </a>
             </div>
           </div>
         </div>

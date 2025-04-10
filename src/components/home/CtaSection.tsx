@@ -1,5 +1,4 @@
 
-import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
@@ -15,17 +14,17 @@ const CtaSection = () => {
           và bắt đầu tối ưu hóa thu nhập của bạn ngay hôm nay.
         </p>
         <div className="flex flex-col md:flex-row gap-4 justify-center">
-          <Link to="/register">
+          <a href="/register">
             <Button size="lg" className="bg-white text-brand-purple hover:bg-blue-50">
               Đăng ký miễn phí
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-          </Link>
-          <Link to="/demo">
+          </a>
+          <a href="/demo">
             <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
               Xem demo
             </Button>
-          </Link>
+          </a>
         </div>
         <p className="mt-6 text-blue-100 text-sm">
           Không cần thẻ tín dụng. Dùng thử miễn phí 14 ngày.
