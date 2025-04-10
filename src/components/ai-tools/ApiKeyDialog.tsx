@@ -15,7 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Settings } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-const DEFAULT_GEMINI_API_KEY = "AIzaSyCk_MvT2AFWY-_jK02Vi9jc_BX-NjNVWRk";
+// Xóa khóa API mặc định đã bị đình chỉ
+const GEMINI_API_KEY_NAME = 'gemini-api-key';
 
 interface ApiKeyDialogProps {
   open?: boolean;
@@ -24,21 +25,13 @@ interface ApiKeyDialogProps {
 
 export const ApiKeyDialog = ({ open, onOpenChange }: ApiKeyDialogProps) => {
   const [apiKey, setApiKey] = useState(() => {
-    const savedKey = localStorage.getItem("gemini-api-key") || DEFAULT_GEMINI_API_KEY;
-    return savedKey;
+    return localStorage.getItem(GEMINI_API_KEY_NAME) || "";
   });
-
-  useEffect(() => {
-    // Lưu API key mặc định nếu chưa có
-    if (!localStorage.getItem("gemini-api-key")) {
-      localStorage.setItem("gemini-api-key", DEFAULT_GEMINI_API_KEY);
-    }
-  }, []);
 
   const saveApiKey = (key: string) => {
     if (key) {
       setApiKey(key);
-      localStorage.setItem("gemini-api-key", key);
+      localStorage.setItem(GEMINI_API_KEY_NAME, key);
       if (onOpenChange) onOpenChange(false);
       toast({
         title: "Cập nhật API Key",
@@ -76,11 +69,14 @@ export const ApiKeyDialog = ({ open, onOpenChange }: ApiKeyDialogProps) => {
             <Input
               id="api-key"
               type="password" 
-              placeholder="AIzaSy..."
+              placeholder="Nhập API key của bạn..."
               className="col-span-4"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
             />
+          </div>
+          <div className="col-span-4 text-sm text-amber-600">
+            Khóa API trước đó đã bị đình chỉ. Vui lòng nhập khóa API mới từ Google AI Studio.
           </div>
         </div>
         <DialogFooter>

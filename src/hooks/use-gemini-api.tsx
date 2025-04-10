@@ -53,6 +53,11 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
     if (!genAI) {
       if (options?.onApiKeyMissing) {
         options.onApiKeyMissing();
+        toast({
+          title: "API Key cần thiết",
+          description: "Vui lòng nhập API key của bạn để sử dụng tính năng này.",
+          variant: "destructive"
+        });
       }
       return null;
     }
@@ -84,7 +89,7 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
         systemInstruction: systemPrompt ? { text: systemPrompt } : undefined,
       });
       
-      // Gửi tin nhắn và nhận phản hồi
+      // Lấy tin nhắn cuối cùng của người dùng và trích xuất phần nội dung
       const lastUserMessage = userMessages[userMessages.length - 1];
       const result = await chat.sendMessageStream(lastUserMessage.parts);
       
@@ -104,8 +109,21 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
     } catch (error: any) {
       console.error("Google Gemini API error:", error);
       
-      // Xử lý lỗi API key
-      if (error.status === 401 || error.message?.includes("API key")) {
+      // Xử lý các loại lỗi khác nhau dựa trên thông điệp lỗi
+      if (error.status === 403 || error.message?.includes("Permission denied") || error.message?.includes("suspended")) {
+        // API key bị đình chỉ hoặc vấn đề về quyền
+        localStorage.removeItem(GEMINI_API_KEY_NAME); // Xóa API key không hợp lệ
+        
+        toast({
+          title: "Lỗi API key",
+          description: "API key đã bị đình chỉ hoặc không hợp lệ. Vui lòng nhập API key mới.",
+          variant: "destructive"
+        });
+        
+        if (options?.onApiKeyMissing) {
+          options.onApiKeyMissing();
+        }
+      } else if (error.status === 401 || error.message?.includes("API key")) {
         toast({
           title: "Lỗi API key",
           description: "API key không hợp lệ hoặc đã hết hạn. Vui lòng cập nhật API key của bạn.",
@@ -123,7 +141,8 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
         });
       }
       
-      return null;
+      // Trả về nội dung mẫu khi gặp lỗi
+      return "Không thể tạo nội dung do lỗi API. Vui lòng cập nhật API key và thử lại.";
     } finally {
       setIsLoading(false);
     }
