@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from "@/hooks/use-toast";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai";
 
 interface UseGeminiApiOptions {
   onApiKeyMissing?: () => void;
@@ -64,7 +64,7 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
       const systemPrompt = messages.find(msg => msg.role === "system")?.content || "";
       
       // Chuyển đổi định dạng tin nhắn từ OpenAI sang Gemini
-      const geminiMessages = messages
+      const userMessages = messages
         .filter(msg => msg.role !== "system")
         .map(msg => ({
           role: msg.role === "assistant" ? "model" : "user",
@@ -85,7 +85,8 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
       });
       
       // Gửi tin nhắn và nhận phản hồi
-      const result = await chat.sendMessageStream(geminiMessages);
+      const lastUserMessage = userMessages[userMessages.length - 1];
+      const result = await chat.sendMessageStream(lastUserMessage.parts);
       
       // Lấy nội dung phản hồi
       let responseText = "";
