@@ -1,9 +1,9 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { PenSquare, Copy, Check, Sparkles, AlertTriangle } from "lucide-react";
+import { PenSquare, Copy, Check, Sparkles } from "lucide-react";
 import { ApiKeyDialog } from "./ApiKeyDialog";
 import { useGeminiApi } from "@/hooks/use-gemini-api";
 
@@ -13,29 +13,8 @@ const ContentGeneratorTool = () => {
   const [generatedContent, setGeneratedContent] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [isApiKeyDialogOpen, setIsApiKeyDialogOpen] = useState(false);
-  const [needsApiKey, setNeedsApiKey] = useState(false);
   
-  const { generateCompletion, isLoading, apiKey } = useGeminiApi({
-    onApiKeyMissing: () => {
-      setIsApiKeyDialogOpen(true);
-      setNeedsApiKey(true);
-    }
-  });
-
-  // Kiểm tra xem có API key không khi component được mount
-  useEffect(() => {
-    const savedKey = localStorage.getItem('gemini-api-key');
-    if (!savedKey) {
-      setNeedsApiKey(true);
-    }
-  }, []);
-
-  // Theo dõi thay đổi của apiKey
-  useEffect(() => {
-    if (apiKey) {
-      setNeedsApiKey(false);
-    }
-  }, [apiKey]);
+  const { generateCompletion, isLoading } = useGeminiApi();
 
   const contentTypeOptions = [
     { id: "blog-post", label: "Bài viết blog" },
@@ -50,17 +29,6 @@ const ContentGeneratorTool = () => {
       toast({
         title: "Thiếu thông tin",
         description: "Vui lòng nhập yêu cầu của bạn để tạo nội dung",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Kiểm tra xem có API key không
-    if (needsApiKey) {
-      setIsApiKeyDialogOpen(true);
-      toast({
-        title: "API Key cần thiết",
-        description: "Vui lòng nhập API key của bạn để sử dụng tính năng này.",
         variant: "destructive"
       });
       return;
@@ -144,27 +112,6 @@ const ContentGeneratorTool = () => {
         
         <ApiKeyDialog open={isApiKeyDialogOpen} onOpenChange={setIsApiKeyDialogOpen} />
       </div>
-      
-      {needsApiKey && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
-          <div>
-            <h3 className="font-medium text-amber-800">API Key cần thiết</h3>
-            <p className="text-sm text-amber-700 mt-1">
-              API key hiện tại không hợp lệ hoặc đã bị đình chỉ. Vui lòng nhập API key mới để sử dụng tính năng này. 
-              Bạn có thể lấy API key từ <a href="https://ai.google.dev/" target="_blank" rel="noopener noreferrer" className="underline font-medium">Google AI Studio</a>.
-            </p>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="mt-2 bg-white" 
-              onClick={() => setIsApiKeyDialogOpen(true)}
-            >
-              Cập nhật API Key
-            </Button>
-          </div>
-        </div>
-      )}
       
       <div className="space-y-4">
         <div>

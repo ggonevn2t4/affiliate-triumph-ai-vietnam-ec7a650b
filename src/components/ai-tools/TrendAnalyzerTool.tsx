@@ -22,9 +22,7 @@ const TrendAnalyzerTool = () => {
   const [results, setResults] = useState<TrendResult[] | null>(null);
   const [isApiKeyDialogOpen, setIsApiKeyDialogOpen] = useState(false);
   
-  const { generateCompletion, isLoading } = useGeminiApi({
-    onApiKeyMissing: () => setIsApiKeyDialogOpen(true)
-  });
+  const { generateCompletion, isLoading } = useGeminiApi();
 
   const nicheOptions = [
     { id: "fashion", label: "Thời trang" },

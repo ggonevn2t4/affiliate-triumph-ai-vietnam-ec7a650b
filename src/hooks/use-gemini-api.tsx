@@ -7,20 +7,17 @@ interface UseGeminiApiOptions {
   onApiKeyMissing?: () => void;
 }
 
-// Tên API key trong local storage
-const GEMINI_API_KEY_NAME = 'gemini-api-key';
+// Thay thế API key này bằng API key của bạn
+const YOUR_FIXED_API_KEY = "YOUR_API_KEY_HERE";
 
 export const useGeminiApi = (options?: UseGeminiApiOptions) => {
-  const [apiKey, setApiKey] = useState<string>('');
   const [genAI, setGenAI] = useState<GoogleGenerativeAI | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Load API key from localStorage on component mount
-    const savedKey = localStorage.getItem(GEMINI_API_KEY_NAME);
-    if (savedKey) {
-      setApiKey(savedKey);
-      setGenAI(new GoogleGenerativeAI(savedKey));
+    // Sử dụng API key cố định từ hệ thống
+    if (YOUR_FIXED_API_KEY && YOUR_FIXED_API_KEY !== "YOUR_API_KEY_HERE") {
+      setGenAI(new GoogleGenerativeAI(YOUR_FIXED_API_KEY));
     }
   }, []);
 
@@ -28,37 +25,16 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
     return text.replace(/\*\*/g, "");
   };
 
-  const updateApiKey = (newKey: string) => {
-    if (newKey) {
-      setApiKey(newKey);
-      localStorage.setItem(GEMINI_API_KEY_NAME, newKey);
-      setGenAI(new GoogleGenerativeAI(newKey));
-      toast({
-        title: "API Key đã được cập nhật",
-        description: "Google Gemini API key của bạn đã được lưu thành công."
-      });
-    } else {
-      toast({
-        title: "Lỗi",
-        description: "API key không được để trống.",
-        variant: "destructive"
-      });
-    }
-  };
-
   const generateCompletion = async (
     messages: Array<{role: "system" | "user" | "assistant"; content: string}>,
     model = "gemini-2.0-flash-live-001"
   ) => {
-    if (!genAI) {
-      if (options?.onApiKeyMissing) {
-        options.onApiKeyMissing();
-        toast({
-          title: "API Key cần thiết",
-          description: "Vui lòng nhập API key của bạn để sử dụng tính năng này.",
-          variant: "destructive"
-        });
-      }
+    if (!genAI || YOUR_FIXED_API_KEY === "YOUR_API_KEY_HERE") {
+      toast({
+        title: "Thông báo hệ thống",
+        description: "Tính năng AI đang được bảo trì. Vui lòng thử lại sau.",
+        variant: "destructive"
+      });
       return null;
     }
 
@@ -109,48 +85,20 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
     } catch (error: any) {
       console.error("Google Gemini API error:", error);
       
-      // Xử lý các loại lỗi khác nhau dựa trên thông điệp lỗi
-      if (error.status === 403 || error.message?.includes("Permission denied") || error.message?.includes("suspended")) {
-        // API key bị đình chỉ hoặc vấn đề về quyền
-        localStorage.removeItem(GEMINI_API_KEY_NAME); // Xóa API key không hợp lệ
-        
-        toast({
-          title: "Lỗi API key",
-          description: "API key đã bị đình chỉ hoặc không hợp lệ. Vui lòng nhập API key mới.",
-          variant: "destructive"
-        });
-        
-        if (options?.onApiKeyMissing) {
-          options.onApiKeyMissing();
-        }
-      } else if (error.status === 401 || error.message?.includes("API key")) {
-        toast({
-          title: "Lỗi API key",
-          description: "API key không hợp lệ hoặc đã hết hạn. Vui lòng cập nhật API key của bạn.",
-          variant: "destructive"
-        });
-        
-        if (options?.onApiKeyMissing) {
-          options.onApiKeyMissing();
-        }
-      } else {
-        toast({
-          title: "Lỗi",
-          description: "Đã có lỗi xảy ra khi thực hiện yêu cầu. Vui lòng thử lại sau.",
-          variant: "destructive"
-        });
-      }
+      toast({
+        title: "Thông báo hệ thống",
+        description: "Tính năng AI đang gặp sự cố. Vui lòng thử lại sau.",
+        variant: "destructive"
+      });
       
       // Trả về nội dung mẫu khi gặp lỗi
-      return "Không thể tạo nội dung do lỗi API. Vui lòng cập nhật API key và thử lại.";
+      return "Không thể tạo nội dung. Hệ thống đang bảo trì, vui lòng thử lại sau.";
     } finally {
       setIsLoading(false);
     }
   };
 
   return {
-    apiKey,
-    updateApiKey,
     genAI,
     isLoading,
     generateCompletion,

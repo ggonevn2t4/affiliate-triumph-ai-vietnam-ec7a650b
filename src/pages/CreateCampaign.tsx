@@ -5,17 +5,13 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import CampaignForm, { CampaignFormValues } from "@/components/campaigns/CampaignForm";
-import ApiKeyDialog from "@/components/ai-tools/ApiKeyDialog";
 import { useGeminiApi } from "@/hooks/use-gemini-api";
 
 const CreateCampaign = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isKeyDialogOpen, setIsKeyDialogOpen] = useState(false);
   
-  const { generateCompletion, isLoading: isAiLoading } = useGeminiApi({
-    onApiKeyMissing: () => setIsKeyDialogOpen(true)
-  });
+  const { generateCompletion, isLoading: isAiLoading } = useGeminiApi();
 
   const onSubmit = async (values: CampaignFormValues) => {
     setIsSubmitting(true);
@@ -86,7 +82,6 @@ const CreateCampaign = () => {
             </Link>
             <h1 className="text-xl font-bold">Tạo chiến dịch mới</h1>
           </div>
-          <ApiKeyDialog open={isKeyDialogOpen} onOpenChange={setIsKeyDialogOpen} />
         </div>
       </header>
 

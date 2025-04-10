@@ -2,20 +2,10 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, ArrowLeft, Settings } from "lucide-react";
+import { Send, ArrowLeft } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useGeminiApi } from "@/hooks/use-gemini-api";
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { ApiKeyDialog } from "../ai-tools/ApiKeyDialog";
 
 interface AiCoachingChatProps {
   selectedTopic: string;
@@ -31,20 +21,13 @@ interface Message {
 const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
-  const [apiKey, setApiKey] = useState(() => {
-    const savedKey = localStorage.getItem("gemini-api-key");
-    return savedKey || "";
-  });
-  const [isApiKeyDialogOpen, setIsApiKeyDialogOpen] = useState(!apiKey);
+  const [isApiKeyDialogOpen, setIsApiKeyDialogOpen] = useState(false);
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
   
   const { 
     generateCompletion, 
-    isLoading,
-    updateApiKey 
-  } = useGeminiApi({
-    onApiKeyMissing: () => setIsApiKeyDialogOpen(true)
-  });
+    isLoading
+  } = useGeminiApi();
 
   // Scroll to bottom whenever messages change
   useEffect(() => {
@@ -65,22 +48,9 @@ const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
     ]);
   }, [selectedTopic]);
 
-  const saveApiKey = (key: string) => {
-    if (key) {
-      setApiKey(key);
-      updateApiKey(key);
-      setIsApiKeyDialogOpen(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
-    
-    if (!apiKey) {
-      setIsApiKeyDialogOpen(true);
-      return;
-    }
 
     // Add user message
     const userMessage = {
@@ -164,42 +134,7 @@ const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
             <h3 className="font-medium">AI Coaching: {selectedTopic}</h3>
           </div>
           <div>
-            <Dialog open={isApiKeyDialogOpen} onOpenChange={setIsApiKeyDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Settings className="h-4 w-4 mr-1" />
-                  Cài đặt API
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Google Gemini API Key</DialogTitle>
-                  <DialogDescription>
-                    Nhập API key Google Gemini của bạn để sử dụng dịch vụ AI. API key sẽ được lưu trên trình duyệt của bạn.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="api-key" className="col-span-4">
-                      API Key
-                    </Label>
-                    <Input
-                      id="api-key"
-                      type="password"
-                      placeholder="AIzaSy..."
-                      className="col-span-4"
-                      value={apiKey}
-                      onChange={(e) => setApiKey(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="submit" onClick={() => saveApiKey(apiKey)}>
-                    Lưu thay đổi
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <ApiKeyDialog open={isApiKeyDialogOpen} onOpenChange={setIsApiKeyDialogOpen} />
           </div>
         </div>
 
