@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -70,18 +69,19 @@ const UserProfile = () => {
         throw error;
       }
 
-      toast.success('Thông tin hồ sơ đã được cập nhật');
+      toast({
+        title: "Thông tin hồ sơ đã được cập nhật",
+      });
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error('Không thể cập nhật hồ sơ');
+      toast({
+        variant: "destructive",
+        title: "Không thể cập nhật hồ sơ",
+      });
     } finally {
       setLoading(false);
     }
   };
-
-  if (!user) {
-    return <div>Vui lòng đăng nhập để xem hồ sơ.</div>;
-  }
 
   const getInitials = () => {
     if (firstName && lastName) {
@@ -93,6 +93,10 @@ const UserProfile = () => {
     }
     return 'U';
   };
+
+  if (!user) {
+    return <div>Vui lòng đăng nhập để xem hồ sơ.</div>;
+  }
 
   return (
     <div className="bg-white rounded-lg shadow p-6">

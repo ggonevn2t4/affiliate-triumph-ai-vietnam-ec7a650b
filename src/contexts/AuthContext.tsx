@@ -48,13 +48,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) {
-        toast.error('Đăng nhập thất bại', {
+        toast({
+          variant: "destructive",
+          title: "Đăng nhập thất bại",
           description: error.message,
         });
         throw error;
       }
       
-      toast.success('Đăng nhập thành công');
+      toast({
+        title: "Đăng nhập thành công",
+      });
       navigate('/dashboard');
     } catch (error) {
       console.error('Error signing in:', error);
@@ -84,14 +88,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       
       if (error) {
-        toast.error('Đăng ký thất bại', {
+        toast({
+          variant: "destructive",
+          title: "Đăng ký thất bại",
           description: error.message,
         });
         throw error;
       }
       
-      toast.success('Đăng ký thành công', {
-        description: 'Vui lòng kiểm tra email để xác nhận tài khoản.',
+      toast({
+        title: "Đăng ký thành công",
+        description: "Vui lòng kiểm tra email để xác nhận tài khoản.",
       });
       navigate('/dashboard');
     } catch (error) {
