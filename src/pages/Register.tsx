@@ -1,8 +1,9 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Eye, EyeOff, Check } from 'lucide-react';
+import { Eye, EyeOff, Check } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Register = () => {
   const [fullName, setFullName] = useState('');
@@ -10,17 +11,12 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { signUp, loading, user } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      window.location.href = '/dashboard';
-    }, 1500);
+    if (!agreeTerms) return;
+    await signUp(email, password, fullName);
   };
   
   // Check password strength
@@ -40,6 +36,11 @@ const Register = () => {
   };
   
   const passwordStrength = getPasswordStrength(password);
+
+  // Redirect if already logged in
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -205,10 +206,10 @@ const Register = () => {
 
               <Button
                 type="submit"
-                disabled={isLoading || !agreeTerms}
+                disabled={loading || !agreeTerms}
                 className="w-full btn-gradient h-11"
               >
-                {isLoading ? 'Đang xử lý...' : 'Đăng ký tài khoản'}
+                {loading ? 'Đang xử lý...' : 'Đăng ký tài khoản'}
               </Button>
             </form>
 

@@ -1,9 +1,11 @@
-import React, { useEffect } from "react";
+
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
@@ -14,12 +16,30 @@ import AiTools from "./pages/AiTools";
 import CreateCampaign from "./pages/CreateCampaign";
 import Analytics from "./pages/Analytics";
 
+// Protected route wrapper
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    // You could render a loading spinner here
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
+
+  if (!user) {
+    // Redirect to login but save the location they were trying to access
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return <>{children}</>;
+};
+
 // Handle redirect from sessionStorage
 const RedirectHandler = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  useEffect(() => {
+  React.useEffect(() => {
     // Only run on the root path
     if (location.pathname === '/') {
       const redirectPath = sessionStorage.getItem('redirect_path');
@@ -36,6 +56,71 @@ const RedirectHandler = () => {
 // Create a client
 const queryClient = new QueryClient();
 
+const AppRoutes = () => {
+  return (
+    <>
+      <RedirectHandler />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        
+        {/* Protected routes */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/ai-coaching" element={
+          <ProtectedRoute>
+            <AiCoaching />
+          </ProtectedRoute>
+        } />
+        <Route path="/ai-tools" element={
+          <ProtectedRoute>
+            <AiTools />
+          </ProtectedRoute>
+        } />
+        <Route path="/create-campaign" element={
+          <ProtectedRoute>
+            <CreateCampaign />
+          </ProtectedRoute>
+        } />
+        <Route path="/analytics" element={
+          <ProtectedRoute>
+            <Analytics />
+          </ProtectedRoute>
+        } />
+        
+        {/* Nested routes - if you add any, add them here */}
+        <Route path="/ai-coaching/history" element={
+          <ProtectedRoute>
+            <Navigate to="/ai-coaching" />
+          </ProtectedRoute>
+        } />
+        <Route path="/ai-coaching/resources" element={
+          <ProtectedRoute>
+            <Navigate to="/ai-coaching" />
+          </ProtectedRoute>
+        } />
+        <Route path="/ai-coaching/tips" element={
+          <ProtectedRoute>
+            <Navigate to="/ai-coaching" />
+          </ProtectedRoute>
+        } />
+        <Route path="/ai-coaching/success-stories" element={
+          <ProtectedRoute>
+            <Navigate to="/ai-coaching" />
+          </ProtectedRoute>
+        } />
+        
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
+  );
+};
+
 const App = () => {
   return (
     <React.StrictMode>
@@ -44,26 +129,9 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <RedirectHandler />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/ai-coaching" element={<AiCoaching />} />
-              <Route path="/ai-tools" element={<AiTools />} />
-              <Route path="/create-campaign" element={<CreateCampaign />} />
-              <Route path="/analytics" element={<Analytics />} />
-              
-              {/* Nested routes - if you add any, add them here */}
-              <Route path="/ai-coaching/history" element={<Navigate to="/ai-coaching" />} />
-              <Route path="/ai-coaching/resources" element={<Navigate to="/ai-coaching" />} />
-              <Route path="/ai-coaching/tips" element={<Navigate to="/ai-coaching" />} />
-              <Route path="/ai-coaching/success-stories" element={<Navigate to="/ai-coaching" />} />
-              
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <AuthProvider>
+              <AppRoutes />
+            </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>

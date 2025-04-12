@@ -1,26 +1,26 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { signIn, loading, user } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      window.location.href = '/dashboard';
-    }, 1500);
+    await signIn(email, password);
   };
+
+  // Redirect if already logged in
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -110,10 +110,10 @@ const Login = () => {
 
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={loading}
                 className="w-full btn-gradient h-11"
               >
-                {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
               </Button>
             </form>
 
