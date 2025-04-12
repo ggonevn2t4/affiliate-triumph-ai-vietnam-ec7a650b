@@ -1,72 +1,19 @@
 
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
-import CampaignForm, { CampaignFormValues } from "@/components/campaigns/CampaignForm";
-import { useGeminiApi } from "@/hooks/use-gemini-api";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, LayoutTemplate } from 'lucide-react';
+import CampaignForm from '@/components/campaigns/CampaignForm';
+import CampaignTemplates from '@/components/campaigns/CampaignTemplates';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const CreateCampaign = () => {
-  const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("templates");
   
-  const { generateCompletion, isLoading: isAiLoading } = useGeminiApi();
-
-  const onSubmit = async (values: CampaignFormValues) => {
-    setIsSubmitting(true);
-    try {
-      console.log("Creating campaign:", values);
-      // In a real app, you would send this data to your API
-      // For now, we'll just show a success message
-      
-      toast({
-        title: "Chiến dịch đã được tạo",
-        description: `Chiến dịch "${values.name}" đã được tạo thành công.`,
-      });
-      
-      // Redirect to dashboard after successful creation
-      setTimeout(() => navigate("/dashboard"), 1500);
-    } catch (error) {
-      console.error("Error creating campaign:", error);
-      toast({
-        title: "Có lỗi xảy ra",
-        description: "Không thể tạo chiến dịch. Vui lòng thử lại.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const generateDescription = async (name: string, target: string, budget: string) => {
-    if (!name || !target) {
-      toast({
-        title: "Thiếu thông tin",
-        description: "Vui lòng nhập tên chiến dịch và mục tiêu để tạo mô tả",
-        variant: "destructive",
-      });
-      return null;
-    }
-
-    try {
-      const prompt = `Tạo mô tả chiến dịch affiliate marketing với tên "${name}", mục tiêu "${target}" và ngân sách "${budget}". Mô tả nên ngắn gọn, súc tích và thể hiện rõ giá trị của chiến dịch. QUAN TRỌNG: KHÔNG sử dụng ký tự ** trong nội dung.`;
-      
-      let result = await generateCompletion([
-        { role: "system", content: "Bạn là trợ lý viết nội dung affiliate marketing chuyên nghiệp. Hãy tạo mô tả chiến dịch súc tích, hấp dẫn và thuyết phục. Không sử dụng ký tự ** trong nội dung." },
-        { role: "user", content: prompt }
-      ], "anthropic/claude-3-haiku:latest"); // Sử dụng Claude Haiku thông qua OpenRouter
-
-      return result;
-    } catch (error) {
-      console.error("Error generating description:", error);
-      toast({
-        title: "Lỗi",
-        description: "Không thể tạo mô tả chiến dịch. Vui lòng thử lại.",
-        variant: "destructive",
-      });
-      return null;
-    }
+  const handleSelectTemplate = (templateId: number) => {
+    setSelectedTemplateId(templateId);
+    setActiveTab("custom");
   };
 
   return (
@@ -86,14 +33,25 @@ const CreateCampaign = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <CampaignForm
-            onSubmit={onSubmit}
-            onCancel={() => navigate("/dashboard")}
-            generateDescription={generateDescription}
-            isSubmitting={isSubmitting || isAiLoading}
-          />
-        </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-2 mb-8">
+            <TabsTrigger value="templates" className="flex items-center">
+              <LayoutTemplate className="mr-2 h-4 w-4" />
+              Mẫu có sẵn
+            </TabsTrigger>
+            <TabsTrigger value="custom">
+              Tùy chỉnh
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="templates">
+            <CampaignTemplates onSelectTemplate={handleSelectTemplate} />
+          </TabsContent>
+          
+          <TabsContent value="custom">
+            <CampaignForm templateId={selectedTemplateId} />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

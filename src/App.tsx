@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -13,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import AiCoaching from "./pages/AiCoaching";
 import AiTools from "./pages/AiTools";
 import CreateCampaign from "./pages/CreateCampaign";
+import Analytics from "./pages/Analytics";
 
 // Handle redirect from sessionStorage
 const RedirectHandler = () => {
@@ -53,6 +53,7 @@ const App = () => {
               <Route path="/ai-coaching" element={<AiCoaching />} />
               <Route path="/ai-tools" element={<AiTools />} />
               <Route path="/create-campaign" element={<CreateCampaign />} />
+              <Route path="/analytics" element={<Analytics />} />
               
               {/* Nested routes - if you add any, add them here */}
               <Route path="/ai-coaching/history" element={<Navigate to="/ai-coaching" />} />

@@ -93,37 +93,47 @@ const Dashboard = () => {
 
             {/* Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <StatCard 
-                title="Doanh thu tháng này" 
-                value="9.850.000₫" 
-                icon={<DollarSign className="h-4 w-4 text-brand-blue" />}
-                change={18.2}
-                changeText="so với tháng trước"
-              />
-              <StatCard 
-                title="Số lượt click" 
-                value="3,872" 
-                icon={<Users className="h-4 w-4 text-brand-purple" />}
-                change={12.5}
-                changeText="so với tháng trước"
-              />
-              <StatCard 
-                title="Tỉ lệ chuyển đổi" 
-                value="4.28%" 
-                icon={<BarChart2 className="h-4 w-4 text-brand-blue" />}
-                change={-1.8}
-                changeText="so với tháng trước"
-              />
-              <StatCard 
-                title="Sản phẩm đang quảng bá" 
-                value="12" 
-                icon={<ShoppingBag className="h-4 w-4 text-brand-purple" />}
-                changeText="2 sản phẩm mới"
-              />
+              <Link to="/analytics">
+                <StatCard 
+                  title="Doanh thu tháng này" 
+                  value="9.850.000₫" 
+                  icon={<DollarSign className="h-4 w-4 text-brand-blue" />}
+                  change={18.2}
+                  changeText="so với tháng trước"
+                />
+              </Link>
+              <Link to="/analytics">
+                <StatCard 
+                  title="Số lượt click" 
+                  value="3,872" 
+                  icon={<Users className="h-4 w-4 text-brand-purple" />}
+                  change={12.5}
+                  changeText="so với tháng trước"
+                />
+              </Link>
+              <Link to="/analytics">
+                <StatCard 
+                  title="Tỉ lệ chuyển đổi" 
+                  value="4.28%" 
+                  icon={<BarChart2 className="h-4 w-4 text-brand-blue" />}
+                  change={-1.8}
+                  changeText="so với tháng trước"
+                />
+              </Link>
+              <Link to="/create-campaign">
+                <StatCard 
+                  title="Sản phẩm đang quảng bá" 
+                  value="12" 
+                  icon={<ShoppingBag className="h-4 w-4 text-brand-purple" />}
+                  changeText="2 sản phẩm mới"
+                />
+              </Link>
             </div>
 
             {/* Charts */}
-            <RevenueChart className="w-full" />
+            <Link to="/analytics" className="block">
+              <RevenueChart className="w-full" />
+            </Link>
 
             {/* AI Tools */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
