@@ -10,8 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Settings, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { Settings, AlertTriangle, CheckCircle } from "lucide-react";
 import { useGeminiApi } from "@/hooks/use-gemini-api";
 
 interface ApiKeyDialogProps {
@@ -20,17 +19,17 @@ interface ApiKeyDialogProps {
 }
 
 export const ApiKeyDialog = ({ open, onOpenChange }: ApiKeyDialogProps) => {
-  const { genAI } = useGeminiApi();
+  const { isApiConfigured } = useGeminiApi();
   const [apiStatus, setApiStatus] = useState<"configured" | "missing" | "checking">("checking");
   
   useEffect(() => {
     // Kiểm tra trạng thái API key
-    if (genAI) {
+    if (isApiConfigured) {
       setApiStatus("configured");
     } else {
       setApiStatus("missing");
     }
-  }, [genAI]);
+  }, [isApiConfigured]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -42,9 +41,9 @@ export const ApiKeyDialog = ({ open, onOpenChange }: ApiKeyDialogProps) => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Thông tin API Google Gemini</DialogTitle>
+          <DialogTitle>Thông tin API OpenRouter</DialogTitle>
           <DialogDescription>
-            Ứng dụng sử dụng API Google Gemini được cấu hình bởi hệ thống.
+            Ứng dụng sử dụng API OpenRouter được cấu hình bởi hệ thống.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -66,7 +65,7 @@ export const ApiKeyDialog = ({ open, onOpenChange }: ApiKeyDialogProps) => {
               <div>
                 <h3 className="font-medium text-green-800">API đã được cấu hình</h3>
                 <p className="text-sm text-green-700 mt-1">
-                  Hệ thống đã cấu hình API Google Gemini. Bạn có thể sử dụng tất cả các tính năng AI.
+                  Hệ thống đã cấu hình API OpenRouter. Bạn có thể sử dụng tất cả các tính năng AI.
                 </p>
               </div>
             </div>
@@ -78,7 +77,7 @@ export const ApiKeyDialog = ({ open, onOpenChange }: ApiKeyDialogProps) => {
               <div>
                 <h3 className="font-medium text-amber-800">API chưa được cấu hình</h3>
                 <p className="text-sm text-amber-700 mt-1">
-                  Hệ thống chưa cấu hình API Google Gemini. Vui lòng liên hệ quản trị viên để kích hoạt tính năng AI.
+                  Hệ thống chưa cấu hình API OpenRouter. Vui lòng liên hệ quản trị viên để kích hoạt tính năng AI.
                 </p>
               </div>
             </div>

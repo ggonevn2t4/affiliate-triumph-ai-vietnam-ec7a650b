@@ -84,9 +84,10 @@ const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
                 Hãy trả lời với kiến thức cập nhật về thị trường Việt Nam và xu hướng Affiliate Marketing hiện tại.`
       };
 
-      // Call the Gemini API
+      // Call the OpenRouter API through our custom hook
       const aiResponse = await generateCompletion(
-        [systemMessage, ...conversationHistory]
+        [systemMessage, ...conversationHistory],
+        "anthropic/claude-3-sonnet:latest" // Use Claude model via OpenRouter
       );
 
       if (aiResponse) {
@@ -199,7 +200,7 @@ const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
             </Button>
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            AI Coaching được hỗ trợ bởi công nghệ Google Gemini API. Tư vấn dựa trên dữ liệu thị trường Việt Nam và xu hướng Affiliate Marketing hiện tại.
+            AI Coaching được hỗ trợ bởi công nghệ OpenRouter API. Tư vấn dựa trên dữ liệu thị trường Việt Nam và xu hướng Affiliate Marketing hiện tại.
           </p>
         </form>
       </div>

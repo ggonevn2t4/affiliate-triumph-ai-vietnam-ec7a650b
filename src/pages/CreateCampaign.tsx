@@ -55,7 +55,7 @@ const CreateCampaign = () => {
       let result = await generateCompletion([
         { role: "system", content: "Bạn là trợ lý viết nội dung affiliate marketing chuyên nghiệp. Hãy tạo mô tả chiến dịch súc tích, hấp dẫn và thuyết phục. Không sử dụng ký tự ** trong nội dung." },
         { role: "user", content: prompt }
-      ]);
+      ], "anthropic/claude-3-haiku:latest"); // Sử dụng Claude Haiku thông qua OpenRouter
 
       return result;
     } catch (error) {
