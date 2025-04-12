@@ -16,6 +16,27 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@lovable_dev" />
     <meta name="twitter:image" content="/lovable-uploads/fe552ef4-2925-40cb-8893-947cf1db4471.png" />
+    
+    <!-- Add base tag for client-side routing -->
+    <base href="/" />
+    
+    <!-- Redirect script for direct links -->
+    <script>
+      // Redirect to index.html for client-side routing
+      (function() {
+        // Don't run on localhost development
+        if (window.location.hostname === 'localhost') return;
+        
+        // Redirect only if it's a direct page access (not an asset)
+        var path = window.location.pathname;
+        var isAssetPath = /\.(css|js|png|jpe?g|gif|svg|ico|json)$/i.test(path);
+        
+        if (!isAssetPath && path !== '/' && !path.startsWith('/index.html')) {
+          sessionStorage.setItem('redirect_path', path);
+          window.location.replace('/');
+        }
+      })();
+    </script>
   </head>
 
   <body>

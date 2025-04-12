@@ -1,10 +1,10 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
@@ -13,6 +13,25 @@ import NotFound from "./pages/NotFound";
 import AiCoaching from "./pages/AiCoaching";
 import AiTools from "./pages/AiTools";
 import CreateCampaign from "./pages/CreateCampaign";
+
+// Handle redirect from sessionStorage
+const RedirectHandler = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  useEffect(() => {
+    // Only run on the root path
+    if (location.pathname === '/') {
+      const redirectPath = sessionStorage.getItem('redirect_path');
+      if (redirectPath) {
+        sessionStorage.removeItem('redirect_path');
+        navigate(redirectPath, { replace: true });
+      }
+    }
+  }, [navigate, location]);
+  
+  return null;
+};
 
 // Create a client
 const queryClient = new QueryClient();
@@ -25,6 +44,7 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <RedirectHandler />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/dashboard" element={<Dashboard />} />
