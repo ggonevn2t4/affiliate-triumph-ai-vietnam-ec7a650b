@@ -38,13 +38,14 @@ export const campaignFormSchema = z.object({
 
 export type CampaignFormValues = z.infer<typeof campaignFormSchema>;
 
-interface CampaignFormProps {
+export interface CampaignFormProps {
   defaultValues?: Partial<CampaignFormValues>;
   onSubmit: (values: CampaignFormValues) => void;
   onCancel?: () => void;
   generateDescription?: (name: string, target: string, budget: string) => Promise<string | null>;
   submitText?: string;
   isSubmitting?: boolean;
+  templateId?: number | null;
 }
 
 const CampaignForm = ({
@@ -54,6 +55,7 @@ const CampaignForm = ({
   generateDescription,
   submitText = "Tạo chiến dịch",
   isSubmitting = false,
+  templateId,
 }: CampaignFormProps) => {
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   

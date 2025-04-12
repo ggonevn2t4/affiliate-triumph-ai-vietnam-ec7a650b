@@ -58,7 +58,7 @@ const ConversionFunnelChart = ({ className = "" }: ConversionFunnelChartProps) =
           <XAxis type="number" />
           <YAxis dataKey="name" type="category" scale="band" />
           <Tooltip content={<CustomTooltip />} />
-          <Bar dataKey="value" nameKey="name" radius={[0, 4, 4, 0]}>
+          <Bar dataKey="value" radius={[0, 4, 4, 0]}>
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.fill} />
             ))}

@@ -6,6 +6,8 @@ import { ArrowLeft, LayoutTemplate } from 'lucide-react';
 import CampaignForm from '@/components/campaigns/CampaignForm';
 import CampaignTemplates from '@/components/campaigns/CampaignTemplates';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
+import { CampaignFormValues } from '@/components/campaigns/CampaignForm';
 
 const CreateCampaign = () => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
@@ -14,6 +16,12 @@ const CreateCampaign = () => {
   const handleSelectTemplate = (templateId: number) => {
     setSelectedTemplateId(templateId);
     setActiveTab("custom");
+  };
+
+  const handleSubmitCampaign = (values: CampaignFormValues) => {
+    console.log("Submitted campaign:", values, "with template:", selectedTemplateId);
+    toast.success("Chiến dịch đã được tạo thành công!");
+    // Here you would typically save the campaign to the database
   };
 
   return (
@@ -49,7 +57,15 @@ const CreateCampaign = () => {
           </TabsContent>
           
           <TabsContent value="custom">
-            <CampaignForm templateId={selectedTemplateId} />
+            <CampaignForm 
+              templateId={selectedTemplateId} 
+              onSubmit={handleSubmitCampaign} 
+              generateDescription={async (name, target, budget) => {
+                // This would typically call an AI service to generate a description
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+                return `Chiến dịch ${name} với mục tiêu ${target} và ngân sách ${budget}. Tối ưu hóa cho chuyển đổi và ROI cao.`;
+              }}
+            />
           </TabsContent>
         </Tabs>
       </main>
