@@ -3,13 +3,15 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { PenSquare, Copy, Check, Sparkles, AlertTriangle } from "lucide-react";
+import { PenSquare, Copy, Check, Sparkles, AlertTriangle, Share2, Twitter, Facebook, Linkedin } from "lucide-react";
 import { ApiKeyDialog } from "./ApiKeyDialog";
 import { useGeminiApi } from "@/hooks/use-gemini-api";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ContentGeneratorTool = () => {
   const [prompt, setPrompt] = useState("");
   const [contentType, setContentType] = useState<string>("blog-post");
+  const [marketingChannel, setMarketingChannel] = useState<string>("general");
   const [generatedContent, setGeneratedContent] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [isApiKeyDialogOpen, setIsApiKeyDialogOpen] = useState(false);
@@ -23,6 +25,15 @@ const ContentGeneratorTool = () => {
     { id: "social-media", label: "Bài đăng mạng xã hội" },
     { id: "email", label: "Email marketing" },
     { id: "landing-page", label: "Nội dung trang đích" }
+  ];
+
+  const marketingChannelOptions = [
+    { id: "general", label: "Tổng quát" },
+    { id: "facebook", label: "Facebook" },
+    { id: "instagram", label: "Instagram" },
+    { id: "tiktok", label: "TikTok" },
+    { id: "youtube", label: "YouTube" },
+    { id: "zalo", label: "Zalo" }
   ];
 
   const handleGenerateContent = async () => {
@@ -39,12 +50,14 @@ const ContentGeneratorTool = () => {
     
     try {
       const contentTypeLabel = contentTypeOptions.find(option => option.id === contentType)?.label || contentType;
+      const channelLabel = marketingChannelOptions.find(option => option.id === marketingChannel)?.label || "general";
       
       const systemPrompt = `Bạn là một chuyên gia về Affiliate Marketing tại thị trường Việt Nam. 
-      Hãy tạo một ${contentTypeLabel} dựa trên yêu cầu sau: "${prompt}".
+      Hãy tạo một ${contentTypeLabel} dựa trên yêu cầu sau: "${prompt}" được tối ưu hóa cho nền tảng ${channelLabel}.
       
       Hãy đảm bảo nội dung:
       - Phù hợp với định dạng ${contentTypeLabel}
+      - Được tối ưu cho nền tảng ${channelLabel} cụ thể
       - Tối ưu hóa SEO với từ khóa phù hợp
       - Phù hợp với văn hóa và thị trường Việt Nam
       - Có tính thuyết phục cao và tạo niềm tin
@@ -120,6 +133,34 @@ const ContentGeneratorTool = () => {
     }
   };
 
+  const handleShareToSocial = (platform: string) => {
+    if (!generatedContent) return;
+    
+    let shareUrl = '';
+    const encodedText = encodeURIComponent(generatedContent.substring(0, 280)); // Twitter character limit
+    
+    switch(platform) {
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
+        break;
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodedText}`;
+        break;
+      case 'linkedin':
+        shareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(window.location.href)}&title=Affiliate%20Content&summary=${encodedText}`;
+        break;
+      default:
+        return;
+    }
+    
+    window.open(shareUrl, '_blank', 'width=600,height=400');
+    
+    toast({
+      title: "Chia sẻ thành công",
+      description: `Nội dung đã được chia sẻ lên ${platform}`,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -131,56 +172,93 @@ const ContentGeneratorTool = () => {
         <ApiKeyDialog open={isApiKeyDialogOpen} onOpenChange={setIsApiKeyDialogOpen} />
       </div>
       
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Loại nội dung</label>
-          <div className="flex flex-wrap gap-2">
-            {contentTypeOptions.map(option => (
-              <button
-                key={option.id}
-                onClick={() => setContentType(option.id)}
-                className={`px-4 py-2 rounded-md text-sm ${
-                  contentType === option.id
-                    ? "bg-brand-blue text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
+      <Tabs defaultValue="content" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="content">Tạo nội dung</TabsTrigger>
+          <TabsTrigger value="advanced">Tùy chọn nâng cao</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="content" className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Loại nội dung</label>
+            <div className="flex flex-wrap gap-2">
+              {contentTypeOptions.map(option => (
+                <button
+                  key={option.id}
+                  onClick={() => setContentType(option.id)}
+                  className={`px-4 py-2 rounded-md text-sm ${
+                    contentType === option.id
+                      ? "bg-brand-blue text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Yêu cầu của bạn
+            </label>
+            <Textarea
+              placeholder="Mô tả chi tiết nội dung bạn muốn tạo. Ví dụ: Tôi cần một bài viết blog về cách bắt đầu với Affiliate Marketing ở Việt Nam, tập trung vào các chiến lược cơ bản cho người mới..."
+              className="min-h-[120px]"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+            />
+          </div>
+        </TabsContent>
         
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Yêu cầu của bạn
-          </label>
-          <Textarea
-            placeholder="Mô tả chi tiết nội dung bạn muốn tạo. Ví dụ: Tôi cần một bài viết blog về cách bắt đầu với Affiliate Marketing ở Việt Nam, tập trung vào các chiến lược cơ bản cho người mới..."
-            className="min-h-[120px]"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-          />
-        </div>
-        
-        <Button 
-          onClick={handleGenerateContent}
-          disabled={isLoading || !prompt.trim()}
-          className="w-full"
-        >
-          {isLoading ? (
-            <>
-              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              Đang tạo nội dung...
-            </>
-          ) : (
-            <>
-              <Sparkles className="mr-2 h-4 w-4" />
-              Tạo nội dung
-            </>
-          )}
-        </Button>
-      </div>
+        <TabsContent value="advanced" className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tối ưu cho kênh marketing</label>
+            <div className="flex flex-wrap gap-2">
+              {marketingChannelOptions.map(option => (
+                <button
+                  key={option.id}
+                  onClick={() => setMarketingChannel(option.id)}
+                  className={`px-4 py-2 rounded-md text-sm ${
+                    marketingChannel === option.id
+                      ? "bg-brand-purple text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          <div className="border rounded-md p-4 bg-blue-50">
+            <h3 className="text-sm font-medium text-blue-800 mb-2">
+              Tính năng nâng cao
+            </h3>
+            <p className="text-xs text-blue-600 mb-3">
+              Nội dung được tạo sẽ được tối ưu hóa tự động cho kênh marketing bạn đã chọn, bao gồm độ dài, giọng điệu và cấu trúc phù hợp với từng nền tảng.
+            </p>
+          </div>
+        </TabsContent>
+      </Tabs>
+      
+      <Button 
+        onClick={handleGenerateContent}
+        disabled={isLoading || !prompt.trim()}
+        className="w-full"
+      >
+        {isLoading ? (
+          <>
+            <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            Đang tạo nội dung...
+          </>
+        ) : (
+          <>
+            <Sparkles className="mr-2 h-4 w-4" />
+            Tạo nội dung
+          </>
+        )}
+      </Button>
       
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
@@ -196,24 +274,66 @@ const ContentGeneratorTool = () => {
         <div className="mt-8 border rounded-lg">
           <div className="bg-gray-50 p-3 border-b flex justify-between items-center">
             <h3 className="font-medium">Nội dung đã tạo</h3>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleCopyContent}
-            >
-              {copied ? (
-                <>
-                  <Check className="h-4 w-4 mr-1" /> Đã sao chép
-                </>
-              ) : (
-                <>
-                  <Copy className="h-4 w-4 mr-1" /> Sao chép
-                </>
-              )}
-            </Button>
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCopyContent}
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-4 w-4 mr-1" /> Đã sao chép
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4 mr-1" /> Sao chép
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-2"
+                onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`)} 
+              >
+                <Share2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           <div className="p-4 whitespace-pre-line">
             {generatedContent}
+          </div>
+          
+          <div className="p-3 border-t bg-gray-50">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-500">Chia sẻ nội dung</div>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-[#1DA1F2] hover:bg-[#1a94df] text-white border-[#1DA1F2]"
+                  onClick={() => handleShareToSocial('twitter')}
+                >
+                  <Twitter className="h-4 w-4 mr-1" /> Twitter
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-[#4267B2] hover:bg-[#365899] text-white border-[#4267B2]"
+                  onClick={() => handleShareToSocial('facebook')}
+                >
+                  <Facebook className="h-4 w-4 mr-1" /> Facebook
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-[#0A66C2] hover:bg-[#0958a7] text-white border-[#0A66C2]"
+                  onClick={() => handleShareToSocial('linkedin')}
+                >
+                  <Linkedin className="h-4 w-4 mr-1" /> LinkedIn
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}

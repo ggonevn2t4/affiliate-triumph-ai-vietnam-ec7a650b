@@ -1,13 +1,13 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, PenSquare, Sparkles, Compass, BookUser } from "lucide-react";
+import { ArrowLeft, PenSquare, Sparkles, Compass, BookUser, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ContentGeneratorTool from "@/components/ai-tools/ContentGeneratorTool";
 import TrendAnalyzerTool from "@/components/ai-tools/TrendAnalyzerTool";
 
 const AiTools = () => {
-  const [activeTab, setActiveTab] = useState<"content" | "trends">("content");
+  const [activeTab, setActiveTab] = useState<"content" | "trends" | "share">("content");
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -82,13 +82,36 @@ const AiTools = () => {
                   AI Trend Analyzer
                 </div>
               </button>
+              <button
+                onClick={() => setActiveTab("share")}
+                className={`px-6 py-4 text-sm font-medium ${
+                  activeTab === "share"
+                    ? "border-b-2 border-brand-blue text-brand-blue"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                <div className="flex items-center">
+                  <Share2 className="mr-2 h-4 w-4" />
+                  Social Media Sharing
+                </div>
+              </button>
             </div>
           </div>
           <div className="p-6">
             {activeTab === "content" ? (
               <ContentGeneratorTool />
-            ) : (
+            ) : activeTab === "trends" ? (
               <TrendAnalyzerTool />
+            ) : (
+              <div className="text-center p-8">
+                <h3 className="text-lg font-semibold mb-2">Chia sẻ nội dung lên mạng xã hội</h3>
+                <p className="text-gray-600 mb-4">
+                  Công cụ này cho phép bạn chia sẻ nội dung đã tạo lên các nền tảng mạng xã hội khác nhau một cách dễ dàng.
+                </p>
+                <p className="text-gray-500 text-sm">
+                  Vui lòng tạo nội dung từ AI Content Creator trước khi sử dụng tính năng này.
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -112,9 +135,9 @@ const AiTools = () => {
               <div className="text-brand-blue font-medium">Dự đoán xu hướng với độ chính xác cao</div>
             </div>
             <div className="border border-gray-100 rounded-lg p-5 shadow-sm">
-              <h4 className="font-medium text-lg mb-2">Tối ưu hóa từ khóa tự động</h4>
-              <p className="text-gray-600 mb-4">Phân tích từ khóa mục tiêu và tối ưu hóa nội dung của bạn để đạt thứ hạng tốt hơn trên các công cụ tìm kiếm</p>
-              <div className="text-brand-blue font-medium">Tăng lưu lượng tự nhiên</div>
+              <h4 className="font-medium text-lg mb-2">Chia sẻ mạng xã hội tích hợp</h4>
+              <p className="text-gray-600 mb-4">Chia sẻ nội dung affiliate trực tiếp lên các nền tảng xã hội phổ biến như Facebook, Twitter và LinkedIn</p>
+              <div className="text-brand-blue font-medium">Tăng tiếp cận và chuyển đổi</div>
             </div>
           </div>
         </div>

@@ -1,9 +1,10 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Sparkles, RefreshCcw, Copy, Check, AlertTriangle } from 'lucide-react';
+import { Sparkles, RefreshCcw, Copy, Check, AlertTriangle, Share2, Facebook, Twitter } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useGeminiApi } from '@/hooks/use-gemini-api';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ContentFormat {
   id: string;
@@ -17,9 +18,18 @@ const contentFormats: ContentFormat[] = [
   { id: 'product', name: 'Mô tả sản phẩm' },
 ];
 
+const marketingChannels: ContentFormat[] = [
+  { id: 'general', name: 'Tổng quát' },
+  { id: 'facebook', name: 'Facebook' },
+  { id: 'instagram', name: 'Instagram' },
+  { id: 'tiktok', name: 'TikTok' },
+  { id: 'zalo', name: 'Zalo' },
+];
+
 const ContentGenerator = () => {
   const [productName, setProductName] = useState('');
   const [selectedFormat, setSelectedFormat] = useState<string>('blog');
+  const [selectedChannel, setSelectedChannel] = useState<string>('general');
   const [generatedContent, setGeneratedContent] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,11 +51,14 @@ const ContentGenerator = () => {
     
     try {
       const formatName = contentFormats.find(format => format.id === selectedFormat)?.name || selectedFormat;
+      const channelName = marketingChannels.find(channel => channel.id === selectedChannel)?.name || 'Tổng quát';
       
-      console.log("Bắt đầu tạo nội dung cho:", productName, "với định dạng:", formatName);
+      console.log("Bắt đầu tạo nội dung cho:", productName, "với định dạng:", formatName, "kênh:", channelName);
       
       const prompt = `Bạn là một chuyên gia về Affiliate Marketing tại Việt Nam.
       Hãy tạo nội dung "${formatName}" cho sản phẩm có tên: "${productName}".
+      
+      Nội dung cần được tối ưu hóa cho kênh marketing: ${channelName}.
       
       Hãy tạo nội dung phù hợp với định dạng, tối ưu SEO, và hấp dẫn để tăng tỷ lệ chuyển đổi.
       Viết bằng tiếng Việt và phù hợp với thị trường Việt Nam.
@@ -159,6 +172,31 @@ Mua ngay kẻo hết!`,
   const handleRegenerate = () => {
     handleGenerate();
   };
+
+  const handleShareSocial = (platform: string) => {
+    if (!generatedContent) return;
+    
+    let shareUrl = '';
+    const encodedText = encodeURIComponent(generatedContent.substring(0, 280)); // Twitter character limit
+    
+    switch(platform) {
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodedText}`;
+        break;
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
+        break;
+      default:
+        return;
+    }
+    
+    window.open(shareUrl, '_blank', 'width=600,height=400');
+    
+    toast({
+      title: "Chia sẻ thành công",
+      description: `Nội dung đã được chia sẻ lên ${platform}`,
+    });
+  };
   
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -170,58 +208,92 @@ Mua ngay kẻo hết!`,
         </div>
       </div>
       
-      <div className="grid gap-4 mb-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Tên sản phẩm</label>
-          <input
-            type="text"
-            value={productName}
-            onChange={(e) => setProductName(e.target.value)}
-            placeholder="Nhập tên sản phẩm để tạo nội dung"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-blue/50 focus:border-brand-blue"
-          />
-        </div>
+      <Tabs defaultValue="basic" className="w-full mb-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="basic">Cơ bản</TabsTrigger>
+          <TabsTrigger value="advanced">Nâng cao</TabsTrigger>
+        </TabsList>
         
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Định dạng nội dung</label>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {contentFormats.map((format) => (
-              <button
-                key={format.id}
-                onClick={() => setSelectedFormat(format.id)}
-                className={`px-3 py-2 border rounded-md text-sm transition-all
-                  ${selectedFormat === format.id
-                    ? 'border-brand-purple bg-brand-purple/10 text-brand-purple'
-                    : 'border-gray-200 hover:border-gray-300'
-                  }`}
-              >
-                {format.name}
-              </button>
-            ))}
+        <TabsContent value="basic" className="space-y-4 pt-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tên sản phẩm</label>
+            <input
+              type="text"
+              value={productName}
+              onChange={(e) => setProductName(e.target.value)}
+              placeholder="Nhập tên sản phẩm để tạo nội dung"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-blue/50 focus:border-brand-blue"
+            />
           </div>
-        </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Định dạng nội dung</label>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {contentFormats.map((format) => (
+                <button
+                  key={format.id}
+                  onClick={() => setSelectedFormat(format.id)}
+                  className={`px-3 py-2 border rounded-md text-sm transition-all
+                    ${selectedFormat === format.id
+                      ? 'border-brand-purple bg-brand-purple/10 text-brand-purple'
+                      : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                >
+                  {format.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </TabsContent>
         
-        <Button 
-          onClick={handleGenerate}
-          disabled={!productName || isGenerating}
-          className="btn-gradient"
-        >
-          {isGenerating ? (
-            <>
-              <RefreshCcw className="w-4 h-4 mr-2 animate-spin" />
-              Đang tạo...
-            </>
-          ) : (
-            <>
-              <Sparkles className="w-4 h-4 mr-2" />
-              Tạo nội dung
-            </>
-          )}
-        </Button>
-      </div>
+        <TabsContent value="advanced" className="space-y-4 pt-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tối ưu cho kênh marketing</label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {marketingChannels.map((channel) => (
+                <button
+                  key={channel.id}
+                  onClick={() => setSelectedChannel(channel.id)}
+                  className={`px-3 py-2 border rounded-md text-sm transition-all
+                    ${selectedChannel === channel.id
+                      ? 'border-brand-blue bg-brand-blue/10 text-brand-blue'
+                      : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                >
+                  {channel.name}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          <div className="bg-blue-50 border border-blue-100 rounded-md p-3">
+            <p className="text-sm text-blue-800">
+              Tính năng nâng cao giúp tối ưu nội dung cho từng kênh marketing cụ thể, bao gồm độ dài, giọng điệu và cấu trúc phù hợp nhất.
+            </p>
+          </div>
+        </TabsContent>
+      </Tabs>
+        
+      <Button 
+        onClick={handleGenerate}
+        disabled={!productName || isGenerating}
+        className="btn-gradient w-full"
+      >
+        {isGenerating ? (
+          <>
+            <RefreshCcw className="w-4 h-4 mr-2 animate-spin" />
+            Đang tạo...
+          </>
+        ) : (
+          <>
+            <Sparkles className="w-4 h-4 mr-2" />
+            Tạo nội dung
+          </>
+        )}
+      </Button>
       
       {error && (
-        <div className="mb-4 bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
+        <div className="mt-4 mb-4 bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
           <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-amber-800 text-sm">{error}</p>
@@ -230,7 +302,7 @@ Mua ngay kẻo hết!`,
       )}
       
       {generatedContent && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg">
+        <div className="mt-6 bg-gray-50 border border-gray-200 rounded-lg">
           <div className="flex justify-between items-center px-4 py-2 border-b border-gray-200">
             <span className="text-sm font-medium">Nội dung đã tạo</span>
             <div className="flex space-x-2">
@@ -252,10 +324,39 @@ Mua ngay kẻo hết!`,
                   <Copy className="w-4 h-4 text-gray-600" />
                 )}
               </button>
+              <button 
+                onClick={() => handleShareSocial('facebook')} 
+                className="p-1 rounded hover:bg-gray-200"
+                title="Chia sẻ Facebook"
+              >
+                <Facebook className="w-4 h-4 text-[#4267B2]" />
+              </button>
+              <button 
+                onClick={() => handleShareSocial('twitter')} 
+                className="p-1 rounded hover:bg-gray-200"
+                title="Chia sẻ Twitter"
+              >
+                <Twitter className="w-4 h-4 text-[#1DA1F2]" />
+              </button>
             </div>
           </div>
           <div className="p-4 text-sm whitespace-pre-line max-h-80 overflow-y-auto">
             {generatedContent}
+          </div>
+          <div className="border-t border-gray-200 px-4 py-2 bg-gray-50 rounded-b-lg">
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-500">
+                Tối ưu cho: {marketingChannels.find(c => c.id === selectedChannel)?.name}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs"
+                onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`)}
+              >
+                <Share2 className="h-3 w-3 mr-1" /> Chia sẻ
+              </Button>
+            </div>
           </div>
         </div>
       )}
