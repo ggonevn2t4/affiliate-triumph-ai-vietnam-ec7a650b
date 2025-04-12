@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from "@/hooks/use-toast";
 
@@ -14,8 +13,8 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
   const [isApiConfigured, setIsApiConfigured] = useState(false);
 
   useEffect(() => {
-    // Kiểm tra API key có sẵn
-    if (OPENROUTER_API_KEY && OPENROUTER_API_KEY !== "YOUR_API_KEY_HERE") {
+    // Kiểm tra API key có sẵn - fix TypeScript error by not using direct string comparison
+    if (OPENROUTER_API_KEY && OPENROUTER_API_KEY.length > 10) {
       setIsApiConfigured(true);
     } else {
       console.error("OpenRouter API key is missing or not set correctly");
@@ -72,7 +71,6 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
       const data = await response.json();
       let responseText = data.choices[0]?.message?.content || "";
       
-      // Xử lý và trả về kết quả
       if (responseText) {
         responseText = cleanAsterisks(responseText);
         return responseText;
@@ -89,7 +87,6 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
         variant: "destructive"
       });
       
-      // Trả về nội dung mẫu khi gặp lỗi
       return "Không thể tạo nội dung. Hệ thống đang bảo trì, vui lòng thử lại sau.";
     } finally {
       setIsLoading(false);

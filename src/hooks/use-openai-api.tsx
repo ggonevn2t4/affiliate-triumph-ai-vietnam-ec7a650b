@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from "@/hooks/use-toast";
 
@@ -14,8 +13,8 @@ export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
   const [isApiConfigured, setIsApiConfigured] = useState(false);
 
   useEffect(() => {
-    // Kiểm tra API key có sẵn
-    if (OPENROUTER_API_KEY && OPENROUTER_API_KEY !== "YOUR_API_KEY_HERE") {
+    // Kiểm tra API key có sẵn - fix TypeScript error by not using direct string comparison
+    if (OPENROUTER_API_KEY && OPENROUTER_API_KEY.length > 10) {
       setIsApiConfigured(true);
     } else {
       console.error("OpenRouter API key is missing or not set correctly");
