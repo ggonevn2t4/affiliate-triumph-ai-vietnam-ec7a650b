@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, BarChart3, DollarSign, Users, ShoppingBag, BarChart2, FilePen, BookUser } from 'lucide-react';
+import { ArrowLeft, BarChart3, DollarSign, Users, ShoppingBag, BarChart2, FilePen, BookUser, Smartphone } from 'lucide-react';
 import StatCard from '@/components/dashboard/StatCard';
 import RevenueChart from '@/components/dashboard/RevenueChart';
 import ProductSuggestion from '@/components/dashboard/ProductSuggestion';
@@ -59,6 +59,12 @@ const Dashboard = () => {
                     </Link>
                   </li>
                   <li>
+                    <Link to="/earnings" className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md">
+                      <DollarSign className="h-4 w-4 mr-3" />
+                      Thu nhập
+                    </Link>
+                  </li>
+                  <li>
                     <Link to="/content" className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md">
                       <FilePen className="h-4 w-4 mr-3" />
                       Nội dung
@@ -68,6 +74,12 @@ const Dashboard = () => {
                     <Link to="/ai-coaching" className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md">
                       <BookUser className="h-4 w-4 mr-3" />
                       AI Coaching
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/mobile-app" className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md">
+                      <Smartphone className="h-4 w-4 mr-3" />
+                      Ứng dụng di động
                     </Link>
                   </li>
                 </ul>
@@ -127,6 +139,31 @@ const Dashboard = () => {
                   icon={<ShoppingBag className="h-4 w-4 text-brand-purple" />}
                   changeText="2 sản phẩm mới"
                 />
+              </Link>
+            </div>
+
+            {/* New Quick Links */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Link to="/earnings">
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white hover:shadow-lg transition-all">
+                  <DollarSign className="h-8 w-8 mb-4" />
+                  <h3 className="text-xl font-bold mb-2">Theo dõi thu nhập</h3>
+                  <p className="opacity-90">Xem và quản lý thu nhập hoa hồng của bạn</p>
+                </div>
+              </Link>
+              <Link to="/mobile-app">
+                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white hover:shadow-lg transition-all">
+                  <Smartphone className="h-8 w-8 mb-4" />
+                  <h3 className="text-xl font-bold mb-2">Ứng dụng di động</h3>
+                  <p className="opacity-90">Quản lý chiến dịch affiliate mọi lúc mọi nơi</p>
+                </div>
+              </Link>
+              <Link to="/ai-tools">
+                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white hover:shadow-lg transition-all">
+                  <FilePen className="h-8 w-8 mb-4" />
+                  <h3 className="text-xl font-bold mb-2">Tạo nội dung AI</h3>
+                  <p className="opacity-90">Tạo nội dung hiệu quả với công cụ AI</p>
+                </div>
               </Link>
             </div>
 

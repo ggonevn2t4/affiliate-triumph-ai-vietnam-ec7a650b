@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -15,6 +14,8 @@ import AiCoaching from "./pages/AiCoaching";
 import AiTools from "./pages/AiTools";
 import CreateCampaign from "./pages/CreateCampaign";
 import Analytics from "./pages/Analytics";
+import Earnings from "./pages/Earnings";
+import MobileAppPage from "./pages/MobileAppPage";
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -89,6 +90,16 @@ const AppRoutes = () => {
         <Route path="/analytics" element={
           <ProtectedRoute>
             <Analytics />
+          </ProtectedRoute>
+        } />
+        <Route path="/earnings" element={
+          <ProtectedRoute>
+            <Earnings />
+          </ProtectedRoute>
+        } />
+        <Route path="/mobile-app" element={
+          <ProtectedRoute>
+            <MobileAppPage />
           </ProtectedRoute>
         } />
         
