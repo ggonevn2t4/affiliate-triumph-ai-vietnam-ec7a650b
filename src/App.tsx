@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -16,6 +17,8 @@ import CreateCampaign from "./pages/CreateCampaign";
 import Analytics from "./pages/Analytics";
 import Earnings from "./pages/Earnings";
 import MobileAppPage from "./pages/MobileAppPage";
+import CompetitorAnalysis from "./pages/CompetitorAnalysis";
+import AudienceTargeting from "./pages/AudienceTargeting";
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -100,6 +103,16 @@ const AppRoutes = () => {
         <Route path="/mobile-app" element={
           <ProtectedRoute>
             <MobileAppPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/competitor-analysis" element={
+          <ProtectedRoute>
+            <CompetitorAnalysis />
+          </ProtectedRoute>
+        } />
+        <Route path="/audience-targeting" element={
+          <ProtectedRoute>
+            <AudienceTargeting />
           </ProtectedRoute>
         } />
         

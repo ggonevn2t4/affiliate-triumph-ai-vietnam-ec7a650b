@@ -1,6 +1,7 @@
+
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, BarChart3, ShoppingBag, BarChart2, FilePen, BookUser, DollarSign, Smartphone } from 'lucide-react';
+import { ArrowLeft, BarChart3, ShoppingBag, BarChart2, FilePen, BookUser, DollarSign, Smartphone, Target, Search } from 'lucide-react';
 import EarningsTracker from '@/components/earnings/EarningsTracker';
 
 const Earnings = () => {
@@ -57,6 +58,18 @@ const Earnings = () => {
                     <Link to="/analytics" className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md">
                       <BarChart2 className="h-4 w-4 mr-3" />
                       Phân tích
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/competitor-analysis" className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md">
+                      <Search className="h-4 w-4 mr-3" />
+                      Đối thủ
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/audience-targeting" className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md">
+                      <Target className="h-4 w-4 mr-3" />
+                      Khán giả
                     </Link>
                   </li>
                   <li>
