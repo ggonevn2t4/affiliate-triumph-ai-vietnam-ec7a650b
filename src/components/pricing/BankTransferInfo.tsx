@@ -1,6 +1,6 @@
 
 import React from "react";
-import { CopyIcon, CheckIcon, Bank } from "lucide-react";
+import { CopyIcon, CheckIcon, Building, Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,7 +31,7 @@ const BankTransferInfo = () => {
     <div className="space-y-8 py-4">
       <Card className="overflow-hidden shadow-md border-accent/20">
         <div className="bg-gradient-primary p-4 text-white flex items-center gap-3">
-          <Bank className="h-5 w-5" />
+          <Landmark className="h-5 w-5" />
           <h3 className="font-medium">Thông tin chuyển khoản ngân hàng</h3>
         </div>
         
