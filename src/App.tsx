@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -19,32 +18,28 @@ import Earnings from "./pages/Earnings";
 import MobileAppPage from "./pages/MobileAppPage";
 import CompetitorAnalysis from "./pages/CompetitorAnalysis";
 import AudienceTargeting from "./pages/AudienceTargeting";
+import Pricing from "./pages/Pricing";
 
-// Protected route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
 
   if (loading) {
-    // You could render a loading spinner here
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
   if (!user) {
-    // Redirect to login but save the location they were trying to access
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;
 };
 
-// Handle redirect from sessionStorage
 const RedirectHandler = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
   React.useEffect(() => {
-    // Only run on the root path
     if (location.pathname === '/') {
       const redirectPath = sessionStorage.getItem('redirect_path');
       if (redirectPath) {
@@ -57,7 +52,6 @@ const RedirectHandler = () => {
   return null;
 };
 
-// Create a client
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
@@ -68,8 +62,8 @@ const AppRoutes = () => {
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/pricing" element={<Pricing />} />
         
-        {/* Protected routes */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <Dashboard />
@@ -116,7 +110,6 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
         
-        {/* Nested routes - if you add any, add them here */}
         <Route path="/ai-coaching/history" element={
           <ProtectedRoute>
             <Navigate to="/ai-coaching" />
@@ -138,7 +131,6 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
         
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
