@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, CircleDollarSign, ShoppingBag, TrendingUp, BarChart, Rocket } from 'lucide-react';
 
 const HeroSection = () => {
   const [email, setEmail] = useState('');
@@ -87,12 +87,41 @@ const HeroSection = () => {
         <div className="mt-16 text-center">
           <p className="text-gray-500 mb-8">Được tin tưởng bởi hàng nghìn Affiliate Marketer</p>
           
-          <div className="flex flex-wrap justify-center gap-8 md:gap-16 opacity-60 grayscale">
-            <img src="https://placehold.co/120x40?text=Logo+1" alt="Partner logo" className="h-8" />
-            <img src="https://placehold.co/120x40?text=Logo+2" alt="Partner logo" className="h-8" />
-            <img src="https://placehold.co/120x40?text=Logo+3" alt="Partner logo" className="h-8" />
-            <img src="https://placehold.co/120x40?text=Logo+4" alt="Partner logo" className="h-8" />
-            <img src="https://placehold.co/120x40?text=Logo+5" alt="Partner logo" className="h-8" />
+          <div className="flex flex-wrap justify-center gap-8 md:gap-16">
+            <div className="flex items-center justify-center bg-white/80 backdrop-blur-sm shadow-md rounded-lg h-16 w-36 p-4 hover:shadow-lg transition-all">
+              <div className="flex items-center gap-2 text-brand-blue">
+                <CircleDollarSign size={28} className="text-brand-blue" />
+                <span className="font-semibold">AffiPay</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-center bg-white/80 backdrop-blur-sm shadow-md rounded-lg h-16 w-36 p-4 hover:shadow-lg transition-all">
+              <div className="flex items-center gap-2 text-green-600">
+                <ShoppingBag size={24} className="text-green-600" />
+                <span className="font-semibold">AffShop</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-center bg-white/80 backdrop-blur-sm shadow-md rounded-lg h-16 w-36 p-4 hover:shadow-lg transition-all">
+              <div className="flex items-center gap-2 text-brand-purple">
+                <TrendingUp size={24} className="text-brand-purple" />
+                <span className="font-semibold">GrowthX</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-center bg-white/80 backdrop-blur-sm shadow-md rounded-lg h-16 w-36 p-4 hover:shadow-lg transition-all">
+              <div className="flex items-center gap-2 text-amber-600">
+                <BarChart size={24} className="text-amber-600" />
+                <span className="font-semibold">DataViz</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-center bg-white/80 backdrop-blur-sm shadow-md rounded-lg h-16 w-36 p-4 hover:shadow-lg transition-all">
+              <div className="flex items-center gap-2 text-blue-600">
+                <Rocket size={24} className="text-blue-600" />
+                <span className="font-semibold">LaunchX</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

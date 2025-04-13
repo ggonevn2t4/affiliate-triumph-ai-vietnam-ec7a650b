@@ -1,6 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { Sparkles, ArrowRight, BookUser } from 'lucide-react';
+import { Sparkles, ArrowRight, BookUser, Bot, Brain, Fingerprint, Zap, LineChart } from 'lucide-react';
 
 const AiToolsSection = () => {
   return (
@@ -22,6 +22,9 @@ const AiToolsSection = () => {
           <div className="rounded-2xl overflow-hidden shadow-lg">
             <div className="h-64 bg-gradient-to-r from-blue-600 to-indigo-600 p-6 flex items-end">
               <div className="mb-4">
+                <div className="mb-8">
+                  <Brain className="w-12 h-12 text-white/90" />
+                </div>
                 <h3 className="text-white text-2xl font-bold mb-2">AI Content Creator</h3>
                 <p className="text-blue-100">Tạo nội dung tiếp thị hấp dẫn chỉ trong vài giây</p>
               </div>
@@ -59,6 +62,9 @@ const AiToolsSection = () => {
           <div className="rounded-2xl overflow-hidden shadow-lg">
             <div className="h-64 bg-gradient-to-r from-purple-600 to-pink-600 p-6 flex items-end">
               <div className="mb-4">
+                <div className="mb-8">
+                  <LineChart className="w-12 h-12 text-white/90" />
+                </div>
                 <h3 className="text-white text-2xl font-bold mb-2">AI Trend Analyzer</h3>
                 <p className="text-purple-100">Dự đoán xu hướng thị trường để tối ưu hóa chiến dịch</p>
               </div>
@@ -96,6 +102,9 @@ const AiToolsSection = () => {
           <div className="rounded-2xl overflow-hidden shadow-lg">
             <div className="h-64 bg-gradient-to-r from-teal-600 to-emerald-600 p-6 flex items-end">
               <div className="mb-4">
+                <div className="mb-8">
+                  <Bot className="w-12 h-12 text-white/90" />
+                </div>
                 <h3 className="text-white text-2xl font-bold mb-2">AI Coaching</h3>
                 <p className="text-emerald-100">Nhận tư vấn cá nhân hóa cho chiến lược tiếp thị của bạn</p>
               </div>
