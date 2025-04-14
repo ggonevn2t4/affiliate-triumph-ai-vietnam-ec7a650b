@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -40,14 +41,21 @@ const RedirectHandler = () => {
   const location = useLocation();
   
   React.useEffect(() => {
+    // Only run on initial load and when we're at the root path
     if (location.pathname === '/') {
       const redirectPath = sessionStorage.getItem('redirect_path');
+      console.log('RedirectHandler found path:', redirectPath);
+      
       if (redirectPath) {
+        // Remove from session storage to prevent future redirects
         sessionStorage.removeItem('redirect_path');
+        
+        // Navigate to the saved path
+        console.log('Redirecting to:', redirectPath);
         navigate(redirectPath, { replace: true });
       }
     }
-  }, [navigate, location]);
+  }, [navigate, location.pathname]);
   
   return null;
 };

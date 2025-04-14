@@ -1,13 +1,30 @@
-
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, PenSquare, Sparkles, Compass, BookUser, Share2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import ContentGeneratorTool from "@/components/ai-tools/ContentGeneratorTool";
-import TrendAnalyzerTool from "@/components/ai-tools/TrendAnalyzerTool";
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, Sparkles, Magic, Wand2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useState } from 'react';
+import { toast } from "sonner";
+import SocialShareWidget from '@/components/ai-tools/SocialShareWidget';
+import OptimusAlphaGenerator from '@/components/ai-tools/OptimusAlphaGenerator';
 
 const AiTools = () => {
-  const [activeTab, setActiveTab] = useState<"content" | "trends" | "share">("content");
+  const [articleTopic, setArticleTopic] = useState('');
+  const [generatedArticle, setGeneratedArticle] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  
+  const handleGenerateArticle = async () => {
+    setIsGenerating(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setGeneratedArticle(`Đây là bài viết mẫu về chủ đề ${articleTopic}.`);
+    setIsGenerating(false);
+    
+    toast.success("Bài viết đã được tạo thành công!");
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -17,18 +34,15 @@ const AiTools = () => {
             <Link to="/dashboard" className="mr-6">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Quay lại bảng điều khiển
+                Quay lại Dashboard
               </Button>
             </Link>
             <h1 className="text-xl font-bold">Công cụ AI</h1>
           </div>
           <div className="flex items-center space-x-4">
-            <Link to="/ai-coaching">
-              <Button variant="outline" size="sm">
-                <BookUser className="h-4 w-4 mr-2" />
-                AI Coaching
-              </Button>
-            </Link>
+            <Button variant="outline" size="sm">
+              Hướng dẫn
+            </Button>
             <div className="w-8 h-8 rounded-full bg-brand-blue text-white flex items-center justify-center">
               TA
             </div>
@@ -37,124 +51,84 @@ const AiTools = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="bg-gradient-primary rounded-xl p-6 text-white mb-8">
-          <h2 className="text-2xl font-bold mb-1">Công cụ AI cho Affiliate Marketing</h2>
-          <p className="mb-4 opacity-90">Tận dụng sức mạnh của trí tuệ nhân tạo để tối ưu hóa chiến dịch tiếp thị liên kết của bạn</p>
-          <div className="flex items-center space-x-4">
-            <Button className="bg-white text-brand-blue hover:bg-blue-50 flex items-center">
-              <PenSquare className="h-4 w-4 mr-2" />
-              Tạo nội dung mới
-            </Button>
-            <Button variant="outline" className="border-white text-white hover:bg-white/10 flex items-center">
-              <Compass className="h-4 w-4 mr-2" />
-              Khám phá tính năng
-            </Button>
-          </div>
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-2">Sức mạnh của AI trong tầm tay bạn</h2>
+          <p className="text-gray-500">Sử dụng các công cụ AI để tạo nội dung, tối ưu hóa chiến dịch và hơn thế nữa</p>
         </div>
 
-        {/* Tabs */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
-          <div className="border-b border-gray-200">
-            <div className="flex">
-              <button
-                onClick={() => setActiveTab("content")}
-                className={`px-6 py-4 text-sm font-medium ${
-                  activeTab === "content"
-                    ? "border-b-2 border-brand-blue text-brand-blue"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                <div className="flex items-center">
-                  <PenSquare className="mr-2 h-4 w-4" />
-                  AI Content Creator
-                </div>
-              </button>
-              <button
-                onClick={() => setActiveTab("trends")}
-                className={`px-6 py-4 text-sm font-medium ${
-                  activeTab === "trends"
-                    ? "border-b-2 border-brand-blue text-brand-blue"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                <div className="flex items-center">
-                  <Compass className="mr-2 h-4 w-4" />
-                  AI Trend Analyzer
-                </div>
-              </button>
-              <button
-                onClick={() => setActiveTab("share")}
-                className={`px-6 py-4 text-sm font-medium ${
-                  activeTab === "share"
-                    ? "border-b-2 border-brand-blue text-brand-blue"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                <div className="flex items-center">
-                  <Share2 className="mr-2 h-4 w-4" />
-                  Social Media Sharing
-                </div>
-              </button>
-            </div>
-          </div>
-          <div className="p-6">
-            {activeTab === "content" ? (
-              <ContentGeneratorTool />
-            ) : activeTab === "trends" ? (
-              <TrendAnalyzerTool />
-            ) : (
-              <div className="text-center p-8">
-                <h3 className="text-lg font-semibold mb-2">Chia sẻ nội dung lên mạng xã hội</h3>
-                <p className="text-gray-600 mb-4">
-                  Công cụ này cho phép bạn chia sẻ nội dung đã tạo lên các nền tảng mạng xã hội khác nhau một cách dễ dàng.
-                </p>
-                <p className="text-gray-500 text-sm">
-                  Vui lòng tạo nội dung từ AI Content Creator trước khi sử dụng tính năng này.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* AI Features Showcase */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-          <h3 className="text-xl font-bold mb-4 flex items-center">
-            <Sparkles className="h-5 w-5 mr-2 text-brand-blue" />
-            Tính năng AI tiên tiến
-          </h3>
+        <Tabs defaultValue="article-generator" className="space-y-8">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="article-generator">
+              <Magic className="h-4 w-4 mr-2" />
+              Tạo bài viết
+            </TabsTrigger>
+            <TabsTrigger value="optimus-alpha">
+              <Sparkles className="h-4 w-4 mr-2" />
+              Optimus Alpha
+            </TabsTrigger>
+          </TabsList>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="border border-gray-100 rounded-lg p-5 shadow-sm">
-              <h4 className="font-medium text-lg mb-2">Tạo nội dung tự động</h4>
-              <p className="text-gray-600 mb-4">Tạo bài viết blog, mô tả sản phẩm và nội dung mạng xã hội chất lượng cao chỉ với vài cú nhấp chuột</p>
-              <div className="text-brand-blue font-medium">Sử dụng công nghệ OpenAI GPT</div>
-            </div>
-            <div className="border border-gray-100 rounded-lg p-5 shadow-sm">
-              <h4 className="font-medium text-lg mb-2">Phân tích xu hướng thị trường</h4>
-              <p className="text-gray-600 mb-4">Nhận thông tin chi tiết về xu hướng mới nổi để tận dụng cơ hội trước khi đối thủ cạnh tranh</p>
-              <div className="text-brand-blue font-medium">Dự đoán xu hướng với độ chính xác cao</div>
-            </div>
-            <div className="border border-gray-100 rounded-lg p-5 shadow-sm">
-              <h4 className="font-medium text-lg mb-2">Chia sẻ mạng xã hội tích hợp</h4>
-              <p className="text-gray-600 mb-4">Chia sẻ nội dung affiliate trực tiếp lên các nền tảng xã hội phổ biến như Facebook, Twitter và LinkedIn</p>
-              <div className="text-brand-blue font-medium">Tăng tiếp cận và chuyển đổi</div>
-            </div>
-          </div>
-        </div>
-
-        {/* AI Coaching Promotion */}
-        <div className="bg-gradient-to-r from-teal-600 to-emerald-600 rounded-xl p-6 text-white flex flex-col md:flex-row items-center justify-between">
-          <div className="mb-4 md:mb-0">
-            <h3 className="text-xl font-bold mb-2">Nâng cao kỹ năng của bạn với AI Coaching</h3>
-            <p className="opacity-90">Nhận lời khuyên cá nhân hóa và chiến lược chuyên sâu từ trợ lý AI của chúng tôi</p>
-          </div>
-          <Link to="/ai-coaching">
-            <Button className="bg-white text-emerald-700 hover:bg-emerald-50">
-              <BookUser className="h-4 w-4 mr-2" />
-              Trải nghiệm AI Coaching ngay
-            </Button>
-          </Link>
-        </div>
+          <TabsContent value="article-generator" className="space-y-6">
+            <Card className="w-full shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Wand2 className="h-5 w-5 mr-2 text-amber-500" />
+                  Công cụ tạo bài viết AI
+                </CardTitle>
+                <CardDescription>
+                  Nhập chủ đề và AI sẽ tạo một bài viết hoàn chỉnh cho bạn
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="article-topic">Chủ đề bài viết</Label>
+                  <Input
+                    id="article-topic"
+                    placeholder="Ví dụ: Top 5 sản phẩm affiliate marketing"
+                    value={articleTopic}
+                    onChange={(e) => setArticleTopic(e.target.value)}
+                  />
+                </div>
+                
+                {generatedArticle && (
+                  <div className="space-y-2 mt-4">
+                    <Label htmlFor="generated-article">Bài viết đã tạo</Label>
+                    <Textarea
+                      id="generated-article"
+                      value={generatedArticle}
+                      readOnly
+                      className="min-h-[100px]"
+                    />
+                    <SocialShareWidget content={generatedArticle} title="Bài viết Affiliate Marketing" />
+                  </div>
+                )}
+              </CardContent>
+              <CardContent>
+                <Button 
+                  className="w-full"
+                  onClick={handleGenerateArticle}
+                  disabled={isGenerating}
+                >
+                  {isGenerating ? (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2 animate-spin" />
+                      Đang tạo...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Tạo bài viết
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="optimus-alpha">
+            <OptimusAlphaGenerator />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

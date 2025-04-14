@@ -6,6 +6,7 @@ import { ArrowLeft, Home, AlertTriangle } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { toast } from "sonner";
 
 const NotFound = () => {
   const location = useLocation();
@@ -16,6 +17,20 @@ const NotFound = () => {
       "404 Error: User attempted to access non-existent route:",
       location.pathname
     );
+    
+    // Report the error to analytics
+    try {
+      // This would normally connect to an analytics service
+      console.info("Reporting 404 error to analytics:", location.pathname);
+      
+      // Show toast to inform user about the error
+      toast.error("Trang không tìm thấy", {
+        description: "Đang chuyển hướng đến trang chủ...",
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error("Failed to report 404 error:", error);
+    }
     
     // Add page title for better SEO
     document.title = "Không tìm thấy trang | AffiliateVN";
