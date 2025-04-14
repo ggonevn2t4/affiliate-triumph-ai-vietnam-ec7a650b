@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Sparkles, Magic, Wand2 } from 'lucide-react';
+import { ArrowLeft, Sparkles, Wand2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,7 +18,6 @@ const AiTools = () => {
   
   const handleGenerateArticle = async () => {
     setIsGenerating(true);
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 2000));
     setGeneratedArticle(`Đây là bài viết mẫu về chủ đề ${articleTopic}.`);
     setIsGenerating(false);
@@ -59,7 +58,7 @@ const AiTools = () => {
         <Tabs defaultValue="article-generator" className="space-y-8">
           <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="article-generator">
-              <Magic className="h-4 w-4 mr-2" />
+              <Wand2 className="h-4 w-4 mr-2" />
               Tạo bài viết
             </TabsTrigger>
             <TabsTrigger value="optimus-alpha">
