@@ -1,62 +1,12 @@
 
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Sparkles, Wand2 } from 'lucide-react';
+import { ArrowLeft, Sparkles } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useState } from 'react';
-import { toast } from "sonner";
-import SocialShareWidget from '@/components/ai-tools/SocialShareWidget';
 import OptimusAlphaGenerator from '@/components/ai-tools/OptimusAlphaGenerator';
 import ApiKeyDialog from '@/components/ai-tools/ApiKeyDialog';
-import useOpenAiApi from '@/hooks/use-openai-api';
 
 const AiTools = () => {
-  const [articleTopic, setArticleTopic] = useState('');
-  const [generatedArticle, setGeneratedArticle] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const { generateCompletion, isLoading, isApiConfigured } = useOpenAiApi();
-  
-  const handleGenerateArticle = async () => {
-    if (!articleTopic.trim()) {
-      toast.error("Vui lòng nhập chủ đề bài viết");
-      return;
-    }
-    
-    if (!isApiConfigured) {
-      toast.error("API chưa được cấu hình. Vui lòng liên hệ quản trị viên.");
-      return;
-    }
-    
-    setIsGenerating(true);
-    
-    try {
-      const content = await generateCompletion([
-        {
-          role: 'system',
-          content: 'Bạn là trợ lý viết bài chuyên nghiệp. Hãy viết một bài blog về chủ đề được cung cấp. Bài viết phải có tính thông tin, hấp dẫn và phù hợp với mục đích marketing liên kết.'
-        },
-        {
-          role: 'user', 
-          content: `Viết bài về chủ đề: ${articleTopic}`
-        }
-      ]);
-      
-      if (content) {
-        setGeneratedArticle(content);
-        toast.success("Bài viết đã được tạo thành công!");
-      }
-    } catch (error) {
-      console.error("Error generating article:", error);
-      toast.error("Có lỗi xảy ra khi tạo bài viết. Vui lòng thử lại sau.");
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
   return (
     <div className="bg-gray-50 min-h-screen">
       <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
@@ -85,76 +35,15 @@ const AiTools = () => {
           <p className="text-gray-500">Sử dụng các công cụ AI để tạo nội dung, tối ưu hóa chiến dịch và hơn thế nữa</p>
         </div>
 
-        <Tabs defaultValue="article-generator" className="space-y-8">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="article-generator">
-              <Wand2 className="h-4 w-4 mr-2" />
-              Tạo bài viết
-            </TabsTrigger>
-            <TabsTrigger value="optimus-alpha">
+        <Tabs defaultValue="content-generator" className="space-y-8">
+          <TabsList className="grid w-full max-w-md grid-cols-1">
+            <TabsTrigger value="content-generator" className="flex items-center">
               <Sparkles className="h-4 w-4 mr-2" />
-              Optimus Alpha
+              Tạo nội dung AI
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="article-generator" className="space-y-6">
-            <Card className="w-full shadow-md">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Wand2 className="h-5 w-5 mr-2 text-amber-500" />
-                  Công cụ tạo bài viết AI
-                </CardTitle>
-                <CardDescription>
-                  Nhập chủ đề và AI sẽ tạo một bài viết hoàn chỉnh cho bạn
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="article-topic">Chủ đề bài viết</Label>
-                  <Input
-                    id="article-topic"
-                    placeholder="Ví dụ: Top 5 sản phẩm affiliate marketing"
-                    value={articleTopic}
-                    onChange={(e) => setArticleTopic(e.target.value)}
-                  />
-                </div>
-                
-                {generatedArticle && (
-                  <div className="space-y-2 mt-4">
-                    <Label htmlFor="generated-article">Bài viết đã tạo</Label>
-                    <Textarea
-                      id="generated-article"
-                      value={generatedArticle}
-                      readOnly
-                      className="min-h-[100px]"
-                    />
-                    <SocialShareWidget content={generatedArticle} title="Bài viết Affiliate Marketing" />
-                  </div>
-                )}
-              </CardContent>
-              <CardContent>
-                <Button 
-                  className="w-full"
-                  onClick={handleGenerateArticle}
-                  disabled={isGenerating}
-                >
-                  {isGenerating ? (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2 animate-spin" />
-                      Đang tạo...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Tạo bài viết
-                    </>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="optimus-alpha">
+          <TabsContent value="content-generator">
             <OptimusAlphaGenerator />
           </TabsContent>
         </Tabs>

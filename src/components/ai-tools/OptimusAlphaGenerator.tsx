@@ -5,16 +5,25 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader, Sparkles, Copy, Check } from 'lucide-react';
+import { Loader, Sparkles, Copy, Check, Wand2 } from 'lucide-react';
 import { toast } from 'sonner';
 import SocialShareWidget from '@/components/ai-tools/SocialShareWidget';
 import useGeminiApi from '@/hooks/use-gemini-api';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const OptimusAlphaGenerator = () => {
   const [prompt, setPrompt] = useState('');
   const [generatedContent, setGeneratedContent] = useState('');
   const [isCopied, setIsCopied] = useState(false);
+  const [contentType, setContentType] = useState('blog');
   const { isLoading, generateCompletion, isApiConfigured } = useGeminiApi();
+
+  const contentTypes = [
+    { id: 'blog', label: 'Bài viết blog' },
+    { id: 'product', label: 'Mô tả sản phẩm' },
+    { id: 'social', label: 'Nội dung mạng xã hội' },
+    { id: 'email', label: 'Email marketing' }
+  ];
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -28,10 +37,13 @@ const OptimusAlphaGenerator = () => {
     }
 
     try {
+      // Get the selected content type label
+      const selectedType = contentTypes.find(type => type.id === contentType)?.label || 'Bài viết';
+
       const content = await generateCompletion([
         {
           role: 'system',
-          content: 'Bạn là trợ lý AI chuyên về Affiliate Marketing cho người Việt Nam. Hãy tạo nội dung chất lượng cao, có tính thuyết phục và tối ưu cho SEO.'
+          content: `Bạn là trợ lý AI chuyên về Affiliate Marketing cho người Việt Nam. Hãy tạo ${selectedType} chất lượng cao, có tính thuyết phục và tối ưu cho SEO theo yêu cầu được cung cấp.`
         },
         {
           role: 'user',
@@ -61,13 +73,30 @@ const OptimusAlphaGenerator = () => {
       <CardHeader>
         <CardTitle className="flex items-center">
           <Sparkles className="h-5 w-5 mr-2 text-amber-500" />
-          Optimus Alpha - Sinh nội dung Affiliate
+          Công cụ tạo nội dung AI
         </CardTitle>
         <CardDescription>
           Sử dụng model Claude 3 Opus để tạo nội dung tiếp thị liên kết chất lượng cao
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="content-type">Loại nội dung</Label>
+          <div className="flex flex-wrap gap-2">
+            {contentTypes.map(type => (
+              <Button
+                key={type.id}
+                type="button"
+                variant={contentType === type.id ? "default" : "outline"}
+                onClick={() => setContentType(type.id)}
+                className="h-9"
+              >
+                {type.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="prompt">Yêu cầu</Label>
           <Textarea
