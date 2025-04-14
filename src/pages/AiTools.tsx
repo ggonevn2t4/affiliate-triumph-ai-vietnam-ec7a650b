@@ -2,7 +2,6 @@
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Sparkles } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import OptimusAlphaGenerator from '@/components/ai-tools/OptimusAlphaGenerator';
 import ApiKeyDialog from '@/components/ai-tools/ApiKeyDialog';
 
@@ -35,18 +34,7 @@ const AiTools = () => {
           <p className="text-gray-500">Sử dụng các công cụ AI để tạo nội dung, tối ưu hóa chiến dịch và hơn thế nữa</p>
         </div>
 
-        <Tabs defaultValue="content-generator" className="space-y-8">
-          <TabsList className="grid w-full max-w-md grid-cols-1">
-            <TabsTrigger value="content-generator" className="flex items-center">
-              <Sparkles className="h-4 w-4 mr-2" />
-              Tạo nội dung AI
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="content-generator">
-            <OptimusAlphaGenerator />
-          </TabsContent>
-        </Tabs>
+        <OptimusAlphaGenerator />
       </main>
     </div>
   );
