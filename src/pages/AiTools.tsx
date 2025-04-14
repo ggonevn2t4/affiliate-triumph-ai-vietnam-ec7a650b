@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Sparkles, Wand2 } from 'lucide-react';
@@ -10,19 +11,50 @@ import { useState } from 'react';
 import { toast } from "sonner";
 import SocialShareWidget from '@/components/ai-tools/SocialShareWidget';
 import OptimusAlphaGenerator from '@/components/ai-tools/OptimusAlphaGenerator';
+import ApiKeyDialog from '@/components/ai-tools/ApiKeyDialog';
+import useOpenAiApi from '@/hooks/use-openai-api';
 
 const AiTools = () => {
   const [articleTopic, setArticleTopic] = useState('');
   const [generatedArticle, setGeneratedArticle] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const { generateCompletion, isLoading, isApiConfigured } = useOpenAiApi();
   
   const handleGenerateArticle = async () => {
-    setIsGenerating(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setGeneratedArticle(`Đây là bài viết mẫu về chủ đề ${articleTopic}.`);
-    setIsGenerating(false);
+    if (!articleTopic.trim()) {
+      toast.error("Vui lòng nhập chủ đề bài viết");
+      return;
+    }
     
-    toast.success("Bài viết đã được tạo thành công!");
+    if (!isApiConfigured) {
+      toast.error("API chưa được cấu hình. Vui lòng liên hệ quản trị viên.");
+      return;
+    }
+    
+    setIsGenerating(true);
+    
+    try {
+      const content = await generateCompletion([
+        {
+          role: 'system',
+          content: 'Bạn là trợ lý viết bài chuyên nghiệp. Hãy viết một bài blog về chủ đề được cung cấp. Bài viết phải có tính thông tin, hấp dẫn và phù hợp với mục đích marketing liên kết.'
+        },
+        {
+          role: 'user', 
+          content: `Viết bài về chủ đề: ${articleTopic}`
+        }
+      ]);
+      
+      if (content) {
+        setGeneratedArticle(content);
+        toast.success("Bài viết đã được tạo thành công!");
+      }
+    } catch (error) {
+      console.error("Error generating article:", error);
+      toast.error("Có lỗi xảy ra khi tạo bài viết. Vui lòng thử lại sau.");
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -39,9 +71,7 @@ const AiTools = () => {
             <h1 className="text-xl font-bold">Công cụ AI</h1>
           </div>
           <div className="flex items-center space-x-4">
-            <Button variant="outline" size="sm">
-              Hướng dẫn
-            </Button>
+            <ApiKeyDialog />
             <div className="w-8 h-8 rounded-full bg-brand-blue text-white flex items-center justify-center">
               TA
             </div>

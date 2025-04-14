@@ -8,14 +8,13 @@ import { Label } from '@/components/ui/label';
 import { Loader, Sparkles, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import SocialShareWidget from '@/components/ai-tools/SocialShareWidget';
+import useGeminiApi from '@/hooks/use-gemini-api';
 
 const OptimusAlphaGenerator = () => {
   const [prompt, setPrompt] = useState('');
-  const [apiKey, setApiKey] = useState('');
   const [generatedContent, setGeneratedContent] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  const [showApiKeyInput, setShowApiKeyInput] = useState(true);
+  const { isLoading, generateCompletion, isApiConfigured } = useGeminiApi();
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -23,55 +22,30 @@ const OptimusAlphaGenerator = () => {
       return;
     }
 
-    if (!apiKey.trim()) {
-      toast.error('Vui lòng nhập API key OpenRouter');
+    if (!isApiConfigured) {
+      toast.error('API chưa được cấu hình. Vui lòng liên hệ quản trị viên.');
       return;
     }
 
-    setIsGenerating(true);
-    setGeneratedContent('');
-
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-          'HTTP-Referer': window.location.origin,
-          'X-Title': 'AffiliateVN Content Generator'
+      const content = await generateCompletion([
+        {
+          role: 'system',
+          content: 'Bạn là trợ lý AI chuyên về Affiliate Marketing cho người Việt Nam. Hãy tạo nội dung chất lượng cao, có tính thuyết phục và tối ưu cho SEO.'
         },
-        body: JSON.stringify({
-          model: 'anthropic/claude-3-opus:alpha',
-          messages: [
-            {
-              role: 'system',
-              content: 'Bạn là trợ lý AI chuyên về Affiliate Marketing cho người Việt Nam. Hãy tạo nội dung chất lượng cao, có tính thuyết phục và tối ưu cho SEO.'
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          temperature: 0.7,
-          max_tokens: 1500
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const content = data.choices[0].message.content;
-      setGeneratedContent(content);
-      setShowApiKeyInput(false);
+        {
+          role: 'user',
+          content: prompt
+        }
+      ], 'anthropic/claude-3-opus:beta');
       
-      toast.success('Nội dung đã được tạo thành công!');
+      if (content) {
+        setGeneratedContent(content);
+        toast.success('Nội dung đã được tạo thành công!');
+      }
     } catch (error) {
       console.error('Error generating content:', error);
-      toast.error('Lỗi khi tạo nội dung. Vui lòng kiểm tra API key và thử lại.');
-    } finally {
-      setIsGenerating(false);
+      toast.error('Lỗi khi tạo nội dung. Vui lòng thử lại sau.');
     }
   };
 
@@ -90,25 +64,10 @@ const OptimusAlphaGenerator = () => {
           Optimus Alpha - Sinh nội dung Affiliate
         </CardTitle>
         <CardDescription>
-          Sử dụng OpenRouter API với model Optimus Alpha để tạo nội dung tiếp thị liên kết chất lượng cao
+          Sử dụng model Claude 3 Opus để tạo nội dung tiếp thị liên kết chất lượng cao
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {showApiKeyInput && (
-          <div className="space-y-2">
-            <Label htmlFor="api-key">OpenRouter API Key</Label>
-            <Input
-              id="api-key"
-              type="password"
-              placeholder="Nhập OpenRouter API key của bạn"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="font-mono"
-            />
-            <p className="text-xs text-gray-500">Bạn có thể lấy API key từ <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">OpenRouter.ai</a></p>
-          </div>
-        )}
-        
         <div className="space-y-2">
           <Label htmlFor="prompt">Yêu cầu</Label>
           <Textarea
@@ -154,10 +113,10 @@ const OptimusAlphaGenerator = () => {
       <CardFooter>
         <Button
           onClick={handleGenerate}
-          disabled={isGenerating || !prompt.trim() || !apiKey.trim()}
+          disabled={isLoading || !prompt.trim()}
           className="w-full"
         >
-          {isGenerating ? (
+          {isLoading ? (
             <>
               <Loader className="h-4 w-4 mr-2 animate-spin" />
               Đang tạo nội dung...
