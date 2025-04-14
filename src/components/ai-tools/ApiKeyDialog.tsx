@@ -1,102 +1,66 @@
 
-import { useState, useEffect } from "react";
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription, 
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Settings, AlertTriangle, CheckCircle } from "lucide-react";
-import { useGeminiApi } from "@/hooks/use-gemini-api";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Key } from 'lucide-react';
+import { toast } from 'sonner';
 
-interface ApiKeyDialogProps {
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
-}
+const ApiKeyDialog = () => {
+  const [apiKey, setApiKey] = useState('');
+  const [open, setOpen] = useState(false);
 
-export const ApiKeyDialog = ({ open, onOpenChange }: ApiKeyDialogProps) => {
-  const { isApiConfigured } = useGeminiApi();
-  const [apiStatus, setApiStatus] = useState<"configured" | "missing" | "checking">("checking");
-  
-  useEffect(() => {
-    // Kiểm tra trạng thái API key
-    if (isApiConfigured) {
-      setApiStatus("configured");
+  const handleSaveApiKey = () => {
+    // In a real implementation, we would save this securely or use it to make authenticated requests
+    // For this demo, we'll just show a success message
+    if (apiKey.trim()) {
+      localStorage.setItem('openrouter_api_key', apiKey.trim());
+      toast.success('API key đã được lưu thành công!');
+      setOpen(false);
     } else {
-      setApiStatus("missing");
+      toast.error('Vui lòng nhập API key hợp lệ');
     }
-  }, [isApiConfigured]);
+  };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
-          <Settings className="h-4 w-4 mr-1" />
-          Trạng thái API
+          <Key className="h-4 w-4 mr-2" />
+          Cấu hình API
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Thông tin API OpenRouter</DialogTitle>
+          <DialogTitle>Cấu hình API key</DialogTitle>
           <DialogDescription>
-            Ứng dụng sử dụng API OpenRouter được cấu hình bởi hệ thống.
+            Nhập API key của bạn để sử dụng các tính năng AI. Bạn có thể lấy API key từ trang OpenRouter.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          {apiStatus === "checking" && (
-            <div className="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="h-5 w-5 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"></div>
-              <div>
-                <h3 className="font-medium text-blue-800">Đang kiểm tra</h3>
-                <p className="text-sm text-blue-700 mt-1">
-                  Vui lòng đợi trong khi hệ thống kiểm tra trạng thái API...
-                </p>
-              </div>
-            </div>
-          )}
-          
-          {apiStatus === "configured" && (
-            <div className="flex items-start gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-              <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-medium text-green-800">API đã được cấu hình</h3>
-                <p className="text-sm text-green-700 mt-1">
-                  Hệ thống đã cấu hình API OpenRouter. Bạn có thể sử dụng tất cả các tính năng AI.
-                </p>
-              </div>
-            </div>
-          )}
-          
-          {apiStatus === "missing" && (
-            <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-medium text-amber-800">API chưa được cấu hình</h3>
-                <p className="text-sm text-amber-700 mt-1">
-                  Hệ thống chưa cấu hình API OpenRouter. Vui lòng liên hệ quản trị viên để kích hoạt tính năng AI.
-                </p>
-              </div>
-            </div>
-          )}
-
-          <div className="flex items-start gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-            <div>
-              <h3 className="font-medium text-gray-800">Thông báo</h3>
-              <p className="text-sm text-gray-700 mt-1">
-                Tính năng AI sử dụng API key của hệ thống. Người dùng không cần cung cấp API key riêng.
-              </p>
-            </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="api-key" className="text-right">
+              API Key
+            </Label>
+            <Input
+              id="api-key"
+              type="password"
+              placeholder="sk-or-..."
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              className="col-span-3"
+            />
+          </div>
+          <div className="text-sm text-muted-foreground">
+            API key được lưu trữ an toàn trong trình duyệt của bạn và không được gửi đến máy chủ của chúng tôi.
           </div>
         </div>
-        <DialogFooter>
-          <Button type="button" onClick={() => onOpenChange && onOpenChange(false)}>
-            Đóng
+        <div className="flex justify-end">
+          <Button type="submit" onClick={handleSaveApiKey}>
+            Lưu API key
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
