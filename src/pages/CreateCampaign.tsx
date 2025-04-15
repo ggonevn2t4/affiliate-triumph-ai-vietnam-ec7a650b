@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -8,6 +7,7 @@ import CampaignTemplates from '@/components/campaigns/CampaignTemplates';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { CampaignFormValues } from '@/components/campaigns/CampaignForm';
+import CampaignTargeting from '@/components/campaigns/CampaignTargeting';
 
 const CreateCampaign = () => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
@@ -57,15 +57,21 @@ const CreateCampaign = () => {
           </TabsContent>
           
           <TabsContent value="custom">
-            <CampaignForm 
-              templateId={selectedTemplateId} 
-              onSubmit={handleSubmitCampaign} 
-              generateDescription={async (name, target, budget) => {
-                // This would typically call an AI service to generate a description
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-                return `Chiến dịch ${name} với mục tiêu ${target} và ngân sách ${budget}. Tối ưu hóa cho chuyển đổi và ROI cao.`;
-              }}
-            />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <CampaignForm 
+                  templateId={selectedTemplateId} 
+                  onSubmit={handleSubmitCampaign}
+                  generateDescription={async (name, target, budget) => {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    return `Chiến dịch ${name} với mục tiêu ${target} và ngân sách ${budget}. Tối ưu hóa cho chuyển đổi và ROI cao.`;
+                  }}
+                />
+              </div>
+              <div>
+                {selectedTemplateId && <CampaignTargeting campaignId={selectedTemplateId.toString()} />}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </main>

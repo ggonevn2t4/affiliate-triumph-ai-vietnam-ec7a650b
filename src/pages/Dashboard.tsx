@@ -9,48 +9,57 @@ import ContentGenerator from '@/components/dashboard/ContentGenerator';
 import TeamCollaboration from '@/components/dashboard/TeamCollaboration';
 import CustomReportBuilder from '@/components/dashboard/CustomReportBuilder';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/auth';
 
 const Dashboard = () => {
+  const { user } = useAuth();
   const [teamId, setTeamId] = useState<string | null>(null);
 
   useEffect(() => {
-    const createDefaultTeam = async () => {
-      const { data: existingTeam } = await supabase
+    const createTeamAndAddUser = async () => {
+      if (!user) return;
+
+      // Create a new team
+      const { data: team, error: teamError } = await supabase
         .from('teams')
-        .select('id')
+        .insert({
+          name: `${user.email}'s Team`
+        })
+        .select()
         .single();
 
-      if (existingTeam) {
-        setTeamId(existingTeam.id);
-        return;
-      }
-
-      const { data: newTeam, error } = await supabase
-        .from('teams')
-        .insert({ name: 'My Team' })
-        .select('id')
-        .single();
-
-      if (error) {
+      if (teamError) {
         toast({
           variant: "destructive",
-          title: "Lỗi",
-          description: "Không thể tạo nhóm mặc định.",
+          title: "Error",
+          description: "Could not create team.",
         });
         return;
       }
 
-      if (newTeam) {
-        await supabase.from('team_members').insert({
-          team_id: newTeam.id,
+      // Add user as team owner
+      const { error: memberError } = await supabase
+        .from('team_members')
+        .insert({
+          team_id: team.id,
+          user_id: user.id,
           role: 'owner'
         });
-        setTeamId(newTeam.id);
+
+      if (memberError) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Could not add user to team.",
+        });
+        return;
       }
+
+      setTeamId(team.id);
     };
 
-    createDefaultTeam();
-  }, []);
+    createTeamAndAddUser();
+  }, [user]);
 
   return (
     <div className="bg-gray-50 min-h-screen">

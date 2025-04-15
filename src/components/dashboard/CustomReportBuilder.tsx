@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { FilePen, Save } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface CustomReportConfig {
   metrics: string[];
@@ -14,6 +15,7 @@ export interface CustomReportConfig {
 }
 
 const CustomReportBuilder = ({ teamId }: { teamId: string }) => {
+  const { user } = useAuth();
   const [reportName, setReportName] = useState('');
   const [description, setDescription] = useState('');
 
@@ -25,6 +27,7 @@ const CustomReportBuilder = ({ teamId }: { teamId: string }) => {
           name: reportName,
           description,
           team_id: teamId,
+          created_by: user?.id,
           config: {
             metrics: ['revenue', 'clicks', 'conversions'],
             timeRange: '30d',

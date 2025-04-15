@@ -10,7 +10,7 @@ interface TeamMember {
   id: string;
   user_id: string;
   role: string;
-  profiles: {
+  profiles?: {
     first_name: string | null;
     last_name: string | null;
   } | null;

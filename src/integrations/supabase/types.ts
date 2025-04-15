@@ -9,6 +9,117 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ab_tests: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          end_date: string | null
+          id: string
+          metrics: Json | null
+          name: string
+          start_date: string | null
+          status: string
+          updated_at: string
+          variant_a: Json
+          variant_b: Json
+          winner: string | null
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          metrics?: Json | null
+          name: string
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+          variant_a: Json
+          variant_b: Json
+          winner?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          metrics?: Json | null
+          name?: string
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+          variant_a?: Json
+          variant_b?: Json
+          winner?: string | null
+        }
+        Relationships: []
+      }
+      campaign_roi: {
+        Row: {
+          calculated_at: string
+          campaign_id: string
+          created_at: string
+          id: string
+          metrics: Json | null
+          total_revenue: number | null
+          total_spend: number | null
+          updated_at: string
+        }
+        Insert: {
+          calculated_at?: string
+          campaign_id: string
+          created_at?: string
+          id?: string
+          metrics?: Json | null
+          total_revenue?: number | null
+          total_spend?: number | null
+          updated_at?: string
+        }
+        Update: {
+          calculated_at?: string
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          metrics?: Json | null
+          total_revenue?: number | null
+          total_spend?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      campaign_targeting: {
+        Row: {
+          behavior_filters: Json | null
+          campaign_id: string
+          created_at: string
+          demographic_filters: Json | null
+          id: string
+          interest_filters: Json | null
+          location_filters: Json | null
+          updated_at: string
+        }
+        Insert: {
+          behavior_filters?: Json | null
+          campaign_id: string
+          created_at?: string
+          demographic_filters?: Json | null
+          id?: string
+          interest_filters?: Json | null
+          location_filters?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          behavior_filters?: Json | null
+          campaign_id?: string
+          created_at?: string
+          demographic_filters?: Json | null
+          id?: string
+          interest_filters?: Json | null
+          location_filters?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       custom_reports: {
         Row: {
           config: Json
