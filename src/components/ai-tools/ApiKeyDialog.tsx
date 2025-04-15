@@ -5,39 +5,33 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Key } from 'lucide-react';
-import { toast } from 'sonner';
+import { useApiKey } from '@/hooks/use-api-key';
 
 interface ApiKeyDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   onSave?: (apiKey: string) => void;
+  storageKey?: string;
 }
 
 const ApiKeyDialog = ({ 
   open: controlledOpen, 
   onOpenChange,
-  onSave
+  onSave,
+  storageKey
 }: ApiKeyDialogProps) => {
   const [internalOpen, setInternalOpen] = useState(false);
-  const [apiKey, setApiKey] = useState('');
+  const [inputValue, setInputValue] = useState('');
+  const { saveApiKey } = useApiKey({ storageKey, onApiKeyChange: onSave });
 
   const isControlled = controlledOpen !== undefined;
   const currentOpen = isControlled ? controlledOpen : internalOpen;
   const setOpen = isControlled ? onOpenChange : setInternalOpen;
 
   const handleSaveApiKey = () => {
-    if (apiKey.trim()) {
-      localStorage.setItem('openrouter_api_key', apiKey.trim());
-      toast.success('API key đã được lưu thành công!');
-      
-      // Call the onSave callback if provided
-      if (onSave) {
-        onSave(apiKey.trim());
-      }
-      
+    if (saveApiKey(inputValue)) {
       setOpen?.(false);
-    } else {
-      toast.error('Vui lòng nhập API key hợp lệ');
+      setInputValue('');
     }
   };
 
@@ -66,10 +60,10 @@ const ApiKeyDialog = ({
             </Label>
             <Input
               id="api-key"
-              type="password"
+              type="password" 
               placeholder="sk-or-..."
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
               className="col-span-3"
             />
           </div>
@@ -78,7 +72,7 @@ const ApiKeyDialog = ({
           </div>
         </div>
         <div className="flex justify-end">
-          <Button type="submit" onClick={handleSaveApiKey}>
+          <Button onClick={handleSaveApiKey}>
             Lưu API key
           </Button>
         </div>
