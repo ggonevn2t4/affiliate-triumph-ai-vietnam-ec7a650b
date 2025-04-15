@@ -1,9 +1,12 @@
 
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { ArrowLeft, Sparkles, LineChart, Calendar } from 'lucide-react';
 import OptimusAlphaGenerator from '@/components/ai-tools/OptimusAlphaGenerator';
+import TrendAnalyzerTool from '@/components/ai-tools/TrendAnalyzerTool';
+import SocialMediaPlanner from '@/components/ai-tools/SocialMediaPlanner';
 import ApiKeyDialog from '@/components/ai-tools/ApiKeyDialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AiTools = () => {
   return (
@@ -31,10 +34,34 @@ const AiTools = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-2">Sức mạnh của AI trong tầm tay bạn</h2>
-          <p className="text-gray-500">Sử dụng các công cụ AI để tạo nội dung, tối ưu hóa chiến dịch và hơn thế nữa</p>
+          <p className="text-gray-500">Sử dụng các công cụ AI để tạo nội dung, phân tích xu hướng và tối ưu chiến dịch marketing của bạn</p>
         </div>
-
-        <OptimusAlphaGenerator />
+        
+        <Tabs defaultValue="content-generator" className="mb-8">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="content-generator" className="flex items-center justify-center">
+              <Sparkles className="h-4 w-4 mr-2" />
+              Tạo nội dung
+            </TabsTrigger>
+            <TabsTrigger value="trend-analyzer" className="flex items-center justify-center">
+              <LineChart className="h-4 w-4 mr-2" />
+              Phân tích xu hướng
+            </TabsTrigger>
+            <TabsTrigger value="social-planner" className="flex items-center justify-center">
+              <Calendar className="h-4 w-4 mr-2" />
+              Lên lịch đăng bài
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="content-generator" className="mt-6">
+            <OptimusAlphaGenerator />
+          </TabsContent>
+          <TabsContent value="trend-analyzer" className="mt-6">
+            <TrendAnalyzerTool />
+          </TabsContent>
+          <TabsContent value="social-planner" className="mt-6">
+            <SocialMediaPlanner />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
