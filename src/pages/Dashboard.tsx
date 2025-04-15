@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, BarChart3, DollarSign, Users, ShoppingBag, BarChart2, FilePen, BookUser, Smartphone } from 'lucide-react';
@@ -7,8 +6,52 @@ import StatCard from '@/components/dashboard/StatCard';
 import RevenueChart from '@/components/dashboard/RevenueChart';
 import ProductSuggestion from '@/components/dashboard/ProductSuggestion';
 import ContentGenerator from '@/components/dashboard/ContentGenerator';
+import TeamCollaboration from '@/components/dashboard/TeamCollaboration';
+import CustomReportBuilder from '@/components/dashboard/CustomReportBuilder';
+import { supabase } from '@/integrations/supabase/client';
 
 const Dashboard = () => {
+  const [teamId, setTeamId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const createDefaultTeam = async () => {
+      const { data: existingTeam } = await supabase
+        .from('teams')
+        .select('id')
+        .single();
+
+      if (existingTeam) {
+        setTeamId(existingTeam.id);
+        return;
+      }
+
+      const { data: newTeam, error } = await supabase
+        .from('teams')
+        .insert({ name: 'My Team' })
+        .select('id')
+        .single();
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Lỗi",
+          description: "Không thể tạo nhóm mặc định.",
+        });
+        return;
+      }
+
+      if (newTeam) {
+        await supabase.from('team_members').insert({
+          team_id: newTeam.id,
+          role: 'owner'
+        });
+        setTeamId(newTeam.id);
+      }
+    };
+
+    createDefaultTeam();
+  }, []);
+
   return (
     <div className="bg-gray-50 min-h-screen">
       <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
@@ -166,6 +209,14 @@ const Dashboard = () => {
                 </div>
               </Link>
             </div>
+
+            {/* New Team Collaboration Section */}
+            {teamId && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <TeamCollaboration teamId={teamId} />
+                <CustomReportBuilder teamId={teamId} />
+              </div>
+            )}
 
             {/* Charts */}
             <Link to="/analytics" className="block">
