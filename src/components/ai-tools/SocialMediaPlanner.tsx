@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar as CalendarIcon, Plus, X, Save, Calendar, MessageSquare, Instagram, Facebook, Twitter, Linkedin, Youtube, Check, Clock } from "lucide-react";
+import { CalendarIcon, Plus, X, Save, Clock, MessageSquare, Instagram, Facebook, Twitter, Linkedin, Youtube, Check } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
@@ -125,7 +124,7 @@ const SocialMediaPlanner = () => {
     <Card className="w-full shadow-md">
       <CardHeader>
         <CardTitle className="flex items-center">
-          <Calendar className="h-5 w-5 mr-2 text-brand-purple" />
+          <CalendarIcon className="h-5 w-5 mr-2 text-brand-purple" />
           Lên lịch đăng bài mạng xã hội
         </CardTitle>
         <CardDescription>
@@ -138,7 +137,7 @@ const SocialMediaPlanner = () => {
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="calendar">
-                <Calendar className="h-4 w-4 mr-2" />
+                <CalendarIcon className="h-4 w-4 mr-2" />
                 Lịch đăng bài
               </TabsTrigger>
               <TabsTrigger value="list">
