@@ -7,24 +7,37 @@ import { Label } from '@/components/ui/label';
 import { Key } from 'lucide-react';
 import { toast } from 'sonner';
 
-const ApiKeyDialog = () => {
+interface ApiKeyDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+const ApiKeyDialog = ({ 
+  open: controlledOpen, 
+  onOpenChange 
+}: ApiKeyDialogProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [apiKey, setApiKey] = useState('');
-  const [open, setOpen] = useState(false);
+
+  const isControlled = controlledOpen !== undefined;
+  const currentOpen = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? onOpenChange : setInternalOpen;
 
   const handleSaveApiKey = () => {
-    // In a real implementation, we would save this securely or use it to make authenticated requests
-    // For this demo, we'll just show a success message
     if (apiKey.trim()) {
       localStorage.setItem('openrouter_api_key', apiKey.trim());
       toast.success('API key đã được lưu thành công!');
-      setOpen(false);
+      setOpen?.(false);
     } else {
       toast.error('Vui lòng nhập API key hợp lệ');
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog 
+      open={currentOpen} 
+      onOpenChange={(open) => setOpen?.(open)}
+    >
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Key className="h-4 w-4 mr-2" />
