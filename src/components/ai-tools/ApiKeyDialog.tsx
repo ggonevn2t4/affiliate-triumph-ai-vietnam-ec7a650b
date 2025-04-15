@@ -10,11 +10,13 @@ import { toast } from 'sonner';
 interface ApiKeyDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  onSave?: (apiKey: string) => void;
 }
 
 const ApiKeyDialog = ({ 
   open: controlledOpen, 
-  onOpenChange 
+  onOpenChange,
+  onSave
 }: ApiKeyDialogProps) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const [apiKey, setApiKey] = useState('');
@@ -27,6 +29,12 @@ const ApiKeyDialog = ({
     if (apiKey.trim()) {
       localStorage.setItem('openrouter_api_key', apiKey.trim());
       toast.success('API key đã được lưu thành công!');
+      
+      // Call the onSave callback if provided
+      if (onSave) {
+        onSave(apiKey.trim());
+      }
+      
       setOpen?.(false);
     } else {
       toast.error('Vui lòng nhập API key hợp lệ');
