@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,35 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Target, Save } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Json } from '@/integrations/supabase/types';
+import { type TargetingData, type CampaignTargetingRecord } from '@/types/campaign';
 
 interface CampaignTargetingProps {
   campaignId: string;
-}
-
-interface DemographicsData {
-  ageRange: string;
-  gender: string;
-}
-
-interface LocationData {
-  country: string;
-  cities: string[];
-}
-
-interface InterestsData {
-  categories: string[];
-}
-
-interface BehaviorData {
-  buyingHistory: string[];
-}
-
-interface TargetingData {
-  demographics: DemographicsData;
-  location: LocationData;
-  interests: InterestsData;
-  behavior: BehaviorData;
 }
 
 const CampaignTargeting = ({ campaignId }: CampaignTargetingProps) => {
@@ -78,7 +52,6 @@ const CampaignTargeting = ({ campaignId }: CampaignTargetingProps) => {
       }
 
       if (data) {
-        // Safely handle the JSON data from the database with defaults if values are missing
         const newTargeting: TargetingData = {
           demographics: {
             ageRange: '18-65',
@@ -113,16 +86,17 @@ const CampaignTargeting = ({ campaignId }: CampaignTargetingProps) => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      // Fix: Convert our custom types to Json compatible objects before sending to Supabase
+      const record: CampaignTargetingRecord = {
+        campaign_id: campaignId,
+        demographic_filters: targeting.demographics,
+        location_filters: targeting.location,
+        interest_filters: targeting.interests,
+        behavior_filters: targeting.behavior
+      };
+
       const { error } = await supabase
         .from('campaign_targeting')
-        .upsert({
-          campaign_id: campaignId,
-          demographic_filters: targeting.demographics as unknown as Json,
-          location_filters: targeting.location as unknown as Json,
-          interest_filters: targeting.interests as unknown as Json,
-          behavior_filters: targeting.behavior as unknown as Json
-        });
+        .upsert(record);
 
       if (error) throw error;
 
