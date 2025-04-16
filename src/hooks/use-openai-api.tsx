@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { toast } from "@/hooks/use-toast";
 
@@ -5,26 +6,33 @@ interface UseOpenAIApiOptions {
   onApiKeyMissing?: () => void;
 }
 
-// API key OpenRouter được cấu hình sẵn
+// Backup API key in case the configured one fails
 const OPENROUTER_API_KEY = "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";
 
 export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isApiConfigured, setIsApiConfigured] = useState(false);
+  const [apiKey, setApiKey] = useState<string | null>(
+    localStorage.getItem('openai_api_key') || OPENROUTER_API_KEY
+  );
 
   useEffect(() => {
-    // Kiểm tra API key có sẵn - fix TypeScript error by not using direct string comparison
-    if (OPENROUTER_API_KEY && OPENROUTER_API_KEY.length > 10) {
+    // Check if API key is available
+    if (apiKey && apiKey.length > 10) {
       setIsApiConfigured(true);
     } else {
-      console.error("OpenRouter API key is missing or not set correctly");
+      console.error("API key is missing or not set correctly");
       toast({
         title: "Thông báo hệ thống",
         description: "Tính năng AI đang được bảo trì. Vui lòng thử lại sau.",
         variant: "destructive"
       });
+      
+      if (options?.onApiKeyMissing) {
+        options.onApiKeyMissing();
+      }
     }
-  }, []);
+  }, [apiKey, options]);
 
   const cleanAsterisks = (text: string): string => {
     return text.replace(/\*\*/g, "");
@@ -32,7 +40,7 @@ export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
 
   const generateCompletion = async (
     messages: Array<{role: "system" | "user" | "assistant"; content: string}>,
-    model = "openai/gpt-4o" // Model mặc định sử dụng GPT-4o của OpenAI thông qua OpenRouter
+    model = "openai/gpt-4o" // Model mặc định
   ) => {
     if (!isApiConfigured) {
       if (options?.onApiKeyMissing) {
@@ -44,12 +52,14 @@ export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
     setIsLoading(true);
     
     try {
+      console.log(`Generating completion with model: ${model}`);
+      
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': window.location.origin, // Origin domain
+          'HTTP-Referer': window.location.origin,
           'X-Title': 'Affiliate Marketing AI'
         },
         body: JSON.stringify({
@@ -63,18 +73,18 @@ export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
       if (!response.ok) {
         const errorData = await response.json();
         console.error("OpenRouter API error:", errorData);
-        throw new Error(`API error: ${response.status}`);
+        throw new Error(`API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
       }
 
       const data = await response.json();
       let responseText = data.choices[0]?.message?.content || "";
       
-      // Xử lý và trả về kết quả
+      // Process and return result
       if (responseText) {
         responseText = cleanAsterisks(responseText);
         return responseText;
       } else {
-        console.error("Không nhận được phản hồi từ API");
+        console.error("No response received from API");
         return "Không thể tạo nội dung. Vui lòng thử lại sau.";
       }
     } catch (error: any) {
@@ -86,7 +96,7 @@ export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
         variant: "destructive"
       });
       
-      // Trả về nội dung mẫu khi gặp lỗi
+      // Return null on error
       return null;
     } finally {
       setIsLoading(false);
