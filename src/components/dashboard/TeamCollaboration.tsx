@@ -1,10 +1,9 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { UserPlus, Users } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface TeamMember {
   id: string;
@@ -17,63 +16,27 @@ interface TeamMember {
 }
 
 const TeamCollaboration = ({ teamId }: { teamId: string }) => {
-  const [members, setMembers] = useState<TeamMember[]>([]);
-
-  useEffect(() => {
-    const fetchTeamMembers = async () => {
-      // First query the team_members table without the profiles join
-      const { data, error } = await supabase
-        .from('team_members')
-        .select('id, user_id, role')
-        .eq('team_id', teamId);
-
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Lỗi",
-          description: "Không thể tải danh sách thành viên.",
-        });
-        return;
+  const { user } = useAuth();
+  const [members] = useState<TeamMember[]>([
+    {
+      id: "1",
+      user_id: user?.id || "demo-user",
+      role: "owner",
+      profiles: {
+        first_name: "Thành",
+        last_name: "An"
       }
-
-      // Now fetch profiles separately and join them manually
-      if (data && data.length > 0) {
-        const userIds = data.map(member => member.user_id);
-        const { data: profilesData, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, first_name, last_name')
-          .in('id', userIds);
-
-        if (profilesError) {
-          toast({
-            variant: "destructive",
-            title: "Lỗi",
-            description: "Không thể tải thông tin hồ sơ người dùng.",
-          });
-        }
-
-        // Create a lookup map for faster access
-        const profilesMap = new Map();
-        if (profilesData) {
-          profilesData.forEach(profile => {
-            profilesMap.set(profile.id, profile);
-          });
-        }
-
-        // Join the data manually
-        const membersWithProfiles = data.map(member => ({
-          ...member,
-          profiles: profilesMap.get(member.user_id) || { first_name: null, last_name: null }
-        }));
-
-        setMembers(membersWithProfiles);
-      } else {
-        setMembers([]); // No members found
+    },
+    {
+      id: "2",
+      user_id: "demo-user-2",
+      role: "member",
+      profiles: {
+        first_name: "Minh",
+        last_name: "Tâm"
       }
-    };
-
-    fetchTeamMembers();
-  }, [teamId]);
+    }
+  ]);
 
   return (
     <Card>

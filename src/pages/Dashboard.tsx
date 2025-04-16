@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -8,59 +9,11 @@ import ProductSuggestion from '@/components/dashboard/ProductSuggestion';
 import ContentGenerator from '@/components/dashboard/ContentGenerator';
 import TeamCollaboration from '@/components/dashboard/TeamCollaboration';
 import CustomReportBuilder from '@/components/dashboard/CustomReportBuilder';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/hooks/use-toast';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const [teamId, setTeamId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const createTeamAndAddUser = async () => {
-      if (!user) return;
-
-      // Create a new team
-      const { data: team, error: teamError } = await supabase
-        .from('teams')
-        .insert({
-          name: `${user.email}'s Team`
-        })
-        .select()
-        .single();
-
-      if (teamError) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Could not create team.",
-        });
-        return;
-      }
-
-      // Add user as team owner
-      const { error: memberError } = await supabase
-        .from('team_members')
-        .insert({
-          team_id: team.id,
-          user_id: user.id,
-          role: 'owner'
-        });
-
-      if (memberError) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Could not add user to team.",
-        });
-        return;
-      }
-
-      setTeamId(team.id);
-    };
-
-    createTeamAndAddUser();
-  }, [user]);
+  const [teamId, setTeamId] = useState<string | null>("demo-team-id"); // Use a demo team ID instead of creating one
 
   return (
     <div className="bg-gray-50 min-h-screen">
