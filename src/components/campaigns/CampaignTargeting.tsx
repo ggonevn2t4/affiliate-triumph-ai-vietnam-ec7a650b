@@ -112,16 +112,16 @@ const CampaignTargeting = ({ campaignId }: CampaignTargetingProps) => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      // Fix: The upsert method expects a single object, not an array
+      // Fix: The upsert method expects an array of objects for batch operations
       const { error } = await supabase
         .from('campaign_targeting')
-        .upsert({
+        .upsert([{
           campaign_id: campaignId,
           demographic_filters: targeting.demographics,
           location_filters: targeting.location,
           interest_filters: targeting.interests,
           behavior_filters: targeting.behavior
-        });
+        }]);
 
       if (error) throw error;
 
