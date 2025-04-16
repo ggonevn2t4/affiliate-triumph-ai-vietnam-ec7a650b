@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { Target, Save } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { type TargetingData, type CampaignTargetingRecord } from '@/types/campaign';
+import { Json } from '@/integrations/supabase/types';
 
 interface CampaignTargetingProps {
   campaignId: string;
@@ -88,10 +90,10 @@ const CampaignTargeting = ({ campaignId }: CampaignTargetingProps) => {
     try {
       const record: CampaignTargetingRecord = {
         campaign_id: campaignId,
-        demographic_filters: targeting.demographics,
-        location_filters: targeting.location,
-        interest_filters: targeting.interests,
-        behavior_filters: targeting.behavior
+        demographic_filters: targeting.demographics as unknown as Json,
+        location_filters: targeting.location as unknown as Json,
+        interest_filters: targeting.interests as unknown as Json,
+        behavior_filters: targeting.behavior as unknown as Json
       };
 
       const { error } = await supabase
