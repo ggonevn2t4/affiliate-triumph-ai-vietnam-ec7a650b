@@ -21,14 +21,10 @@ const TeamCollaboration = ({ teamId }: { teamId: string }) => {
 
   useEffect(() => {
     const fetchTeamMembers = async () => {
+      // First query the team_members table without the profiles join
       const { data, error } = await supabase
         .from('team_members')
-        .select(`
-          id,
-          user_id,
-          role,
-          profiles:profiles!user_id(first_name, last_name)
-        `)
+        .select('id, user_id, role')
         .eq('team_id', teamId);
 
       if (error) {
@@ -40,7 +36,40 @@ const TeamCollaboration = ({ teamId }: { teamId: string }) => {
         return;
       }
 
-      setMembers(data || []);
+      // Now fetch profiles separately and join them manually
+      if (data && data.length > 0) {
+        const userIds = data.map(member => member.user_id);
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name')
+          .in('id', userIds);
+
+        if (profilesError) {
+          toast({
+            variant: "destructive",
+            title: "Lỗi",
+            description: "Không thể tải thông tin hồ sơ người dùng.",
+          });
+        }
+
+        // Create a lookup map for faster access
+        const profilesMap = new Map();
+        if (profilesData) {
+          profilesData.forEach(profile => {
+            profilesMap.set(profile.id, profile);
+          });
+        }
+
+        // Join the data manually
+        const membersWithProfiles = data.map(member => ({
+          ...member,
+          profiles: profilesMap.get(member.user_id) || { first_name: null, last_name: null }
+        }));
+
+        setMembers(membersWithProfiles);
+      } else {
+        setMembers([]); // No members found
+      }
     };
 
     fetchTeamMembers();
@@ -64,7 +93,7 @@ const TeamCollaboration = ({ teamId }: { teamId: string }) => {
             {members.map((member) => (
               <div key={member.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
                 <span>
-                  {member.profiles?.first_name} {member.profiles?.last_name}
+                  {member.profiles?.first_name || 'User'} {member.profiles?.last_name || ''}
                 </span>
                 <span className="text-sm text-gray-500 capitalize">{member.role}</span>
               </div>

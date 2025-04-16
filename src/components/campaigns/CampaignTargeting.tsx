@@ -11,9 +11,34 @@ interface CampaignTargetingProps {
   campaignId: string;
 }
 
+interface DemographicsData {
+  ageRange: string;
+  gender: string;
+}
+
+interface LocationData {
+  country: string;
+  cities: string[];
+}
+
+interface InterestsData {
+  categories: string[];
+}
+
+interface BehaviorData {
+  buyingHistory: string[];
+}
+
+interface TargetingData {
+  demographics: DemographicsData;
+  location: LocationData;
+  interests: InterestsData;
+  behavior: BehaviorData;
+}
+
 const CampaignTargeting = ({ campaignId }: CampaignTargetingProps) => {
   const [loading, setLoading] = useState(false);
-  const [targeting, setTargeting] = useState({
+  const [targeting, setTargeting] = useState<TargetingData>({
     demographics: {
       ageRange: '18-65',
       gender: 'all'
@@ -52,12 +77,29 @@ const CampaignTargeting = ({ campaignId }: CampaignTargetingProps) => {
       }
 
       if (data) {
-        setTargeting({
-          demographics: data.demographic_filters || targeting.demographics,
-          location: data.location_filters || targeting.location,
-          interests: data.interest_filters || targeting.interests,
-          behavior: data.behavior_filters || targeting.behavior
-        });
+        // Safely handle the JSON data from the database with defaults if values are missing
+        const newTargeting: TargetingData = {
+          demographics: {
+            ageRange: '18-65',
+            gender: 'all',
+            ...(typeof data.demographic_filters === 'object' ? data.demographic_filters : {})
+          },
+          location: {
+            country: 'Vietnam',
+            cities: [],
+            ...(typeof data.location_filters === 'object' ? data.location_filters : {})
+          },
+          interests: {
+            categories: [],
+            ...(typeof data.interest_filters === 'object' ? data.interest_filters : {})
+          },
+          behavior: {
+            buyingHistory: [],
+            ...(typeof data.behavior_filters === 'object' ? data.behavior_filters : {})
+          }
+        };
+        
+        setTargeting(newTargeting);
       }
       setLoading(false);
     };
@@ -97,11 +139,11 @@ const CampaignTargeting = ({ campaignId }: CampaignTargetingProps) => {
     }
   };
 
-  const handleInputChange = (category: string, field: string, value: string) => {
+  const handleInputChange = (category: keyof TargetingData, field: string, value: string) => {
     setTargeting(prev => ({
       ...prev,
       [category]: {
-        ...prev[category as keyof typeof prev],
+        ...prev[category],
         [field]: value
       }
     }));
