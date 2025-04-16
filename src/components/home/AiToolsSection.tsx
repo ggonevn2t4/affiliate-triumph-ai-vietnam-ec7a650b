@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles, ArrowRight, BookUser, Bot, Brain, Fingerprint, Zap, LineChart } from 'lucide-react';
 
