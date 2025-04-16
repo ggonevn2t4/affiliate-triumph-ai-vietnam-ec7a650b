@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,37 +12,99 @@ interface CampaignTargetingProps {
 }
 
 const CampaignTargeting = ({ campaignId }: CampaignTargetingProps) => {
+  const [loading, setLoading] = useState(false);
   const [targeting, setTargeting] = useState({
-    demographics: {},
-    location: {},
-    interests: {},
-    behavior: {}
+    demographics: {
+      ageRange: '18-65',
+      gender: 'all'
+    },
+    location: {
+      country: 'Vietnam',
+      cities: []
+    },
+    interests: {
+      categories: []
+    },
+    behavior: {
+      buyingHistory: []
+    }
   });
 
-  const handleSave = async () => {
-    const { error } = await supabase
-      .from('campaign_targeting')
-      .insert({
-        campaign_id: campaignId,
-        demographic_filters: targeting.demographics,
-        location_filters: targeting.location,
-        interest_filters: targeting.interests,
-        behavior_filters: targeting.behavior
-      });
+  useEffect(() => {
+    const fetchTargeting = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('campaign_targeting')
+        .select('*')
+        .eq('campaign_id', campaignId)
+        .single();
 
-    if (error) {
+      if (error) {
+        if (error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not load targeting settings.",
+          });
+        }
+        setLoading(false);
+        return;
+      }
+
+      if (data) {
+        setTargeting({
+          demographics: data.demographic_filters || targeting.demographics,
+          location: data.location_filters || targeting.location,
+          interests: data.interest_filters || targeting.interests,
+          behavior: data.behavior_filters || targeting.behavior
+        });
+      }
+      setLoading(false);
+    };
+
+    if (campaignId) {
+      fetchTargeting();
+    }
+  }, [campaignId]);
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('campaign_targeting')
+        .upsert({
+          campaign_id: campaignId,
+          demographic_filters: targeting.demographics,
+          location_filters: targeting.location,
+          interest_filters: targeting.interests,
+          behavior_filters: targeting.behavior
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Targeting settings saved successfully.",
+      });
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
         description: "Could not save targeting settings.",
       });
-      return;
+    } finally {
+      setLoading(false);
     }
+  };
 
-    toast({
-      title: "Success",
-      description: "Targeting settings saved successfully.",
-    });
+  const handleInputChange = (category: string, field: string, value: string) => {
+    setTargeting(prev => ({
+      ...prev,
+      [category]: {
+        ...prev[category as keyof typeof prev],
+        [field]: value
+      }
+    }));
   };
 
   return (
@@ -54,9 +116,52 @@ const CampaignTargeting = ({ campaignId }: CampaignTargetingProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Button onClick={handleSave} className="w-full">
-          <Save className="h-4 w-4 mr-2" />
-          Save Targeting Settings
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-sm font-medium mb-2">Demographics</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="ageRange" className="text-xs">Age Range</label>
+                <Input 
+                  id="ageRange"
+                  value={targeting.demographics.ageRange}
+                  onChange={(e) => handleInputChange('demographics', 'ageRange', e.target.value)}
+                  placeholder="18-65"
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="gender" className="text-xs">Gender</label>
+                <Input 
+                  id="gender"
+                  value={targeting.demographics.gender}
+                  onChange={(e) => handleInputChange('demographics', 'gender', e.target.value)}
+                  placeholder="all, male, female"
+                />
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <h3 className="text-sm font-medium mb-2">Location</h3>
+            <div className="space-y-2">
+              <label htmlFor="country" className="text-xs">Country</label>
+              <Input 
+                id="country"
+                value={targeting.location.country}
+                onChange={(e) => handleInputChange('location', 'country', e.target.value)}
+                placeholder="Country"
+              />
+            </div>
+          </div>
+        </div>
+        
+        <Button onClick={handleSave} className="w-full" disabled={loading}>
+          {loading ? 'Saving...' : (
+            <>
+              <Save className="h-4 w-4 mr-2" />
+              Save Targeting Settings
+            </>
+          )}
         </Button>
       </CardContent>
     </Card>

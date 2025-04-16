@@ -27,7 +27,7 @@ const TeamCollaboration = ({ teamId }: { teamId: string }) => {
           id,
           user_id,
           role,
-          profiles:user_id(first_name, last_name)
+          profiles:profiles!user_id(first_name, last_name)
         `)
         .eq('team_id', teamId);
 

@@ -9,7 +9,8 @@ import ContentGenerator from '@/components/dashboard/ContentGenerator';
 import TeamCollaboration from '@/components/dashboard/TeamCollaboration';
 import CustomReportBuilder from '@/components/dashboard/CustomReportBuilder';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/auth';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/hooks/use-toast';
 
 const Dashboard = () => {
   const { user } = useAuth();
