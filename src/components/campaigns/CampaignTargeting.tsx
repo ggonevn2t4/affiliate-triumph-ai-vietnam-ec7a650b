@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Target, Save } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Json } from '@/integrations/supabase/types';
 
 interface CampaignTargetingProps {
   campaignId: string;
@@ -112,16 +113,16 @@ const CampaignTargeting = ({ campaignId }: CampaignTargetingProps) => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      // Fix: The upsert method expects an array of objects for batch operations
+      // Fix: Convert our custom types to Json compatible objects before sending to Supabase
       const { error } = await supabase
         .from('campaign_targeting')
-        .upsert([{
+        .upsert({
           campaign_id: campaignId,
-          demographic_filters: targeting.demographics,
-          location_filters: targeting.location,
-          interest_filters: targeting.interests,
-          behavior_filters: targeting.behavior
-        }]);
+          demographic_filters: targeting.demographics as unknown as Json,
+          location_filters: targeting.location as unknown as Json,
+          interest_filters: targeting.interests as unknown as Json,
+          behavior_filters: targeting.behavior as unknown as Json
+        });
 
       if (error) throw error;
 
