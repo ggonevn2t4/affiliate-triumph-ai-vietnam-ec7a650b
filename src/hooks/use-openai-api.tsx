@@ -40,7 +40,7 @@ export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
 
   const generateCompletion = async (
     messages: Array<{role: "system" | "user" | "assistant"; content: string}>,
-    model = "openai/gpt-4o" // Model mặc định
+    model = "openai/gpt-4o" // Model mặc định mới nhất của OpenAI
   ) => {
     if (!isApiConfigured) {
       if (options?.onApiKeyMissing) {
@@ -66,7 +66,7 @@ export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
           model: model,
           messages: messages,
           temperature: 0.7,
-          max_tokens: 2048
+          max_tokens: 4096, // Tăng giới hạn token
         }),
       });
 

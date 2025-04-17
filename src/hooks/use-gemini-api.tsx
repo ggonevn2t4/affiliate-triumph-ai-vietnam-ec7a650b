@@ -40,7 +40,7 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
 
   const generateCompletion = async (
     messages: Array<{role: "system" | "user" | "assistant"; content: string}>,
-    model = "anthropic/claude-3-opus:beta" // Model mặc định
+    model = "google/gemini-1.5-pro-latest" // Sử dụng model Gemini mới nhất
   ) => {
     if (!isApiConfigured) {
       toast({
@@ -68,7 +68,7 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
           model: model,
           messages: messages,
           temperature: 0.7,
-          max_tokens: 2048
+          max_tokens: 4096, // Tăng giới hạn token để có kết quả dài hơn
         }),
       });
 

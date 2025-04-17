@@ -95,7 +95,7 @@ const ApiKeyDialog = ({
         <DialogHeader>
           <DialogTitle>Cấu hình API key</DialogTitle>
           <DialogDescription>
-            Nhập API key của bạn để sử dụng các tính năng AI. Bạn có thể lấy API key từ trang OpenRouter hoặc sử dụng API key mặc định.
+            Nhập API key của bạn để sử dụng các tính năng AI. Hệ thống đang sử dụng các model mới nhất như Gemini 1.5 Pro và GPT-4o.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -117,6 +117,11 @@ const ApiKeyDialog = ({
             <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline block mt-1">
               Nhận API key từ OpenRouter
             </a>
+            <div className="mt-2 p-2 bg-blue-50 rounded-md">
+              <p className="text-blue-800 text-xs">
+                Hệ thống đang sử dụng model <strong>google/gemini-1.5-pro-latest</strong> và <strong>openai/gpt-4o</strong> cho các tính năng AI.
+              </p>
+            </div>
           </div>
         </div>
         <div className="flex justify-end space-x-2">
