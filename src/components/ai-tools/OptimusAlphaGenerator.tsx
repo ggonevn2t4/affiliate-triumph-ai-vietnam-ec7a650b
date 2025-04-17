@@ -1,19 +1,16 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader, Sparkles, Copy, Check, Wand2, History, Save, Bold, Italic, Underline, List, ListOrdered, Link as LinkIcon, Clock, RotateCcw, FileText } from 'lucide-react';
+import { Loader, Sparkles, Copy, Check, Wand2, History, Save, Bold, Italic, Underline, List, ListOrdered, Link as LinkIcon, Clock, RotateCcw, FileText, AlertTriangle, Key } from 'lucide-react';
 import { toast } from 'sonner';
 import SocialShareWidget from '@/components/ai-tools/SocialShareWidget';
 import useGeminiApi from '@/hooks/use-gemini-api';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { supabase } from '@/integrations/supabase/client';
+import ApiKeyDialog from '@/components/ai-tools/ApiKeyDialog';
 
 const OptimusAlphaGenerator = () => {
   const [prompt, setPrompt] = useState('');
@@ -24,7 +21,10 @@ const OptimusAlphaGenerator = () => {
   const [contentHistory, setContentHistory] = useState<Array<{id: string, prompt: string, content: string, type: string, date: Date}>>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('');
-  const { isLoading, generateCompletion, isApiConfigured } = useGeminiApi();
+  const [showApiKeyDialog, setShowApiKeyDialog] = useState(false);
+  const { isLoading, generateCompletion, isApiConfigured } = useGeminiApi({
+    onApiKeyMissing: () => setShowApiKeyDialog(true)
+  });
 
   const templates = {
     blog: [
@@ -60,12 +60,9 @@ const OptimusAlphaGenerator = () => {
     { id: 'email', label: 'Email marketing' }
   ];
 
-  // Load content history on component mount
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        // Here we're simulating loading history - in a real app, this would come from a database
-        // This could be replaced with a real API call in the future
         const mockHistory = [
           {
             id: '1',
@@ -108,12 +105,11 @@ const OptimusAlphaGenerator = () => {
     }
 
     if (!isApiConfigured) {
-      toast.error('API chưa được cấu hình. Vui lòng liên hệ quản trị viên.');
+      setShowApiKeyDialog(true);
       return;
     }
 
     try {
-      // Get the selected content type label
       const selectedType = contentTypes.find(type => type.id === contentType)?.label || 'Bài viết';
 
       const content = await generateCompletion([
@@ -125,13 +121,12 @@ const OptimusAlphaGenerator = () => {
           role: 'user',
           content: prompt
         }
-      ], 'anthropic/claude-3-opus:beta');
+      ], 'google/gemini-1.5-pro-latest');
       
       if (content) {
         setGeneratedContent(content);
         setEditedContent(content);
         
-        // Add to history
         const newHistoryItem = {
           id: Date.now().toString(),
           prompt: prompt,
@@ -143,6 +138,8 @@ const OptimusAlphaGenerator = () => {
         setContentHistory(prev => [newHistoryItem, ...prev]);
         
         toast.success('Nội dung đã được tạo thành công!');
+      } else {
+        toast.error('Không thể tạo nội dung. Vui lòng kiểm tra API key hoặc thử lại sau.');
       }
     } catch (error) {
       console.error('Error generating content:', error);
@@ -174,9 +171,7 @@ const OptimusAlphaGenerator = () => {
     }
   };
 
-  // Rich text editing functions
   const applyFormatting = (formatting: string) => {
-    // This is a simple implementation - in a real app you'd use a more robust rich text editor
     let formattedContent = editedContent;
     
     switch(formatting) {
@@ -205,14 +200,37 @@ const OptimusAlphaGenerator = () => {
   return (
     <Card className="w-full shadow-md">
       <CardHeader>
-        <CardTitle className="flex items-center">
-          <Sparkles className="h-5 w-5 mr-2 text-amber-500" />
-          Công cụ tạo nội dung AI
-        </CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle className="flex items-center">
+            <Sparkles className="h-5 w-5 mr-2 text-amber-500" />
+            Công cụ tạo nội dung AI
+          </CardTitle>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setShowApiKeyDialog(true)}
+            className="flex items-center"
+          >
+            <Key className="h-3.5 w-3.5 mr-1" />
+            API Key
+            {!isApiConfigured && <span className="ml-1 w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>}
+          </Button>
+        </div>
         <CardDescription>
-          Sử dụng model Claude 3 Opus để tạo nội dung tiếp thị liên kết chất lượng cao
+          Sử dụng model Gemini 1.5 Pro để tạo nội dung tiếp thị liên kết chất lượng cao
         </CardDescription>
       </CardHeader>
+
+      {!isApiConfigured && (
+        <div className="mx-6 my-2 bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start gap-2">
+          <AlertTriangle className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-blue-800 text-sm font-medium">Cần cấu hình API Key</p>
+            <p className="text-blue-600 text-sm">Bạn cần cấu hình API key để sử dụng tính năng tạo nội dung AI.</p>
+          </div>
+        </div>
+      )}
+      
       <CardContent className="space-y-4">
         <div className="flex justify-between">
           <div className="space-y-2">
@@ -298,7 +316,6 @@ const OptimusAlphaGenerator = () => {
           </div>
         </div>
         
-        {/* Templates section */}
         <div className="space-y-2">
           <Label htmlFor="template">Mẫu nội dung</Label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -354,7 +371,6 @@ const OptimusAlphaGenerator = () => {
               </div>
             </div>
             
-            {/* Rich text editing toolbar */}
             <div className="flex items-center space-x-1 p-1 bg-gray-50 rounded-t-md border border-b-0">
               <Button variant="ghost" size="sm" onClick={() => applyFormatting('bold')}>
                 <Bold className="h-4 w-4" />

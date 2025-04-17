@@ -96,8 +96,8 @@ export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
         variant: "destructive"
       });
       
-      // Return null on error
-      return null;
+      // Return better error message instead of null
+      return "Không thể tạo nội dung. Hệ thống đang bảo trì, vui lòng cập nhật API key hoặc thử lại sau.";
     } finally {
       setIsLoading(false);
     }

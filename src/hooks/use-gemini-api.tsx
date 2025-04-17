@@ -97,6 +97,7 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
         variant: "destructive"
       });
       
+      // Return a string with error message instead of null, so the UI can display something
       return "Không thể tạo nội dung. Hệ thống đang bảo trì, vui lòng thử lại sau.";
     } finally {
       setIsLoading(false);

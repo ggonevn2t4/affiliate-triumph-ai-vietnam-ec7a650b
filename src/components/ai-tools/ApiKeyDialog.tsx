@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Key } from 'lucide-react';
+import { Key, Info } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 import { useApiKey } from '@/hooks/use-api-key';
 
@@ -86,9 +86,10 @@ const ApiKeyDialog = ({
       onOpenChange={(open) => setOpen?.(open)}
     >
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" className="flex items-center">
           <Key className="h-4 w-4 mr-2" />
           {isConfigured ? "Cập nhật API key" : "Cấu hình API"}
+          {!isConfigured && <span className="ml-1 w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
@@ -112,9 +113,12 @@ const ApiKeyDialog = ({
               className="col-span-3"
             />
           </div>
-          <div className="text-sm text-muted-foreground">
-            API key được lưu trữ an toàn trong trình duyệt của bạn và không được gửi đến máy chủ của chúng tôi.
-            <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline block mt-1">
+          <div className="text-sm text-muted-foreground bg-gray-50 p-3 rounded-md border border-gray-100">
+            <div className="flex items-start gap-2 mb-2">
+              <Info className="h-4 w-4 mt-0.5 text-blue-500" />
+              <p>API key được lưu trữ an toàn trong trình duyệt của bạn và không được gửi đến máy chủ của chúng tôi.</p>
+            </div>
+            <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline block mt-1 font-medium">
               Nhận API key từ OpenRouter
             </a>
             <div className="mt-2 p-2 bg-blue-50 rounded-md">

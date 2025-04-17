@@ -1,10 +1,10 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Sparkles, RefreshCcw, Copy, Check, AlertTriangle, Share2, Facebook, Twitter } from 'lucide-react';
+import { Sparkles, RefreshCcw, Copy, Check, AlertTriangle, Share2, Facebook, Twitter, Key } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useGeminiApi } from '@/hooks/use-gemini-api';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ApiKeyDialog from '@/components/ai-tools/ApiKeyDialog';
 
 interface ContentFormat {
   id: string;
@@ -33,8 +33,11 @@ const ContentGenerator = () => {
   const [generatedContent, setGeneratedContent] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [showApiKeyDialog, setShowApiKeyDialog] = useState(false);
   
-  const { generateCompletion, isLoading: isGenerating } = useGeminiApi();
+  const { generateCompletion, isLoading: isGenerating, isApiConfigured } = useGeminiApi({
+    onApiKeyMissing: () => setShowApiKeyDialog(true)
+  });
 
   const handleGenerate = async () => {
     if (!productName) {
@@ -43,6 +46,11 @@ const ContentGenerator = () => {
         description: "Vui lòng nhập tên sản phẩm để tạo nội dung",
         variant: "destructive"
       });
+      return;
+    }
+    
+    if (!isApiConfigured) {
+      setShowApiKeyDialog(true);
       return;
     }
     
@@ -81,7 +89,7 @@ const ContentGenerator = () => {
       if (content) {
         setGeneratedContent(content);
       } else {
-        setError("Không thể tạo nội dung cho sản phẩm này. Đang hiển thị nội dung mẫu.");
+        setError("Không thể tạo nội dung cho sản phẩm này. Vui lòng kiểm tra API key của bạn hoặc thử lại sau.");
         setFallbackContent();
       }
     } catch (error) {
@@ -202,9 +210,20 @@ Mua ngay kẻo hết!`,
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold">Tạo nội dung bằng AI</h3>
-        <div className="flex items-center text-brand-purple text-sm font-medium">
-          <Sparkles className="w-4 h-4 mr-2" />
-          <span>AI content creator</span>
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center text-brand-purple text-sm font-medium">
+            <Sparkles className="w-4 h-4 mr-2" />
+            <span>AI content creator</span>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setShowApiKeyDialog(true)}
+            className="flex items-center"
+          >
+            <Key className="h-3.5 w-3.5 mr-1" />
+            API Key
+          </Button>
         </div>
       </div>
       
@@ -292,6 +311,25 @@ Mua ngay kẻo hết!`,
         )}
       </Button>
       
+      {!isApiConfigured && (
+        <div className="mt-4 mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start gap-2">
+          <AlertTriangle className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-blue-800 text-sm font-medium">Cấu hình API Key</p>
+            <p className="text-blue-600 text-sm">Bạn cần cấu hình API key để sử dụng tính năng AI.</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setShowApiKeyDialog(true)}
+              className="mt-2 bg-white"
+            >
+              <Key className="h-3.5 w-3.5 mr-1" />
+              Cấu hình API Key
+            </Button>
+          </div>
+        </div>
+      )}
+      
       {error && (
         <div className="mt-4 mb-4 bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
           <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
@@ -360,6 +398,11 @@ Mua ngay kẻo hết!`,
           </div>
         </div>
       )}
+      
+      <ApiKeyDialog
+        open={showApiKeyDialog}
+        onOpenChange={setShowApiKeyDialog}
+      />
     </div>
   );
 };
