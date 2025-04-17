@@ -6,7 +6,7 @@ interface UseOpenAIApiOptions {
   onApiKeyMissing?: () => void;
 }
 
-// Updated API key
+// Updated OpenRouter API key
 const OPENROUTER_API_KEY = "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";
 
 export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
@@ -20,7 +20,7 @@ export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
 
   const generateCompletion = async (
     messages: Array<{role: "system" | "user" | "assistant"; content: string}>,
-    model = "openai/gpt-4o" // Model mặc định mới nhất của OpenAI
+    model = "anthropic/claude-3-haiku" // Switched to Claude which often has better availability
   ) => {
     setIsLoading(true);
     
@@ -39,7 +39,7 @@ export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
           model: model,
           messages: messages,
           temperature: 0.7,
-          max_tokens: 4096, // Tăng giới hạn token
+          max_tokens: 4000,
         }),
       });
 
@@ -63,7 +63,6 @@ export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
     } catch (error: any) {
       console.error("OpenRouter API error:", error);
       
-      // Provide better error handling
       if (import.meta.env.DEV) {
         toast({
           title: "Thông báo hệ thống",
@@ -72,7 +71,6 @@ export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
         });
       }
       
-      // Return better error message instead of null
       return "Không thể tạo nội dung. Hệ thống đang bảo trì, vui lòng thử lại sau.";
     } finally {
       setIsLoading(false);

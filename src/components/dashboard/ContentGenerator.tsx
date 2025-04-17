@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles, RefreshCcw, Copy, Check, Share2, Facebook, Twitter } from 'lucide-react';
@@ -73,7 +74,7 @@ const ContentGenerator = () => {
           role: "user",
           content: prompt
         }
-      ]);
+      ], "anthropic/claude-3-haiku");
       
       console.log("Nhận được phản hồi:", content ? "Có nội dung" : "Không có nội dung");
       

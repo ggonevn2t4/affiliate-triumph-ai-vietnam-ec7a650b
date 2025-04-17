@@ -6,7 +6,7 @@ interface UseGeminiApiOptions {
   onApiKeyMissing?: () => void;
 }
 
-// Updated API key configuration
+// Updated OpenRouter API key configuration
 const OPENROUTER_API_KEY = "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";
 
 export const useGeminiApi = (options?: UseGeminiApiOptions) => {
@@ -20,7 +20,7 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
 
   const generateCompletion = async (
     messages: Array<{role: "system" | "user" | "assistant"; content: string}>,
-    model = "google/gemini-1.5-pro-latest" // Sử dụng model Gemini mới nhất
+    model = "anthropic/claude-3-haiku" // Switched to Claude which often has better availability
   ) => {
     setIsLoading(true);
     
@@ -39,7 +39,7 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
           model: model,
           messages: messages,
           temperature: 0.7,
-          max_tokens: 4096, // Tăng giới hạn token để có kết quả dài hơn
+          max_tokens: 4000,
         }),
       });
 
@@ -62,7 +62,6 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
     } catch (error: any) {
       console.error("OpenRouter API error:", error);
       
-      // Provide better error handling but don't show toast to user in production
       if (import.meta.env.DEV) {
         toast({
           title: "Thông báo hệ thống",
@@ -71,7 +70,6 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
         });
       }
       
-      // Return a string with better error message
       return "Không thể tạo nội dung. Hệ thống đang bảo trì, vui lòng thử lại sau.";
     } finally {
       setIsLoading(false);

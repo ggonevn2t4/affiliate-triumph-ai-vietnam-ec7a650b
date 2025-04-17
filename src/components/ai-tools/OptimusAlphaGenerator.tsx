@@ -113,7 +113,7 @@ const OptimusAlphaGenerator = () => {
           role: 'user',
           content: prompt
         }
-      ], 'google/gemini-1.5-pro-latest');
+      ], 'anthropic/claude-3-haiku');
       
       if (content) {
         setGeneratedContent(content);
