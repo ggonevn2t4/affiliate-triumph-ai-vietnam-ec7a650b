@@ -1,25 +1,18 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { toast } from "@/hooks/use-toast";
 
 interface UseOpenAIApiOptions {
   onApiKeyMissing?: () => void;
 }
 
-// Fixed API key configuration - only using the predefined key
-const OPENROUTER_API_KEY = "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";
+// Updated API key
+const OPENROUTER_API_KEY = "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";
 
 export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isApiConfigured, setIsApiConfigured] = useState(true); // Always consider API as configured
   const [apiKey] = useState<string>(OPENROUTER_API_KEY); // Using fixed API key
-
-  useEffect(() => {
-    // Only log errors in development but don't show toasts to users
-    if (import.meta.env.DEV && (!apiKey || apiKey.length < 10)) {
-      console.error("API key is missing or not set correctly");
-    }
-  }, [apiKey]);
 
   const cleanAsterisks = (text: string): string => {
     return text.replace(/\*\*/g, "");
@@ -70,7 +63,7 @@ export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
     } catch (error: any) {
       console.error("OpenRouter API error:", error);
       
-      // Don't show error toast to users
+      // Provide better error handling
       if (import.meta.env.DEV) {
         toast({
           title: "Thông báo hệ thống",

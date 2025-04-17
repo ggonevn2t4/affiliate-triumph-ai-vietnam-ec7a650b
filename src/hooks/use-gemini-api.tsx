@@ -6,8 +6,8 @@ interface UseGeminiApiOptions {
   onApiKeyMissing?: () => void;
 }
 
-// Fixed API key configuration - only using the predefined key
-const OPENROUTER_API_KEY = "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";
+// Updated API key configuration
+const OPENROUTER_API_KEY = "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";
 
 export const useGeminiApi = (options?: UseGeminiApiOptions) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -62,7 +62,7 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
     } catch (error: any) {
       console.error("OpenRouter API error:", error);
       
-      // Only show error toast in development
+      // Provide better error handling but don't show toast to user in production
       if (import.meta.env.DEV) {
         toast({
           title: "Thông báo hệ thống",
@@ -71,7 +71,7 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
         });
       }
       
-      // Return a string with error message instead of null, so the UI can display something
+      // Return a string with better error message
       return "Không thể tạo nội dung. Hệ thống đang bảo trì, vui lòng thử lại sau.";
     } finally {
       setIsLoading(false);
