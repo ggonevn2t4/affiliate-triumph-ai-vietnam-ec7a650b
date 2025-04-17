@@ -5,7 +5,6 @@ import { ArrowLeft, Sparkles, LineChart, Calendar } from 'lucide-react';
 import OptimusAlphaGenerator from '@/components/ai-tools/OptimusAlphaGenerator';
 import TrendAnalyzerTool from '@/components/ai-tools/TrendAnalyzerTool';
 import SocialMediaPlanner from '@/components/ai-tools/SocialMediaPlanner';
-import ApiKeyDialog from '@/components/ai-tools/ApiKeyDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AiTools = () => {
@@ -23,7 +22,6 @@ const AiTools = () => {
             <h1 className="text-xl font-bold">Công cụ AI</h1>
           </div>
           <div className="flex items-center space-x-4">
-            <ApiKeyDialog />
             <div className="w-8 h-8 rounded-full bg-brand-blue text-white flex items-center justify-center">
               TA
             </div>

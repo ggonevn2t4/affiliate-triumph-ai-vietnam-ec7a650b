@@ -6,33 +6,20 @@ interface UseOpenAIApiOptions {
   onApiKeyMissing?: () => void;
 }
 
-// Backup API key in case the configured one fails
+// Fixed API key configuration - only using the predefined key
 const OPENROUTER_API_KEY = "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";
 
 export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isApiConfigured, setIsApiConfigured] = useState(false);
-  const [apiKey, setApiKey] = useState<string | null>(
-    localStorage.getItem('openai_api_key') || OPENROUTER_API_KEY
-  );
+  const [isApiConfigured, setIsApiConfigured] = useState(true); // Always consider API as configured
+  const [apiKey] = useState<string>(OPENROUTER_API_KEY); // Using fixed API key
 
   useEffect(() => {
-    // Check if API key is available
-    if (apiKey && apiKey.length > 10) {
-      setIsApiConfigured(true);
-    } else {
+    // Only log errors in development but don't show toasts to users
+    if (import.meta.env.DEV && (!apiKey || apiKey.length < 10)) {
       console.error("API key is missing or not set correctly");
-      toast({
-        title: "Thông báo hệ thống",
-        description: "Tính năng AI đang được bảo trì. Vui lòng thử lại sau.",
-        variant: "destructive"
-      });
-      
-      if (options?.onApiKeyMissing) {
-        options.onApiKeyMissing();
-      }
     }
-  }, [apiKey, options]);
+  }, [apiKey]);
 
   const cleanAsterisks = (text: string): string => {
     return text.replace(/\*\*/g, "");
@@ -42,13 +29,6 @@ export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
     messages: Array<{role: "system" | "user" | "assistant"; content: string}>,
     model = "openai/gpt-4o" // Model mặc định mới nhất của OpenAI
   ) => {
-    if (!isApiConfigured) {
-      if (options?.onApiKeyMissing) {
-        options.onApiKeyMissing();
-      }
-      return null;
-    }
-
     setIsLoading(true);
     
     try {
@@ -90,14 +70,17 @@ export const useOpenAiApi = (options?: UseOpenAIApiOptions) => {
     } catch (error: any) {
       console.error("OpenRouter API error:", error);
       
-      toast({
-        title: "Thông báo hệ thống",
-        description: "Tính năng AI đang gặp sự cố. Vui lòng thử lại sau.",
-        variant: "destructive"
-      });
+      // Don't show error toast to users
+      if (import.meta.env.DEV) {
+        toast({
+          title: "Thông báo hệ thống",
+          description: "Tính năng AI đang gặp sự cố. Vui lòng thử lại sau.",
+          variant: "destructive"
+        });
+      }
       
       // Return better error message instead of null
-      return "Không thể tạo nội dung. Hệ thống đang bảo trì, vui lòng cập nhật API key hoặc thử lại sau.";
+      return "Không thể tạo nội dung. Hệ thống đang bảo trì, vui lòng thử lại sau.";
     } finally {
       setIsLoading(false);
     }

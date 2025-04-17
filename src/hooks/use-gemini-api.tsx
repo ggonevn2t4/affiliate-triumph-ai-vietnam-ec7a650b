@@ -1,38 +1,18 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { toast } from "@/hooks/use-toast";
 
 interface UseGeminiApiOptions {
   onApiKeyMissing?: () => void;
 }
 
-// Backup API key in case the configured one fails
+// Fixed API key configuration - only using the predefined key
 const OPENROUTER_API_KEY = "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";
 
 export const useGeminiApi = (options?: UseGeminiApiOptions) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isApiConfigured, setIsApiConfigured] = useState(false);
-  const [apiKey, setApiKey] = useState<string | null>(
-    localStorage.getItem('openai_api_key') || OPENROUTER_API_KEY
-  );
-
-  useEffect(() => {
-    // Check if API key is available
-    if (apiKey && apiKey.length > 10) {
-      setIsApiConfigured(true);
-    } else {
-      console.error("API key is missing or not set correctly");
-      toast({
-        title: "Thông báo hệ thống",
-        description: "Tính năng AI đang được bảo trì. Vui lòng thử lại sau.",
-        variant: "destructive"
-      });
-      
-      if (options?.onApiKeyMissing) {
-        options.onApiKeyMissing();
-      }
-    }
-  }, [apiKey, options]);
+  const [isApiConfigured, setIsApiConfigured] = useState(true); // Always consider API as configured
+  const [apiKey] = useState<string>(OPENROUTER_API_KEY); // Using fixed API key
 
   const cleanAsterisks = (text: string): string => {
     return text.replace(/\*\*/g, "");
@@ -42,15 +22,6 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
     messages: Array<{role: "system" | "user" | "assistant"; content: string}>,
     model = "google/gemini-1.5-pro-latest" // Sử dụng model Gemini mới nhất
   ) => {
-    if (!isApiConfigured) {
-      toast({
-        title: "Thông báo hệ thống",
-        description: "Tính năng AI đang được bảo trì. Vui lòng thử lại sau.",
-        variant: "destructive"
-      });
-      return null;
-    }
-
     setIsLoading(true);
     
     try {
@@ -91,11 +62,14 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
     } catch (error: any) {
       console.error("OpenRouter API error:", error);
       
-      toast({
-        title: "Thông báo hệ thống",
-        description: "Tính năng AI đang gặp sự cố. Vui lòng thử lại sau.",
-        variant: "destructive"
-      });
+      // Only show error toast in development
+      if (import.meta.env.DEV) {
+        toast({
+          title: "Thông báo hệ thống",
+          description: "Tính năng AI đang gặp sự cố. Vui lòng thử lại sau.",
+          variant: "destructive"
+        });
+      }
       
       // Return a string with error message instead of null, so the UI can display something
       return "Không thể tạo nội dung. Hệ thống đang bảo trì, vui lòng thử lại sau.";
