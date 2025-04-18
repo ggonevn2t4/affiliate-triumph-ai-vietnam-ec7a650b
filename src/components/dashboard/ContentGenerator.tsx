@@ -1,8 +1,10 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles, RefreshCcw, Copy, Check, Share2, Facebook, Twitter } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useContentGeneration } from '@/hooks/use-content-generation';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ContentFormat {
   id: string;
