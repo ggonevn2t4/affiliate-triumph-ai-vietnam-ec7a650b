@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Loader, Sparkles, Copy, Check, Wand2, History, Save, Bold, Italic, Underline, List, ListOrdered, Link as LinkIcon, Clock, RotateCcw, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import SocialShareWidget from '@/components/ai-tools/SocialShareWidget';
-import useGeminiApi from '@/hooks/use-gemini-api';
+import useContentGeneration from '@/hooks/use-content-generation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -21,7 +20,7 @@ const OptimusAlphaGenerator = () => {
   const [contentHistory, setContentHistory] = useState<Array<{id: string, prompt: string, content: string, type: string, date: Date}>>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('');
-  const { isLoading, generateCompletion, isApiConfigured } = useGeminiApi();
+  const { isLoading, generateCompletion } = useContentGeneration();
 
   const templates = {
     blog: [
@@ -113,7 +112,7 @@ const OptimusAlphaGenerator = () => {
           role: 'user',
           content: prompt
         }
-      ], 'anthropic/claude-3-haiku');
+      ]);
       
       if (content) {
         setGeneratedContent(content);
@@ -198,7 +197,6 @@ const OptimusAlphaGenerator = () => {
             Công cụ tạo nội dung AI
           </CardTitle>
         </div>
-        {/* Removed the description mentioning Gemini 1.5 Pro as requested */}
       </CardHeader>
       
       <CardContent className="space-y-4">

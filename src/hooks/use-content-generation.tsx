@@ -2,41 +2,30 @@
 import { useState } from 'react';
 import { toast } from "@/hooks/use-toast";
 
-interface UseGeminiApiOptions {
-  onApiKeyMissing?: () => void;
-}
-
-// Updated OpenRouter API key configuration
+// OpenRouter API key configuration
 const OPENROUTER_API_KEY = "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";
 
-export const useGeminiApi = (options?: UseGeminiApiOptions) => {
+export const useContentGeneration = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isApiConfigured, setIsApiConfigured] = useState(true); // Always consider API as configured
-  const [apiKey] = useState<string>(OPENROUTER_API_KEY); // Using fixed API key
-
-  const cleanAsterisks = (text: string): string => {
-    return text.replace(/\*\*/g, "");
-  };
 
   const generateCompletion = async (
-    messages: Array<{role: "system" | "user" | "assistant"; content: string}>,
-    model = "anthropic/claude-3-haiku" // Switched to Claude which often has better availability
+    messages: Array<{role: "system" | "user" | "assistant"; content: string}>
   ) => {
     setIsLoading(true);
     
     try {
-      console.log(`Generating completion with model: ${model}`);
+      console.log("Generating completion with Claude 3 Haiku");
       
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
+          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
           'Content-Type': 'application/json',
           'HTTP-Referer': window.location.origin,
           'X-Title': 'Affiliate Marketing AI'
         },
         body: JSON.stringify({
-          model: model,
+          model: "anthropic/claude-3-haiku",
           messages: messages,
           temperature: 0.7,
           max_tokens: 4000,
@@ -50,10 +39,9 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
       }
 
       const data = await response.json();
-      let responseText = data.choices[0]?.message?.content || "";
+      const responseText = data.choices[0]?.message?.content || "";
       
       if (responseText) {
-        responseText = cleanAsterisks(responseText);
         return responseText;
       } else {
         console.error("No response received from API");
@@ -77,10 +65,9 @@ export const useGeminiApi = (options?: UseGeminiApiOptions) => {
   };
 
   return {
-    isApiConfigured,
     isLoading,
     generateCompletion,
   };
 };
 
-export default useGeminiApi;
+export default useContentGeneration;

@@ -1,10 +1,8 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles, RefreshCcw, Copy, Check, Share2, Facebook, Twitter } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useGeminiApi } from '@/hooks/use-gemini-api';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useContentGeneration } from '@/hooks/use-content-generation';
 
 interface ContentFormat {
   id: string;
@@ -34,7 +32,7 @@ const ContentGenerator = () => {
   const [copied, setCopied] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   
-  const { generateCompletion, isLoading: isGenerating, isApiConfigured } = useGeminiApi();
+  const { generateCompletion, isLoading: isGenerating } = useContentGeneration();
 
   const handleGenerate = async () => {
     if (!productName) {
@@ -74,7 +72,7 @@ const ContentGenerator = () => {
           role: "user",
           content: prompt
         }
-      ], "anthropic/claude-3-haiku");
+      ]);
       
       console.log("Nhận được phản hồi:", content ? "Có nội dung" : "Không có nội dung");
       
