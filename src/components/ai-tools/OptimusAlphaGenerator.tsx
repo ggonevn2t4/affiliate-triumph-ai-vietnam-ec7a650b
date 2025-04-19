@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Sparkles, History } from 'lucide-react';
+import { History, Sparkles } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import useContentGeneration from '@/hooks/use-content-generation';
 import HistoryDialog from './components/HistoryDialog';
 import PromptForm from './components/PromptForm';
 import ContentEditor from './components/ContentEditor';
 import type { ContentFormat } from './types/content';
-import type { ToneOption } from './types/content';
 
 const contentFormats: ContentFormat[] = [
   { id: 'blog', name: 'Bài viết blog' },
@@ -25,13 +24,6 @@ const marketingChannels: ContentFormat[] = [
   { id: 'zalo', name: 'Zalo' },
 ];
 
-const toneOptions: ToneOption[] = [
-  { id: 'professional', name: 'Chuyên nghiệp', description: 'Giọng điệu trang trọng và chính thống' },
-  { id: 'casual', name: 'Thân thiện', description: 'Giọng điệu gần gũi và dễ tiếp cận' },
-  { id: 'enthusiastic', name: 'Nhiệt tình', description: 'Giọng điệu năng động và hào hứng' },
-  { id: 'persuasive', name: 'Thuyết phục', description: 'Giọng điệu có tính thuyết phục cao' },
-];
-
 const OptimusAlphaGenerator = () => {
   const [prompt, setPrompt] = useState('');
   const [generatedContent, setGeneratedContent] = useState('');
@@ -40,9 +32,9 @@ const OptimusAlphaGenerator = () => {
   const [contentHistory, setContentHistory] = useState<Array<{id: string, prompt: string, content: string, type: string, date: Date}>>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [selectedChannel, setSelectedChannel] = useState('general');
-  const { isLoading, generateCompletion } = useContentGeneration();
   const [selectedTone, setSelectedTone] = useState('professional');
   const [wordLimit, setWordLimit] = useState(300);
+  const { isLoading, generateCompletion } = useContentGeneration();
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -94,12 +86,11 @@ const OptimusAlphaGenerator = () => {
 
     try {
       const selectedType = contentFormats.find(type => type.id === contentType)?.name || 'Bài viết';
-      const tone = toneOptions.find(t => t.id === selectedTone)?.name || 'Chuyên nghiệp';
       const content = await generateCompletion([
         {
           role: 'system',
           content: `Bạn là trợ lý AI chuyên về Affiliate Marketing cho người Việt Nam. 
-          Hãy tạo ${selectedType} chất lượng cao với giọng điệu ${tone}, 
+          Hãy tạo ${selectedType} chất lượng cao với giọng điệu ${selectedTone}, 
           có tính thuyết phục và tối ưu cho SEO. 
           Giới hạn độ dài khoảng ${wordLimit} từ.`
         },
@@ -224,9 +215,29 @@ const OptimusAlphaGenerator = () => {
           <ContentEditor
             content={generatedContent}
             onRegenerate={handleGenerate}
-            onCopy={handleCopy}
+            onCopy={() => {
+              navigator.clipboard.writeText(generatedContent);
+              setIsCopied(true);
+              setTimeout(() => setIsCopied(false), 2000);
+              toast({
+                title: "Thành công",
+                description: "Đã sao chép nội dung vào clipboard",
+                variant: "default"
+              });
+            }}
             isCopied={isCopied}
-            onShare={handleShareSocial}
+            onShare={(platform) => {
+              const encodedText = encodeURIComponent(generatedContent.substring(0, 280));
+              const shareUrl = platform === 'facebook' 
+                ? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodedText}`
+                : `https://twitter.com/intent/tweet?text=${encodedText}`;
+              window.open(shareUrl, '_blank', 'width=600,height=400');
+              toast({
+                title: "Thành công",
+                description: `Đã chia sẻ nội dung lên ${platform}`,
+                variant: "default"
+              });
+            }}
             selectedChannel={selectedChannel}
             channelName={marketingChannels.find(c => c.id === selectedChannel)?.name || 'Tổng quát'}
           />
@@ -236,8 +247,26 @@ const OptimusAlphaGenerator = () => {
           open={showHistory}
           onOpenChange={setShowHistory}
           contentHistory={contentHistory}
-          onLoadHistoryItem={handleLoadHistoryItem}
-          formatDate={formatDate}
+          onLoadHistoryItem={(item) => {
+            setPrompt(item.prompt);
+            setGeneratedContent(item.content);
+            setContentType(item.type);
+            setShowHistory(false);
+            toast({
+              title: "Thành công",
+              description: "Đã tải nội dung từ lịch sử",
+              variant: "default"
+            });
+          }}
+          formatDate={(date) => {
+            return new Intl.DateTimeFormat('vi-VN', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            }).format(date);
+          }}
         />
       </CardContent>
     </Card>
