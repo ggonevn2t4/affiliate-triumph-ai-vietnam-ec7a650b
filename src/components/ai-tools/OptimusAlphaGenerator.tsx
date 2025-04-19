@@ -80,12 +80,16 @@ const OptimusAlphaGenerator = () => {
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
-      toast.error('Vui lòng nhập nội dung để sinh');
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng nhập nội dung để sinh",
+        variant: "destructive"
+      });
       return;
     }
 
     try {
-      const selectedType = contentFormats.find(type => type.id === contentType)?.label || 'Bài viết';
+      const selectedType = contentFormats.find(type => type.id === contentType)?.name || 'Bài viết';
 
       const content = await generateCompletion([
         {
@@ -111,18 +115,30 @@ const OptimusAlphaGenerator = () => {
         
         setContentHistory(prev => [newHistoryItem, ...prev]);
         
-        toast.success('Nội dung đã được tạo thành công!');
+        toast({
+          title: "Thành công",
+          description: "Nội dung đã được tạo thành công!",
+          variant: "default"
+        });
       }
     } catch (error) {
       console.error('Error generating content:', error);
-      toast.error('Lỗi khi tạo nội dung. Vui lòng thử lại sau.');
+      toast({
+        title: "Lỗi",
+        description: "Lỗi khi tạo nội dung. Vui lòng thử lại sau.",
+        variant: "destructive"
+      });
     }
   };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(generatedContent);
     setIsCopied(true);
-    toast.success('Đã sao chép nội dung vào clipboard');
+    toast({
+      title: "Thành công",
+      description: "Đã sao chép nội dung vào clipboard",
+      variant: "default"
+    });
     setTimeout(() => setIsCopied(false), 2000);
   };
 
@@ -145,7 +161,11 @@ const OptimusAlphaGenerator = () => {
     
     window.open(shareUrl, '_blank', 'width=600,height=400');
     
-    toast.success(`Nội dung đã được chia sẻ lên ${platform}`);
+    toast({
+      title: "Thành công", 
+      description: `Nội dung đã được chia sẻ lên ${platform}`,
+      variant: "default"
+    });
   };
 
   const handleLoadHistoryItem = (item: typeof contentHistory[0]) => {
@@ -153,7 +173,11 @@ const OptimusAlphaGenerator = () => {
     setGeneratedContent(item.content);
     setContentType(item.type);
     setShowHistory(false);
-    toast.success('Đã tải nội dung từ lịch sử');
+    toast({
+      title: "Thành công",
+      description: "Đã tải nội dung từ lịch sử",
+      variant: "default"
+    });
   };
 
   return (

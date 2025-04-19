@@ -23,6 +23,16 @@ const ContentEditor = ({
   selectedChannel,
   channelName,
 }: ContentEditorProps) => {
+  
+  const handleCopyButtonClick = () => {
+    onCopy();
+    toast({
+      title: "Đã sao chép",
+      description: "Nội dung đã được sao chép vào clipboard",
+      variant: "default"
+    });
+  };
+  
   return (
     <div className="mt-6 bg-gray-50 border border-gray-200 rounded-lg">
       <div className="flex justify-between items-center px-4 py-2 border-b border-gray-200">
