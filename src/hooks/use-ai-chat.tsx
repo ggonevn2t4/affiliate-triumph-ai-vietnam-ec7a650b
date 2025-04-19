@@ -38,7 +38,8 @@ export const useAiChat = (selectedTopic: string) => {
           role: 'system',
           content: `Bạn là một AI Coach chuyên về Affiliate Marketing, đặc biệt là về chủ đề "${selectedTopic}". 
           Hãy cung cấp lời khuyên thực tế, chiến lược cụ thể và hướng dẫn chi tiết.
-          Trả lời ngắn gọn, dễ hiểu và đúng trọng tâm.`
+          Trả lời ngắn gọn, dễ hiểu và đúng trọng tâm.
+          Sử dụng ngôn ngữ thân thiện và chuyên nghiệp.`
         },
         ...messages,
         userMessage

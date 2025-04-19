@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { toast } from "@/hooks/use-toast";
 
-// OpenRouter API key configuration
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 
 export const useContentGeneration = () => {
@@ -11,7 +10,6 @@ export const useContentGeneration = () => {
   const generateCompletion = async (
     messages: Array<{role: "system" | "user" | "assistant"; content: string}>
   ) => {
-    // Validate API key before making the request
     if (!OPENROUTER_API_KEY) {
       toast({
         title: "Lỗi Cấu Hình",
@@ -31,7 +29,7 @@ export const useContentGeneration = () => {
         headers: {
           'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': window.location.origin, // Required for OpenRouter
+          'HTTP-Referer': window.location.origin,
           'X-Title': 'Affiliate Marketing AI'
         },
         body: JSON.stringify({
@@ -45,7 +43,7 @@ export const useContentGeneration = () => {
       if (!response.ok) {
         const errorData = await response.json();
         console.error("OpenRouter API error:", errorData);
-        throw new Error(`API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+        throw new Error(`API error: ${response.status} - ${errorData.error?.message || 'Lỗi không xác định'}`);
       }
 
       const data = await response.json();
@@ -54,7 +52,7 @@ export const useContentGeneration = () => {
       if (responseText) {
         return responseText;
       } else {
-        console.error("No response received from API");
+        console.error("Không nhận được phản hồi từ API");
         toast({
           title: "Lỗi Tạo Nội Dung",
           description: "Không thể tạo nội dung. Vui lòng thử lại sau.",
@@ -63,7 +61,7 @@ export const useContentGeneration = () => {
         return null;
       }
     } catch (error: any) {
-      console.error("OpenRouter API error:", error);
+      console.error('OpenRouter API error:', error);
       
       toast({
         title: "Lỗi Hệ Thống",
@@ -84,4 +82,3 @@ export const useContentGeneration = () => {
 };
 
 export default useContentGeneration;
-
