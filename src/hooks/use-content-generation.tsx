@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { toast } from "@/hooks/use-toast";
 
 // OpenRouter API key configuration
-const OPENROUTER_API_KEY = "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";
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "sk-or-v1-..."; // Replace with your API key
 
 export const useContentGeneration = () => {
   const [isLoading, setIsLoading] = useState(false);
