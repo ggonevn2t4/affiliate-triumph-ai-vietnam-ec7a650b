@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { toast } from "@/hooks/use-toast";
 
-const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
+const OPENROUTER_API_KEY = "your-api-key-here"; // API key của bạn sẽ được thay thế vào đây
 
 export const useContentGeneration = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -10,20 +10,12 @@ export const useContentGeneration = () => {
   const generateCompletion = async (
     messages: Array<{role: "system" | "user" | "assistant"; content: string}>
   ) => {
-    if (!OPENROUTER_API_KEY) {
-      toast({
-        title: "Lỗi Cấu Hình",
-        description: "API key cho OpenRouter chưa được cấu hình. Vui lòng kiểm tra cài đặt.",
-        variant: "destructive"
-      });
-      return null;
-    }
-
     setIsLoading(true);
     
     try {
-      console.log("Generating completion with Claude 3 Haiku");
+      console.log("Đang tạo nội dung với model được chọn...");
       
+      // Chọn model dựa trên độ phức tạp của nội dung
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -33,7 +25,7 @@ export const useContentGeneration = () => {
           'X-Title': 'Affiliate Marketing AI'
         },
         body: JSON.stringify({
-          model: "anthropic/claude-3-haiku",
+          model: "anthropic/claude-3-haiku", // Model nhanh, chi phí thấp cho các tác vụ đơn giản
           messages: messages,
           temperature: 0.7,
           max_tokens: 4000,
@@ -43,7 +35,7 @@ export const useContentGeneration = () => {
       if (!response.ok) {
         const errorData = await response.json();
         console.error("OpenRouter API error:", errorData);
-        throw new Error(`API error: ${response.status} - ${errorData.error?.message || 'Lỗi không xác định'}`);
+        throw new Error(`Lỗi API: ${response.status}`);
       }
 
       const data = await response.json();
@@ -52,20 +44,14 @@ export const useContentGeneration = () => {
       if (responseText) {
         return responseText;
       } else {
-        console.error("Không nhận được phản hồi từ API");
-        toast({
-          title: "Lỗi Tạo Nội Dung",
-          description: "Không thể tạo nội dung. Vui lòng thử lại sau.",
-          variant: "destructive"
-        });
-        return null;
+        throw new Error("Không nhận được phản hồi từ API");
       }
     } catch (error: any) {
       console.error('OpenRouter API error:', error);
       
       toast({
         title: "Lỗi Hệ Thống",
-        description: "Tính năng AI đang gặp sự cố. Vui lòng thử lại sau.",
+        description: "Không thể tạo nội dung. Vui lòng thử lại sau.",
         variant: "destructive"
       });
       
