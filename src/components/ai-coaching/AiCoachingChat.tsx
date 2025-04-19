@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import ApiKeyDialog from "../ai-tools/ApiKeyDialog";
+import useContentGeneration from "@/hooks/use-content-generation";
 
 interface AiCoachingChatProps {
   selectedTopic: string;
@@ -15,13 +16,13 @@ interface AiCoachingChatProps {
 const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([]);
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [showApiKeyDialog, setShowApiKeyDialog] = useState(false);
   const [apiKey, setApiKey] = useState<string | null>(localStorage.getItem('openai_api_key'));
+  
+  const { isLoading, generateCompletion } = useContentGeneration();
 
   // Initialize conversation with a system message based on the selected topic
   useEffect(() => {
-    // Add a welcome message from the assistant based on the selected topic
     setMessages([
       {
         role: 'assistant',
@@ -34,41 +35,36 @@ const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
     e.preventDefault();
     
     if (!input.trim()) return;
-    
-    // Check for API key
-    if (!apiKey) {
-      setShowApiKeyDialog(true);
-      return;
-    }
 
     // Add user message to chat
     const userMessage = { role: 'user' as const, content: input };
     setMessages(prev => [...prev, userMessage]);
     setInput("");
-    setIsLoading(true);
 
     try {
-      // Simulating API call to OpenAI
-      // In a real implementation, this would make an actual API call
-      setTimeout(() => {
-        // Example response
-        const response = { 
-          role: 'assistant' as const, 
-          content: `Cảm ơn câu hỏi của bạn về "${selectedTopic}". Đây là một số chiến lược và lời khuyên:\n\n1. Nghiên cứu thị trường kỹ lưỡng\n2. Tạo nội dung giá trị cao cho người dùng\n3. Xây dựng kênh tiếp thị đa dạng\n4. Theo dõi và phân tích dữ liệu hiệu suất\n5. Tối ưu hóa liên tục dựa trên phản hồi\n\nBạn muốn tìm hiểu sâu hơn về điểm nào trong số này?` 
-        };
-        
-        setMessages(prev => [...prev, response]);
-        setIsLoading(false);
-      }, 1500);
+      // Generate AI response using the content generation hook
+      const response = await generateCompletion([
+        {
+          role: 'system',
+          content: `Bạn là một AI Coach chuyên về Affiliate Marketing, đặc biệt là về chủ đề "${selectedTopic}". 
+          Hãy cung cấp lời khuyên thực tế, chiến lược cụ thể và hướng dẫn chi tiết.
+          Trả lời ngắn gọn, dễ hiểu và đúng trọng tâm.`
+        },
+        ...messages,
+        userMessage
+      ]);
+      
+      if (response) {
+        setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+      }
       
     } catch (error) {
-      console.error("Error getting response:", error);
+      console.error("Error in chat:", error);
       toast({
         title: "Lỗi",
-        description: "Không thể kết nối với AI Assistant. Vui lòng thử lại sau.",
+        description: "Không thể tạo phản hồi. Vui lòng thử lại sau.",
         variant: "destructive"
       });
-      setIsLoading(false);
     }
   };
 
@@ -80,8 +76,6 @@ const AiCoachingChat = ({ selectedTopic }: AiCoachingChatProps) => {
       title: "API Key đã được lưu",
       description: "Bây giờ bạn có thể sử dụng AI Coaching",
     });
-    // Re-submit the message
-    handleSubmit(new Event('submit') as unknown as React.FormEvent);
   };
 
   return (
