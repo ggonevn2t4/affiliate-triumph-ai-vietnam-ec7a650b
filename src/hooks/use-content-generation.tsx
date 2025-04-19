@@ -2,20 +2,41 @@
 import { useState } from 'react';
 import { toast } from "@/hooks/use-toast";
 
-const OPENROUTER_API_KEY = "your-api-key-here"; // API key của bạn sẽ được thay thế vào đây
+// API key thực tế của OpenRouter
+const OPENROUTER_API_KEY = "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";
+
+// Các model phù hợp với các loại nội dung khác nhau
+const getModelForContent = (contentType: string, complexity: 'simple' | 'complex' = 'simple') => {
+  if (complexity === 'complex') {
+    return "anthropic/claude-3-opus"; // Model mạnh nhất cho nội dung phức tạp
+  }
+  
+  switch (contentType) {
+    case 'blog':
+      return "anthropic/claude-3-sonnet"; // Phù hợp cho nội dung dài, chất lượng cao
+    case 'product':
+      return "anthropic/claude-3-sonnet"; // Tốt cho mô tả sản phẩm chi tiết
+    default:
+      return "anthropic/claude-3-haiku"; // Nhanh, chi phí thấp cho các nội dung ngắn
+  }
+};
 
 export const useContentGeneration = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const generateCompletion = async (
-    messages: Array<{role: "system" | "user" | "assistant"; content: string}>
+    messages: Array<{role: "system" | "user" | "assistant"; content: string}>,
+    contentType: string = 'general',
+    complexity: 'simple' | 'complex' = 'simple'
   ) => {
     setIsLoading(true);
     
     try {
-      console.log("Đang tạo nội dung với model được chọn...");
+      console.log(`Đang tạo nội dung ${contentType} với độ phức tạp ${complexity}...`);
       
-      // Chọn model dựa trên độ phức tạp của nội dung
+      // Lựa chọn model phù hợp với loại nội dung
+      const model = getModelForContent(contentType, complexity);
+      
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -25,7 +46,7 @@ export const useContentGeneration = () => {
           'X-Title': 'Affiliate Marketing AI'
         },
         body: JSON.stringify({
-          model: "anthropic/claude-3-haiku", // Model nhanh, chi phí thấp cho các tác vụ đơn giản
+          model: model,
           messages: messages,
           temperature: 0.7,
           max_tokens: 4000,

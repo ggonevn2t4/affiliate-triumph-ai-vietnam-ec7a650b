@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -86,6 +87,8 @@ const OptimusAlphaGenerator = () => {
 
     try {
       const selectedType = contentFormats.find(type => type.id === contentType)?.name || 'Bài viết';
+      const complexity = wordLimit > 500 ? 'complex' : 'simple';
+      
       const content = await generateCompletion([
         {
           role: 'system',
@@ -98,7 +101,7 @@ const OptimusAlphaGenerator = () => {
           role: 'user',
           content: prompt
         }
-      ]);
+      ], contentType, complexity);
       
       if (content) {
         setGeneratedContent(content);
