@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Sparkles, History } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import useContentGeneration from '@/hooks/use-content-generation';
@@ -7,6 +8,7 @@ import HistoryDialog from './components/HistoryDialog';
 import PromptForm from './components/PromptForm';
 import ContentEditor from './components/ContentEditor';
 import type { ContentFormat } from './types/content';
+import type { ToneOption } from './types/content';
 
 const contentFormats: ContentFormat[] = [
   { id: 'blog', name: 'Bài viết blog' },
@@ -21,6 +23,13 @@ const marketingChannels: ContentFormat[] = [
   { id: 'instagram', name: 'Instagram' },
   { id: 'tiktok', name: 'TikTok' },
   { id: 'zalo', name: 'Zalo' },
+];
+
+const toneOptions: ToneOption[] = [
+  { id: 'professional', name: 'Chuyên nghiệp', description: 'Giọng điệu trang trọng và chính thống' },
+  { id: 'casual', name: 'Thân thiện', description: 'Giọng điệu gần gũi và dễ tiếp cận' },
+  { id: 'enthusiastic', name: 'Nhiệt tình', description: 'Giọng điệu năng động và hào hứng' },
+  { id: 'persuasive', name: 'Thuyết phục', description: 'Giọng điệu có tính thuyết phục cao' },
 ];
 
 const OptimusAlphaGenerator = () => {
@@ -86,7 +95,6 @@ const OptimusAlphaGenerator = () => {
     try {
       const selectedType = contentFormats.find(type => type.id === contentType)?.name || 'Bài viết';
       const tone = toneOptions.find(t => t.id === selectedTone)?.name || 'Chuyên nghiệp';
-
       const content = await generateCompletion([
         {
           role: 'system',

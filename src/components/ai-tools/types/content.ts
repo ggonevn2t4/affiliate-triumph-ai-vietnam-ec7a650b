@@ -26,3 +26,4 @@ export interface PromptFormProps {
   contentFormats: ContentFormat[];
   marketingChannels: ContentFormat[];
 }
+
