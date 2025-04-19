@@ -21,7 +21,7 @@ export const useContentGeneration = () => {
         headers: {
           'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': window.location.origin,
+          'HTTP-Referer': window.location.origin, // Required for OpenRouter
           'X-Title': 'Affiliate Marketing AI'
         },
         body: JSON.stringify({
@@ -58,6 +58,7 @@ export const useContentGeneration = () => {
         });
       }
       
+      // Fallback content in case of error
       return "Không thể tạo nội dung. Hệ thống đang bảo trì, vui lòng thử lại sau.";
     } finally {
       setIsLoading(false);
