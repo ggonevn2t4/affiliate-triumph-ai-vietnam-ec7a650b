@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { toast } from "@/hooks/use-toast";
 
 // OpenRouter API key configuration
-const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY || "sk-or-v1-..."; // Replace with your API key
+const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 
 export const useContentGeneration = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -11,6 +11,16 @@ export const useContentGeneration = () => {
   const generateCompletion = async (
     messages: Array<{role: "system" | "user" | "assistant"; content: string}>
   ) => {
+    // Validate API key before making the request
+    if (!OPENROUTER_API_KEY) {
+      toast({
+        title: "Lỗi Cấu Hình",
+        description: "API key cho OpenRouter chưa được cấu hình. Vui lòng kiểm tra cài đặt.",
+        variant: "destructive"
+      });
+      return null;
+    }
+
     setIsLoading(true);
     
     try {
@@ -45,21 +55,23 @@ export const useContentGeneration = () => {
         return responseText;
       } else {
         console.error("No response received from API");
-        return "Không thể tạo nội dung. Vui lòng thử lại sau.";
+        toast({
+          title: "Lỗi Tạo Nội Dung",
+          description: "Không thể tạo nội dung. Vui lòng thử lại sau.",
+          variant: "destructive"
+        });
+        return null;
       }
     } catch (error: any) {
       console.error("OpenRouter API error:", error);
       
-      if (import.meta.env.DEV) {
-        toast({
-          title: "Thông báo hệ thống",
-          description: "Tính năng AI đang gặp sự cố. Vui lòng thử lại sau.",
-          variant: "destructive"
-        });
-      }
+      toast({
+        title: "Lỗi Hệ Thống",
+        description: "Tính năng AI đang gặp sự cố. Vui lòng thử lại sau.",
+        variant: "destructive"
+      });
       
-      // Fallback content in case of error
-      return "Không thể tạo nội dung. Hệ thống đang bảo trì, vui lòng thử lại sau.";
+      return null;
     } finally {
       setIsLoading(false);
     }
@@ -72,3 +84,4 @@ export const useContentGeneration = () => {
 };
 
 export default useContentGeneration;
+
