@@ -1,6 +1,4 @@
-
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sparkles, History } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -8,11 +6,7 @@ import useContentGeneration from '@/hooks/use-content-generation';
 import HistoryDialog from './components/HistoryDialog';
 import PromptForm from './components/PromptForm';
 import ContentEditor from './components/ContentEditor';
-
-interface ContentFormat {
-  id: string;
-  name: string;
-}
+import type { ContentFormat } from './types/content';
 
 const contentFormats: ContentFormat[] = [
   { id: 'blog', name: 'Bài viết blog' },
@@ -37,8 +31,9 @@ const OptimusAlphaGenerator = () => {
   const [contentHistory, setContentHistory] = useState<Array<{id: string, prompt: string, content: string, type: string, date: Date}>>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [selectedChannel, setSelectedChannel] = useState('general');
-  
   const { isLoading, generateCompletion } = useContentGeneration();
+  const [selectedTone, setSelectedTone] = useState('professional');
+  const [wordLimit, setWordLimit] = useState(300);
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -90,11 +85,15 @@ const OptimusAlphaGenerator = () => {
 
     try {
       const selectedType = contentFormats.find(type => type.id === contentType)?.name || 'Bài viết';
+      const tone = toneOptions.find(t => t.id === selectedTone)?.name || 'Chuyên nghiệp';
 
       const content = await generateCompletion([
         {
           role: 'system',
-          content: `Bạn là trợ lý AI chuyên về Affiliate Marketing cho người Việt Nam. Hãy tạo ${selectedType} chất lượng cao, có tính thuyết phục và tối ưu cho SEO theo yêu cầu được cung cấp.`
+          content: `Bạn là trợ lý AI chuyên về Affiliate Marketing cho người Việt Nam. 
+          Hãy tạo ${selectedType} chất lượng cao với giọng điệu ${tone}, 
+          có tính thuyết phục và tối ưu cho SEO. 
+          Giới hạn độ dài khoảng ${wordLimit} từ.`
         },
         {
           role: 'user',
@@ -203,6 +202,10 @@ const OptimusAlphaGenerator = () => {
           onFormatChange={setContentType}
           selectedChannel={selectedChannel}
           onChannelChange={setSelectedChannel}
+          selectedTone={selectedTone}
+          onToneChange={setSelectedTone}
+          wordLimit={wordLimit}
+          onWordLimitChange={setWordLimit}
           onGenerate={handleGenerate}
           isGenerating={isLoading}
           contentFormats={contentFormats}
