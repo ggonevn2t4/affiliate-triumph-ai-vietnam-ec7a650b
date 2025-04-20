@@ -7,7 +7,8 @@ interface UseApiKeyOptions {
   onApiKeyChange?: (apiKey: string | null) => void;
 }
 
-// Replace this with your actual, complete OpenRouter API key
+// IMPORTANT: Replace this with your actual, complete OpenRouter API key
+// The current key appears to be invalid causing 401 errors
 const CONFIGURED_API_KEY = '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';
 
 export const useApiKey = (options: UseApiKeyOptions = {}) => {
@@ -16,7 +17,9 @@ export const useApiKey = (options: UseApiKeyOptions = {}) => {
   const [apiKey] = useState<string>(CONFIGURED_API_KEY);
 
   useEffect(() => {
-    onApiKeyChange?.(CONFIGURED_API_KEY);
+    if (onApiKeyChange) {
+      onApiKeyChange(CONFIGURED_API_KEY);
+    }
   }, [onApiKeyChange]);
 
   return {

@@ -2,8 +2,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Key, Info } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 import { useApiKey } from '@/hooks/use-api-key';
@@ -22,7 +20,6 @@ const ApiKeyDialog = ({
   storageKey = 'openrouter_api_key'
 }: ApiKeyDialogProps) => {
   const [internalOpen, setInternalOpen] = useState(false);
-  const [inputValue, setInputValue] = useState('');
   const { saveApiKey, isConfigured } = useApiKey({ 
     storageKey, 
     onApiKeyChange: onSave 
@@ -32,47 +29,22 @@ const ApiKeyDialog = ({
   const currentOpen = isControlled ? controlledOpen : internalOpen;
   const setOpen = isControlled ? onOpenChange : setInternalOpen;
 
-  // Check for existing API key
-  useEffect(() => {
-    const existingKey = localStorage.getItem(storageKey);
-    if (existingKey) {
-      setInputValue(existingKey);
-    }
-  }, [storageKey]);
-
   const handleSaveApiKey = () => {
-    if (!inputValue || inputValue.trim().length < 10) {
-      toast({
-        title: "Lỗi",
-        description: "API key không hợp lệ. Vui lòng kiểm tra lại.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     try {
       // Call saveApiKey without arguments
       saveApiKey();
       
-      // If onSave callback exists, call it with the input value
-      if (onSave) {
-        onSave(inputValue);
-      }
-      
       setOpen?.(false);
       
       toast({
-        title: "Thành công",
-        description: "API key đã được lưu thành công.",
+        title: "Thông báo",
+        description: "API key đã được cấu hình sẵn trong hệ thống.",
       });
-      
-      // Force page reload to apply new API key
-      window.location.reload();
     } catch (error) {
-      console.error("Error saving API key:", error);
+      console.error("Error with API key:", error);
       toast({
         title: "Lỗi",
-        description: "Không thể lưu API key. Vui lòng thử lại sau.",
+        description: "Không thể cấu hình API key. Vui lòng thử lại sau.",
         variant: "destructive"
       });
     }
