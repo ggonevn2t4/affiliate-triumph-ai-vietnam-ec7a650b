@@ -11,7 +11,7 @@ export interface ToneOption {
 }
 
 export interface PromptFormProps {
-  productName: string;
+  productName: string; // Keep as productName for backward compatibility
   onProductNameChange: (value: string) => void;
   selectedFormat: string;
   onFormatChange: (format: string) => void;
@@ -26,4 +26,3 @@ export interface PromptFormProps {
   contentFormats: ContentFormat[];
   marketingChannels: ContentFormat[];
 }
-

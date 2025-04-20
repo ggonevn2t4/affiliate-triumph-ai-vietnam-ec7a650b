@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -79,7 +78,7 @@ const OptimusAlphaGenerator = () => {
     if (!prompt.trim()) {
       toast({
         title: "Lỗi",
-        description: "Vui lòng nhập nội dung để sinh",
+        description: "Vui lòng nhập từ khóa để sinh",
         variant: "destructive"
       });
       return;
@@ -95,7 +94,7 @@ const OptimusAlphaGenerator = () => {
           content: `Bạn là trợ lý AI chuyên về Affiliate Marketing cho người Việt Nam. 
           Hãy tạo ${selectedType} chất lượng cao với giọng điệu ${selectedTone}, 
           có tính thuyết phục và tối ưu cho SEO. 
-          Giới hạn độ dài khoảng ${wordLimit} từ.`
+          Giới hạn độ dài khoảng ${wordLimit} từ dựa trên từ khóa: ${prompt}.`
         },
         {
           role: 'user',

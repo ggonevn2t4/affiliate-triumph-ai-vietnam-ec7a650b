@@ -33,12 +33,12 @@ const PromptForm = ({
   return (
     <div className="space-y-6">
       <div>
-        <Label className="block text-sm font-medium text-gray-700 mb-1">Tên sản phẩm</Label>
+        <Label className="block text-sm font-medium text-gray-700 mb-1">Từ khóa</Label>
         <Input
           type="text"
           value={productName}
           onChange={(e) => onProductNameChange(e.target.value)}
-          placeholder="Nhập tên sản phẩm để tạo nội dung"
+          placeholder="Nhập từ khóa để tạo nội dung"
           className="w-full"
         />
       </div>
