@@ -1,9 +1,9 @@
-
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import useContentGeneration from '@/hooks/use-content-generation';
 import { useContentHistory } from './useContentHistory';
 import type { ContentFormat, LengthPreset } from '../types/content';
+import { useApiKey } from '@/hooks/use-api-key';
 
 export const lengthPresets: LengthPreset[] = [
   { id: 'short', name: 'Ngắn gọn', wordCount: 150 },
@@ -25,6 +25,7 @@ export const useContentGenerator = (contentFormats: ContentFormat[]) => {
   
   const { isLoading, generateCompletion } = useContentGeneration();
   const { contentHistory, addToHistory } = useContentHistory();
+  const { isConfigured } = useApiKey();
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {

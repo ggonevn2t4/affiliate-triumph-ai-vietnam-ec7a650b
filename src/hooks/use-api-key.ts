@@ -7,53 +7,35 @@ interface UseApiKeyOptions {
   onApiKeyChange?: (apiKey: string | null) => void;
 }
 
+// API key được cấu hình sẵn
+const CONFIGURED_API_KEY = 'sk-or-v1-...'; // Thay thế bằng API key thật của bạn
+
 export const useApiKey = (options: UseApiKeyOptions = {}) => {
-  const { 
-    storageKey = 'openrouter_api_key',
-    onApiKeyChange 
-  } = options;
+  const { onApiKeyChange } = options;
   
-  const [apiKey, setApiKey] = useState<string | null>(() => {
-    return localStorage.getItem(storageKey);
-  });
-
-  const saveApiKey = (key: string) => {
-    const trimmedKey = key.trim();
-    if (!trimmedKey) {
-      toast({
-        title: 'Vui lòng nhập API key hợp lệ',
-        variant: 'destructive'
-      });
-      return false;
-    }
-
-    localStorage.setItem(storageKey, trimmedKey);
-    setApiKey(trimmedKey);
-    onApiKeyChange?.(trimmedKey);
-    toast({
-      title: 'API key đã được lưu thành công!',
-    });
-    return true;
-  };
-
-  const clearApiKey = () => {
-    localStorage.removeItem(storageKey);
-    setApiKey(null);
-    onApiKeyChange?.(null);
-  };
+  const [apiKey] = useState<string>(CONFIGURED_API_KEY);
 
   useEffect(() => {
-    const storedKey = localStorage.getItem(storageKey);
-    if (storedKey !== apiKey) {
-      setApiKey(storedKey);
-      onApiKeyChange?.(storedKey);
-    }
-  }, [storageKey, onApiKeyChange]);
+    onApiKeyChange?.(CONFIGURED_API_KEY);
+  }, [onApiKeyChange]);
 
   return {
     apiKey,
-    saveApiKey,
-    clearApiKey,
-    isConfigured: Boolean(apiKey)
+    isConfigured: true,
+    saveApiKey: () => {
+      toast({
+        title: "API đã được cấu hình sẵn",
+        description: "Bạn không thể thay đổi API key.",
+        variant: "default",
+      });
+      return false;
+    },
+    clearApiKey: () => {
+      toast({
+        title: "API đã được cấu hình sẵn",
+        description: "Bạn không thể xóa API key.",
+        variant: "default",
+      });
+    }
   };
 };

@@ -1,10 +1,8 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import GeneratorHeader from './components/GeneratorHeader';
 import PromptForm from './components/PromptForm';
 import GenerationResult from './components/GenerationResult';
-import ApiKeyDialog from './ApiKeyDialog';
 import { useContentGenerator } from './hooks/useContentGenerator';
 import type { ContentFormat } from './types/content';
 
@@ -53,10 +51,7 @@ const OptimusAlphaGenerator = () => {
   return (
     <Card className="w-full shadow-md">
       <CardContent className="space-y-4">
-        <div className="flex justify-between items-center">
-          <GeneratorHeader />
-          <ApiKeyDialog />
-        </div>
+        <GeneratorHeader />
         
         <PromptForm
           productName={prompt}
