@@ -1,9 +1,7 @@
 
 import { useState } from 'react';
 import { toast } from "@/hooks/use-toast";
-
-// API key thực tế của OpenRouter
-const OPENROUTER_API_KEY = "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";
+import { useApiKey } from '@/hooks/use-api-key';
 
 // Các model phù hợp với các loại nội dung khác nhau
 const getModelForContent = (contentType: string, complexity: 'simple' | 'complex' = 'simple') => {
@@ -23,6 +21,7 @@ const getModelForContent = (contentType: string, complexity: 'simple' | 'complex
 
 export const useContentGeneration = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const { apiKey } = useApiKey({ storageKey: 'openrouter_api_key' });
 
   const generateCompletion = async (
     messages: Array<{role: "system" | "user" | "assistant"; content: string}>,
@@ -30,6 +29,16 @@ export const useContentGeneration = () => {
     complexity: 'simple' | 'complex' = 'simple'
   ) => {
     setIsLoading(true);
+    
+    if (!apiKey) {
+      toast({
+        title: "Lỗi API Key",
+        description: "Vui lòng cấu hình API key trước khi sử dụng tính năng này",
+        variant: "destructive"
+      });
+      setIsLoading(false);
+      return null;
+    }
     
     try {
       console.log(`Đang tạo nội dung ${contentType} với độ phức tạp ${complexity}...`);
@@ -40,7 +49,7 @@ export const useContentGeneration = () => {
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
           'HTTP-Referer': window.location.origin,
           'X-Title': 'Affiliate Marketing AI'

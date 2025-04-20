@@ -19,7 +19,7 @@ const ApiKeyDialog = ({
   open: controlledOpen, 
   onOpenChange,
   onSave,
-  storageKey = 'openai_api_key'
+  storageKey = 'openrouter_api_key'
 }: ApiKeyDialogProps) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -94,9 +94,9 @@ const ApiKeyDialog = ({
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Cấu hình API key</DialogTitle>
+          <DialogTitle>Cấu hình OpenRouter API key</DialogTitle>
           <DialogDescription>
-            Nhập API key của bạn để sử dụng các tính năng AI. Hệ thống đang sử dụng các model mới nhất như Gemini 1.5 Pro và GPT-4o.
+            Nhập OpenRouter API key của bạn để sử dụng các tính năng AI. Hệ thống đang sử dụng Claude 3 và các model hiện đại khác.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -123,7 +123,7 @@ const ApiKeyDialog = ({
             </a>
             <div className="mt-2 p-2 bg-blue-50 rounded-md">
               <p className="text-blue-800 text-xs">
-                Hệ thống đang sử dụng model <strong>google/gemini-1.5-pro-latest</strong> và <strong>openai/gpt-4o</strong> cho các tính năng AI.
+                Hệ thống đang sử dụng model <strong>anthropic/claude-3-sonnet</strong> và <strong>anthropic/claude-3-haiku</strong> cho các tính năng AI.
               </p>
             </div>
           </div>

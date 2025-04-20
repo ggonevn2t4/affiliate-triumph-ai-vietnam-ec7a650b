@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 interface UseApiKeyOptions {
   storageKey?: string;
@@ -20,14 +20,19 @@ export const useApiKey = (options: UseApiKeyOptions = {}) => {
   const saveApiKey = (key: string) => {
     const trimmedKey = key.trim();
     if (!trimmedKey) {
-      toast.error('Vui lòng nhập API key hợp lệ');
+      toast({
+        title: 'Vui lòng nhập API key hợp lệ',
+        variant: 'destructive'
+      });
       return false;
     }
 
     localStorage.setItem(storageKey, trimmedKey);
     setApiKey(trimmedKey);
     onApiKeyChange?.(trimmedKey);
-    toast.success('API key đã được lưu thành công!');
+    toast({
+      title: 'API key đã được lưu thành công!',
+    });
     return true;
   };
 
