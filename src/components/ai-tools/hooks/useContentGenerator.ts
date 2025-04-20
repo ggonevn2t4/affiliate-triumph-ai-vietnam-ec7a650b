@@ -3,7 +3,13 @@ import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import useContentGeneration from '@/hooks/use-content-generation';
 import { useContentHistory } from './useContentHistory';
-import type { ContentFormat } from '../types/content';
+import type { ContentFormat, LengthPreset } from '../types/content';
+
+export const lengthPresets: LengthPreset[] = [
+  { id: 'short', name: 'Ngắn gọn', wordCount: 150 },
+  { id: 'medium', name: 'Vừa phải', wordCount: 300 },
+  { id: 'long', name: 'Chi tiết', wordCount: 600 }
+];
 
 export const useContentGenerator = (contentFormats: ContentFormat[]) => {
   const [prompt, setPrompt] = useState('');
@@ -11,7 +17,9 @@ export const useContentGenerator = (contentFormats: ContentFormat[]) => {
   const [contentType, setContentType] = useState('blog');
   const [selectedChannel, setSelectedChannel] = useState('general');
   const [selectedTone, setSelectedTone] = useState('professional');
-  const [wordLimit, setWordLimit] = useState(300);
+  const [selectedLanguage, setSelectedLanguage] = useState('vi');
+  const [selectedStyle, setSelectedStyle] = useState('formal');
+  const [selectedPreset, setSelectedPreset] = useState('medium');
   const [error, setError] = useState<string | null>(null);
   
   const { isLoading, generateCompletion } = useContentGeneration();
@@ -29,14 +37,16 @@ export const useContentGenerator = (contentFormats: ContentFormat[]) => {
 
     try {
       const selectedType = contentFormats.find(type => type.id === contentType)?.name || 'Bài viết';
+      const wordCount = lengthPresets.find(preset => preset.id === selectedPreset)?.wordCount || 300;
       
       const content = await generateCompletion([
         {
           role: 'system',
-          content: `Bạn là trợ lý AI chuyên về Affiliate Marketing cho người Việt Nam. 
-          Hãy tạo ${selectedType} chất lượng cao với giọng điệu ${selectedTone}, 
+          content: `Bạn là trợ lý AI chuyên về Affiliate Marketing cho người Việt Nam.
+          Hãy tạo ${selectedType} chất lượng cao bằng tiếng ${selectedLanguage === 'vi' ? 'Việt' : 'Anh'}
+          với giọng điệu ${selectedTone}, phong cách ${selectedStyle},
           có tính thuyết phục và tối ưu cho SEO. 
-          Giới hạn độ dài khoảng ${wordLimit} từ dựa trên từ khóa: ${prompt}.`
+          Giới hạn độ dài khoảng ${wordCount} từ dựa trên từ khóa: ${prompt}.`
         },
         {
           role: 'user',
@@ -96,8 +106,13 @@ export const useContentGenerator = (contentFormats: ContentFormat[]) => {
     setSelectedChannel,
     selectedTone,
     setSelectedTone,
-    wordLimit,
-    setWordLimit,
+    selectedLanguage,
+    setSelectedLanguage,
+    selectedStyle,
+    setSelectedStyle,
+    selectedPreset,
+    setSelectedPreset,
+    lengthPresets,
     error,
     isLoading,
     handleGenerate,
@@ -105,3 +120,4 @@ export const useContentGenerator = (contentFormats: ContentFormat[]) => {
     handleShareSocial
   };
 };
+

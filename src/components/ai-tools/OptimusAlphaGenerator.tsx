@@ -33,8 +33,13 @@ const OptimusAlphaGenerator = () => {
     setSelectedChannel,
     selectedTone,
     setSelectedTone,
-    wordLimit,
-    setWordLimit,
+    selectedLanguage,
+    setSelectedLanguage,
+    selectedStyle,
+    setSelectedStyle,
+    selectedPreset,
+    setSelectedPreset,
+    lengthPresets,
     error,
     isLoading,
     handleGenerate,
@@ -56,8 +61,13 @@ const OptimusAlphaGenerator = () => {
           onChannelChange={setSelectedChannel}
           selectedTone={selectedTone}
           onToneChange={setSelectedTone}
-          wordLimit={wordLimit}
-          onWordLimitChange={setWordLimit}
+          selectedLanguage={selectedLanguage}
+          onLanguageChange={setSelectedLanguage}
+          selectedStyle={selectedStyle}
+          onStyleChange={setSelectedStyle}
+          lengthPresets={lengthPresets}
+          selectedPreset={selectedPreset}
+          onPresetChange={setSelectedPreset}
           onGenerate={handleGenerate}
           isGenerating={isLoading}
           contentFormats={contentFormats}
