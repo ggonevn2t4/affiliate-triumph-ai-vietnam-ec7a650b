@@ -42,9 +42,11 @@ export const useContentGeneration = () => {
     
     try {
       console.log(`Đang tạo nội dung ${contentType} với độ phức tạp ${complexity}...`);
+      console.log("Sử dụng API key:", apiKey ? "API key đã được cấu hình" : "Không có API key");
       
       // Lựa chọn model phù hợp với loại nội dung
       const model = getModelForContent(contentType, complexity);
+      console.log("Sử dụng model:", model);
       
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
@@ -52,7 +54,8 @@ export const useContentGeneration = () => {
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
           'HTTP-Referer': window.location.origin,
-          'X-Title': 'Affiliate Marketing AI'
+          'X-Title': 'Affiliate Marketing AI',
+          'Origin': window.location.origin
         },
         body: JSON.stringify({
           model: model,
@@ -65,7 +68,7 @@ export const useContentGeneration = () => {
       if (!response.ok) {
         const errorData = await response.json();
         console.error("OpenRouter API error:", errorData);
-        throw new Error(`Lỗi API: ${response.status}`);
+        throw new Error(`Lỗi API: ${response.status} - ${errorData.error?.message || 'Không xác định'}`);
       }
 
       const data = await response.json();
