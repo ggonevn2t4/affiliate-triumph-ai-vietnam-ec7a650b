@@ -1,3 +1,4 @@
+
 export interface ContentFormat {
   id: string;
   name: string;
@@ -10,6 +11,12 @@ export interface LanguageOption {
 }
 
 export interface StyleOption {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface ToneOption {
   id: string;
   name: string;
   description: string;

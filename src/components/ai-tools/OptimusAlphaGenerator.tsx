@@ -44,7 +44,9 @@ const OptimusAlphaGenerator = () => {
     isLoading,
     handleGenerate,
     handleCopy,
-    handleShareSocial
+    handleShareSocial,
+    wordLimit,
+    setWordLimit
   } = useContentGenerator(contentFormats);
 
   return (
@@ -68,6 +70,8 @@ const OptimusAlphaGenerator = () => {
           lengthPresets={lengthPresets}
           selectedPreset={selectedPreset}
           onPresetChange={setSelectedPreset}
+          wordLimit={wordLimit}
+          onWordLimitChange={setWordLimit}
           onGenerate={handleGenerate}
           isGenerating={isLoading}
           contentFormats={contentFormats}
