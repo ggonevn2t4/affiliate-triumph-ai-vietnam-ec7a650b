@@ -21,7 +21,7 @@ const getModelForContent = (contentType: string, complexity: 'simple' | 'complex
 
 export const useContentGeneration = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { apiKey } = useApiKey({ storageKey: 'openrouter_api_key' });
+  const { apiKey, isConfigured } = useApiKey({ storageKey: 'openrouter_api_key' });
 
   const generateCompletion = async (
     messages: Array<{role: "system" | "user" | "assistant"; content: string}>,
@@ -30,10 +30,10 @@ export const useContentGeneration = () => {
   ) => {
     setIsLoading(true);
     
-    if (!apiKey) {
+    if (!isConfigured) {
       toast({
         title: "Lỗi API Key",
-        description: "Vui lòng cấu hình API key trước khi sử dụng tính năng này",
+        description: "Vui lòng liên hệ quản trị viên để kiểm tra cấu hình API key",
         variant: "destructive"
       });
       setIsLoading(false);

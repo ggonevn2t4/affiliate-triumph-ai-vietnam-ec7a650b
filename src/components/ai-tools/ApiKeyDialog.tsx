@@ -51,10 +51,10 @@ const ApiKeyDialog = ({
     }
     
     try {
-      // In the original code, saveApiKey was being called with an argument,
-      // but our current implementation in use-api-key.ts doesn't accept arguments
+      // Call saveApiKey without arguments
       saveApiKey();
       
+      // If onSave callback exists, call it with the input value
       if (onSave) {
         onSave(inputValue);
       }
@@ -86,52 +86,31 @@ const ApiKeyDialog = ({
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="flex items-center">
           <Key className="h-4 w-4 mr-2" />
-          {isConfigured ? "Cập nhật API key" : "Cấu hình API"}
+          {isConfigured ? "Cấu hình sẵn" : "Cấu hình API"}
           {!isConfigured && <span className="ml-1 w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Cấu hình OpenRouter API key</DialogTitle>
+          <DialogTitle>API OpenRouter đã được cấu hình sẵn</DialogTitle>
           <DialogDescription>
-            Nhập OpenRouter API key của bạn để sử dụng các tính năng AI. Hệ thống đang sử dụng Claude 3 và các model hiện đại khác.
+            Hệ thống đang sử dụng API key được cấu hình sẵn. Bạn không cần phải nhập API key riêng.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="api-key" className="text-right">
-              API Key
-            </Label>
-            <Input
-              id="api-key"
-              type="password" 
-              placeholder="sk-or-..."
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              className="col-span-3"
-            />
+        <div className="text-sm text-muted-foreground bg-gray-50 p-3 rounded-md border border-gray-100">
+          <div className="flex items-start gap-2 mb-2">
+            <Info className="h-4 w-4 mt-0.5 text-blue-500" />
+            <p>Hệ thống đang sử dụng API key đã được cấu hình sẵn để đảm bảo tính ổn định.</p>
           </div>
-          <div className="text-sm text-muted-foreground bg-gray-50 p-3 rounded-md border border-gray-100">
-            <div className="flex items-start gap-2 mb-2">
-              <Info className="h-4 w-4 mt-0.5 text-blue-500" />
-              <p>API key được lưu trữ an toàn trong trình duyệt của bạn và không được gửi đến máy chủ của chúng tôi.</p>
-            </div>
-            <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline block mt-1 font-medium">
-              Nhận API key từ OpenRouter
-            </a>
-            <div className="mt-2 p-2 bg-blue-50 rounded-md">
-              <p className="text-blue-800 text-xs">
-                Hệ thống đang sử dụng model <strong>anthropic/claude-3-sonnet</strong> và <strong>anthropic/claude-3-haiku</strong> cho các tính năng AI.
-              </p>
-            </div>
+          <div className="mt-2 p-2 bg-blue-50 rounded-md">
+            <p className="text-blue-800 text-xs">
+              Hệ thống đang sử dụng model <strong>anthropic/claude-3-sonnet</strong> và <strong>anthropic/claude-3-haiku</strong> cho các tính năng AI.
+            </p>
           </div>
         </div>
         <div className="flex justify-end space-x-2">
-          <Button variant="outline" onClick={() => setOpen?.(false)}>
-            Hủy
-          </Button>
-          <Button onClick={handleSaveApiKey}>
-            Lưu API key
+          <Button onClick={() => setOpen?.(false)}>
+            Đóng
           </Button>
         </div>
       </DialogContent>

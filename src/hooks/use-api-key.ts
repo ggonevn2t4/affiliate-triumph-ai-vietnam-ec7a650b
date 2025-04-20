@@ -7,8 +7,8 @@ interface UseApiKeyOptions {
   onApiKeyChange?: (apiKey: string | null) => void;
 }
 
-// API key được cấu hình sẵn
-const CONFIGURED_API_KEY = 'sk-or-v1-...'; // Thay thế bằng API key thật của bạn
+// Replace this with your actual, complete OpenRouter API key
+const CONFIGURED_API_KEY = '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';
 
 export const useApiKey = (options: UseApiKeyOptions = {}) => {
   const { onApiKeyChange } = options;
