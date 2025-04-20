@@ -20,6 +20,7 @@ export const useContentGenerator = (contentFormats: ContentFormat[]) => {
   const [selectedLanguage, setSelectedLanguage] = useState('vi');
   const [selectedStyle, setSelectedStyle] = useState('formal');
   const [selectedPreset, setSelectedPreset] = useState('medium');
+  const [wordLimit, setWordLimit] = useState(300);
   const [error, setError] = useState<string | null>(null);
   
   const { isLoading, generateCompletion } = useContentGeneration();
@@ -37,7 +38,7 @@ export const useContentGenerator = (contentFormats: ContentFormat[]) => {
 
     try {
       const selectedType = contentFormats.find(type => type.id === contentType)?.name || 'Bài viết';
-      const wordCount = lengthPresets.find(preset => preset.id === selectedPreset)?.wordCount || 300;
+      const currentWordLimit = lengthPresets.find(preset => preset.id === selectedPreset)?.wordCount || wordLimit;
       
       const content = await generateCompletion([
         {
@@ -46,7 +47,7 @@ export const useContentGenerator = (contentFormats: ContentFormat[]) => {
           Hãy tạo ${selectedType} chất lượng cao bằng tiếng ${selectedLanguage === 'vi' ? 'Việt' : 'Anh'}
           với giọng điệu ${selectedTone}, phong cách ${selectedStyle},
           có tính thuyết phục và tối ưu cho SEO. 
-          Giới hạn độ dài khoảng ${wordCount} từ dựa trên từ khóa: ${prompt}.`
+          Giới hạn độ dài khoảng ${currentWordLimit} từ dựa trên từ khóa: ${prompt}.`
         },
         {
           role: 'user',
@@ -113,6 +114,8 @@ export const useContentGenerator = (contentFormats: ContentFormat[]) => {
     selectedPreset,
     setSelectedPreset,
     lengthPresets,
+    wordLimit,
+    setWordLimit,
     error,
     isLoading,
     handleGenerate,
@@ -120,4 +123,3 @@ export const useContentGenerator = (contentFormats: ContentFormat[]) => {
     handleShareSocial
   };
 };
-
