@@ -51,11 +51,9 @@ const ApiKeyDialog = ({
     }
     
     try {
-      localStorage.setItem(storageKey, inputValue);
-      
-      if (saveApiKey) {
-        saveApiKey(inputValue);
-      }
+      // In the original code, saveApiKey was being called with an argument,
+      // but our current implementation in use-api-key.ts doesn't accept arguments
+      saveApiKey();
       
       if (onSave) {
         onSave(inputValue);
