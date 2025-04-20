@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import useContentGeneration from '@/hooks/use-content-generation';
 import { useContentHistory } from './useContentHistory';
@@ -13,9 +13,20 @@ export const useContentGenerator = (contentFormats: ContentFormat[]) => {
   const [selectedTone, setSelectedTone] = useState('professional');
   const [wordLimit, setWordLimit] = useState(300);
   const [error, setError] = useState<string | null>(null);
+  const [apiKeyConfigured, setApiKeyConfigured] = useState(false);
   
   const { isLoading, generateCompletion } = useContentGeneration();
   const { contentHistory, addToHistory } = useContentHistory();
+
+  // Kiểm tra xem API key đã được cấu hình chưa
+  useEffect(() => {
+    const apiKey = localStorage.getItem('openrouter_api_key');
+    setApiKeyConfigured(!!apiKey);
+  }, []);
+
+  const onApiKeySave = (apiKey: string) => {
+    setApiKeyConfigured(true);
+  };
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -26,6 +37,15 @@ export const useContentGenerator = (contentFormats: ContentFormat[]) => {
       });
       return;
     }
+
+    // Kiểm tra API key
+    const apiKey = localStorage.getItem('openrouter_api_key');
+    if (!apiKey) {
+      setError("Cần cấu hình API key để sử dụng tính năng này. Vui lòng nhấn nút cấu hình API ở góc phải.");
+      return;
+    }
+
+    setError(null);
 
     try {
       const selectedType = contentFormats.find(type => type.id === contentType)?.name || 'Bài viết';
@@ -58,7 +78,7 @@ export const useContentGenerator = (contentFormats: ContentFormat[]) => {
       }
     } catch (error) {
       console.error('Error generating content:', error);
-      setError("Đã xảy ra lỗi khi tạo nội dung. Vui lòng thử lại sau.");
+      setError("Đã xảy ra lỗi khi tạo nội dung. Vui lòng kiểm tra API key hoặc thử lại sau.");
     }
   };
 
@@ -102,6 +122,8 @@ export const useContentGenerator = (contentFormats: ContentFormat[]) => {
     isLoading,
     handleGenerate,
     handleCopy,
-    handleShareSocial
+    handleShareSocial,
+    apiKeyConfigured,
+    onApiKeySave
   };
 };

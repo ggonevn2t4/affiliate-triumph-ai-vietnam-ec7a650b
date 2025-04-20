@@ -5,6 +5,7 @@ import GeneratorHeader from './components/GeneratorHeader';
 import PromptForm from './components/PromptForm';
 import GenerationResult from './components/GenerationResult';
 import { useContentGenerator } from './hooks/useContentGenerator';
+import ApiKeyDialog from './ApiKeyDialog';
 import type { ContentFormat } from './types/content';
 
 const contentFormats: ContentFormat[] = [
@@ -39,13 +40,21 @@ const OptimusAlphaGenerator = () => {
     isLoading,
     handleGenerate,
     handleCopy,
-    handleShareSocial
+    handleShareSocial,
+    apiKeyConfigured,
+    onApiKeySave
   } = useContentGenerator(contentFormats);
 
   return (
     <Card className="w-full shadow-md">
       <CardContent className="space-y-4">
-        <GeneratorHeader />
+        <div className="flex justify-between items-center">
+          <GeneratorHeader />
+          <ApiKeyDialog 
+            storageKey="openrouter_api_key"
+            onSave={onApiKeySave}
+          />
+        </div>
         
         <PromptForm
           productName={prompt}
