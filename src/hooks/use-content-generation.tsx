@@ -2,10 +2,8 @@
 import { useState } from 'react';
 import { toast } from "@/hooks/use-toast";
 
-// Lấy API key từ localStorage
-const getApiKey = () => {
-  return localStorage.getItem('openrouter_api_key');
-};
+// API key thực tế của OpenRouter
+const OPENROUTER_API_KEY = "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";
 
 // Các model phù hợp với các loại nội dung khác nhau
 const getModelForContent = (contentType: string, complexity: 'simple' | 'complex' = 'simple') => {
@@ -36,19 +34,13 @@ export const useContentGeneration = () => {
     try {
       console.log(`Đang tạo nội dung ${contentType} với độ phức tạp ${complexity}...`);
       
-      // Lấy API key từ localStorage
-      const apiKey = getApiKey();
-      if (!apiKey) {
-        throw new Error("Không tìm thấy API key. Vui lòng cấu hình API key trước.");
-      }
-      
       // Lựa chọn model phù hợp với loại nội dung
       const model = getModelForContent(contentType, complexity);
       
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
+          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
           'Content-Type': 'application/json',
           'HTTP-Referer': window.location.origin,
           'X-Title': 'Affiliate Marketing AI'
@@ -80,11 +72,11 @@ export const useContentGeneration = () => {
       
       toast({
         title: "Lỗi Hệ Thống",
-        description: error.message || "Không thể tạo nội dung. Vui lòng thử lại sau.",
+        description: "Không thể tạo nội dung. Vui lòng thử lại sau.",
         variant: "destructive"
       });
       
-      throw error;
+      return null;
     } finally {
       setIsLoading(false);
     }
