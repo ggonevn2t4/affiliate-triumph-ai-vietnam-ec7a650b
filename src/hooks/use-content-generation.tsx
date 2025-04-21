@@ -3,20 +3,9 @@ import { useState } from 'react';
 import { toast } from "@/hooks/use-toast";
 import { useApiKey } from '@/hooks/use-api-key';
 
-// Các model phù hợp với các loại nội dung khác nhau
-const getModelForContent = (contentType: string, complexity: 'simple' | 'complex' = 'simple') => {
-  if (complexity === 'complex') {
-    return "anthropic/claude-3-opus"; // Model mạnh nhất cho nội dung phức tạp
-  }
-  
-  switch (contentType) {
-    case 'blog':
-      return "anthropic/claude-3-sonnet"; // Phù hợp cho nội dung dài, chất lượng cao
-    case 'product':
-      return "anthropic/claude-3-sonnet"; // Tốt cho mô tả sản phẩm chi tiết
-    default:
-      return "anthropic/claude-3-haiku"; // Nhanh, chi phí thấp cho các nội dung ngắn
-  }
+// Đổi sang model GPT-4o-mini của OpenAI
+const getModelForContent = () => {
+  return "gpt-4o-mini"; // Model OpenAI mới, nhanh
 };
 
 export const useContentGeneration = () => {
@@ -29,7 +18,7 @@ export const useContentGeneration = () => {
     complexity: 'simple' | 'complex' = 'simple'
   ) => {
     setIsLoading(true);
-    
+
     if (!isConfigured || !apiKey) {
       toast({
         title: "Lỗi API Key",
@@ -39,16 +28,13 @@ export const useContentGeneration = () => {
       setIsLoading(false);
       return null;
     }
-    
+
     try {
-      console.log(`Đang tạo nội dung ${contentType} với độ phức tạp ${complexity}...`);
-      console.log("Sử dụng API key:", apiKey ? "API key đã được cấu hình" : "Không có API key");
-      
-      // Lựa chọn model phù hợp với loại nội dung
-      const model = getModelForContent(contentType, complexity);
+      console.log(`Đang tạo nội dung ${contentType} với model GPT-4o-mini...`);
+      const model = getModelForContent();
       console.log("Sử dụng model:", model);
-      
-      // Fix lỗi "No auth credentials found"
+
+      // Sử dụng API endpoint của OpenRouter với model gpt-4o-mini, hoặc điều hướng sang endpoint OpenAI nếu cần
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -59,18 +45,17 @@ export const useContentGeneration = () => {
           'Origin': window.location.origin
         },
         body: JSON.stringify({
-          model: model,
-          messages: messages,
+          model,
+          messages,
           temperature: 0.7,
-          max_tokens: 4000,
+          max_tokens: 2000,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         console.error("OpenRouter API error:", errorData);
-        
-        // Hiển thị thông báo lỗi chi tiết hơn cho người dùng
+
         let errorMessage = "Lỗi khi kết nối đến API";
         if (errorData.error?.message) {
           errorMessage = `${errorMessage}: ${errorData.error.message}`;
@@ -78,21 +63,21 @@ export const useContentGeneration = () => {
         if (errorData.error?.code === 401) {
           errorMessage = "Lỗi xác thực API key. Vui lòng kiểm tra lại API key của bạn.";
         }
-        
+
         toast({
           title: "Lỗi API",
           description: errorMessage,
           variant: "destructive"
         });
-        
+
         throw new Error(errorMessage);
       }
 
       const data = await response.json();
       console.log("API Response:", data);
-      
+
       const responseText = data.choices?.[0]?.message?.content || "";
-      
+
       if (responseText) {
         return responseText;
       } else {
@@ -100,13 +85,13 @@ export const useContentGeneration = () => {
       }
     } catch (error: any) {
       console.error('OpenRouter API error:', error);
-      
+
       toast({
         title: "Lỗi Hệ Thống",
         description: "Không thể tạo nội dung. Vui lòng thử lại sau.",
         variant: "destructive"
       });
-      
+
       return null;
     } finally {
       setIsLoading(false);
