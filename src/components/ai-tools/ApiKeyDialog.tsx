@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Key, Info, ExternalLink } from 'lucide-react';
+import { Key, Info, ExternalLink, AlertCircle } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 import { useApiKey } from '@/hooks/use-api-key';
 
@@ -79,12 +79,21 @@ const ApiKeyDialog = ({
               Hệ thống đang sử dụng model <strong>anthropic/claude-3-sonnet</strong> và <strong>anthropic/claude-3-haiku</strong> cho các tính năng AI.
             </p>
           </div>
-          <div className="mt-2 p-2 bg-green-50 rounded-md">
-            <p className="text-green-800 text-xs flex items-center">
-              <span className="w-2 h-2 bg-green-500 rounded-full mr-1.5"></span>
-              API key đã cấu hình và sẵn sàng sử dụng
-            </p>
-          </div>
+          {isConfigured ? (
+            <div className="mt-2 p-2 bg-green-50 rounded-md">
+              <p className="text-green-800 text-xs flex items-center">
+                <span className="w-2 h-2 bg-green-500 rounded-full mr-1.5"></span>
+                API key đã cấu hình và sẵn sàng sử dụng
+              </p>
+            </div>
+          ) : (
+            <div className="mt-2 p-2 bg-red-50 rounded-md">
+              <p className="text-red-800 text-xs flex items-center">
+                <AlertCircle className="h-4 w-4 mr-1.5" />
+                API key chưa được cấu hình hoặc không hợp lệ
+              </p>
+            </div>
+          )}
         </div>
         <div className="flex justify-end space-x-2">
           <Button variant="outline" size="sm" onClick={() => window.open('https://openrouter.ai/keys', '_blank')}>

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { toast } from "@/hooks/use-toast";
 import { useApiKey } from '@/hooks/use-api-key';
@@ -47,6 +48,7 @@ export const useContentGeneration = () => {
       const model = getModelForContent(contentType, complexity);
       console.log("Sử dụng model:", model);
       
+      // Fix lỗi "No auth credentials found"
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -67,11 +69,29 @@ export const useContentGeneration = () => {
       if (!response.ok) {
         const errorData = await response.json();
         console.error("OpenRouter API error:", errorData);
-        throw new Error(`Lỗi API: ${response.status} - ${errorData.error?.message || 'Không xác định'}`);
+        
+        // Hiển thị thông báo lỗi chi tiết hơn cho người dùng
+        let errorMessage = "Lỗi khi kết nối đến API";
+        if (errorData.error?.message) {
+          errorMessage = `${errorMessage}: ${errorData.error.message}`;
+        }
+        if (errorData.error?.code === 401) {
+          errorMessage = "Lỗi xác thực API key. Vui lòng kiểm tra lại API key của bạn.";
+        }
+        
+        toast({
+          title: "Lỗi API",
+          description: errorMessage,
+          variant: "destructive"
+        });
+        
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
-      const responseText = data.choices[0]?.message?.content || "";
+      console.log("API Response:", data);
+      
+      const responseText = data.choices?.[0]?.message?.content || "";
       
       if (responseText) {
         return responseText;
